@@ -32,12 +32,12 @@ sounding.wind_speeds  # Numpy array of measured wind speeds [m/s]
 sounding.wind_directions  # Numpy array of measured wind directions [°]
 ```
 
-More refined search results can be retrieved by passing arguments that will be added to the WFS request URL.
+More refined search results can be retrieved by passing a list of arguments that will be added to the WFS request URL.
 
 ```python
 
 snd.soundings = download_stored_query("fmi::observations::weather::sounding::multipointcoverage",
-                                      "place=Jokioinen")
+                                      ["place=Jokioinen"])
 ```
 
 
