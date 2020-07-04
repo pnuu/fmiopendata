@@ -22,6 +22,10 @@
 import datetime as dt
 import xml.etree.ElementTree as ET
 
+import tempfile
+import rasterio
+import numpy as np
+
 from fmiopendata import wfs
 from fmiopendata.utils import read_url
 
@@ -45,28 +49,59 @@ class Radar(object):
     def __init__(self):
         """Initialize class."""
         self.time = None
-        self.gain = None
-        self.offset = None
+        self._gain = None
+        self._offset = None
         self.elevation = None
-        self.threshold = None
+        self.etop_threshold = None
         self.projection = None
         self.max_velocity = None
         self.url = None
         self.data = None
+        self._dtype = None
         self.name = None
         self.label = None
         self.unit = None
 
     def download(self):
         """Download the data."""
-        raise NotImplementedError("Downloading not implemented.")
+        if self.data is None:
+            with tempfile.NamedTemporaryFile() as fid:
+                fid.write(read_url(self.url))
+                img = rasterio.open(fid.name)
+                self.projection = img.crs.wkt
+                self.data = img.read()
+                self._dtype = self.data.dtype
+
+    def get_area_mask(self):
+        """Get a mask for areas outside the detection range."""
+        self.download()
+        if self.data.dtype == np.uint8:
+            value = 255
+        elif self.data.dtype == np.uint16:
+            value = 65535
+        else:
+            if self._dtype == np.uint8:
+                max_val = 255
+            else:
+                max_val = 65535
+            value = max_val * self._gain + self._offset
+        return self.data == value
+
+    def get_data_mask(self):
+        """Get a mask for invalid data."""
+        self.download()
+        if self.data.dtype in (np.uint8, np.uint16):
+            value = 0
+        else:
+            value = 0 * self._gain + self._offset
+        return self.data == value
 
     def calibrate(self):
         """Calibrate the data."""
-        if self.data is None:
-            self.download()
-        self.data *= self.gain
-        self.data += self.offset
+        self.download()
+        if self._gain:
+            self.data = self.data * self._gain
+            self.data += self._offset
 
 
 class ParseRadar(object):
@@ -89,14 +124,14 @@ class ParseRadar(object):
             radar.time = tim
             self.times.append(tim)
             for parameter in member.findall(wfs.OM_PARAMETER):
-                val = float(parameter.findall(wfs.GML_MEASURE)[0].text)
-                name = parameter.findall(wfs.OM_NAME)[0].attrib[wfs.LINK]
+                val = float(parameter.find(wfs.GML_MEASURE).text)
+                name = parameter.find(wfs.OM_NAME).attrib[wfs.LINK]
                 if "linearTransformationGain" in name:
-                    radar.gain = val
+                    radar._gain = val
                 elif "linearTransformationOffset" in name:
-                    radar.offset = val
+                    radar._offset = val
                 elif "reflectivityTreshold" in name:
-                    radar.threshold = val
+                    radar.etop_threshold = val
                 elif "elevationAngle" in name:
                     radar.elevation = val
                 elif "maxVel" in name:

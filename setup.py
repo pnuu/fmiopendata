@@ -26,6 +26,12 @@ from setuptools import setup
 
 
 install_requires = ['numpy']
+extras_require = {'radar': ['rasterio'],
+                  }
+all_extras = []
+for extra_deps in extras_require.values():
+    all_extras.extend(extra_deps)
+extras_require['all'] = list(set(all_extras))
 
 setup(name="fmiopendata",
       version="v0.0.1",
@@ -47,6 +53,7 @@ setup(name="fmiopendata",
                ],
       data_files=[],
       install_requires=install_requires,
+      extras_require=extras_require,
       tests_require=['mock'],
       python_requires='>=3.4',
       )
