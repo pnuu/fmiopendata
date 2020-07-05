@@ -81,7 +81,8 @@ class ParseSoundings(object):
             sounding.lats = positions[::4]
             sounding.lons = positions[1::4]
             sounding.altitudes = positions[2::4]
-            sounding.times = positions[3::4]  # dt.datetime.fromtimestamp(int(tim))
+            times = positions[3::4]
+            sounding.times = np.array([dt.datetime.fromtimestamp(t) for t in times])
 
             data = np.fromstring(member.find(wfs.GML_DOUBLE_OR_NIL_REASON_TUPLE_LIST).text, dtype=float, sep=" ")
             # FUTURE: check DataRecord for correct ordering

@@ -1,6 +1,28 @@
 # fmiopendata
 Python interface for FMI open data
 
+## Resources
+[FMI open data](https://en.ilmatieteenlaitos.fi/open-data)
+[FMI WFS guide](https://en.ilmatieteenlaitos.fi/open-data-manual-wfs-examples-and-guidelines)
+
+### Available data
+This library provides two very simple scripts that list all the available data on
+FMI open data WMS and WFS services.
+
+Create `wms.html` that lists all the availble WMS layers:
+```bash
+wms_html.py
+```
+
+The `Layer ID` strings are used to identify WMS (image) datasets. Examples to be added.
+
+Create `wfs.html` that lists all the availble WFS layers:
+```bash
+wfs_html.py
+```
+
+The `Query ID` is the handle that can be used to request data from WFS stored queries. See examples below.
+
 ## Examples
 
 ### Download and parse latest soundings
@@ -24,7 +46,7 @@ sounding.end_time  # Actual end time of the sounding
 sounding.lats  # Numpy array of the measurement location latitudes [degrees]
 sounding.lons  # Numpy array of the measurement location longitudes [degrees]
 sounding.altitudes  # Numpy array of the measurement location altitudes [m]
-sounding.times  # Numpy array of the measurement times [s] (unix time)
+sounding.times  # Numpy array of the measurement times [datetime]
 sounding.pressures  # Numpy array of measured pressures [hPa]
 sounding.temperatures  # Numpy array of measured temperatures [°C]
 sounding.dew_points  # Numpy array of measured dew points [°C]
@@ -85,4 +107,27 @@ Radar.projection  # WKT projection string for the dataset
 Radar.time  # Nominal measurement time of the dataset
 Radar.unit  # Unit of the calibrated data
 Radar.url  # Direct download URL for the data
+```
+
+### Download and parse latest lightning data
+```python
+
+from fmiopendata.wfs import download_stored_query
+
+# These both give identical results, the first one is much faster
+lightning1 = download_stored_query("fmi::observations::lightning::multipointcoverage")
+lightning2 = download_stored_query("fmi::observations::lightning::simple")
+```
+
+The following attributes hold the lightning data.
+
+```python
+
+lightning1.latitudes  # Latitude of the lightning event [° North]
+lightning1.longitudes  # Longitude of the lightning event [° East]
+lightning1.times  # Time of the lightning event [datetime]
+lightning1.cloud_indicator  # Indicator for cloud flashes (1 == cloud lightning)
+lightning1.multiplicity  # Multiplicity of the lightning event
+lightning1.peak_current  # Maximum current of the lightning event [kA]
+lightning1.ellipse_major  # Location accuracy of the lightning event [km]
 ```

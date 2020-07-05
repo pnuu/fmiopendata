@@ -33,6 +33,7 @@ GML_END_POSITION = ".//{http://www.opengis.net/gml/3.2}endPosition"
 GML_FILE_REFERENCE = ".//{http://www.opengis.net/gml/3.2}fileReference"
 GML_MEASURE = ".//{http://www.opengis.net/gml/3.2}Measure"
 GML_NAME = ".//{http://www.opengis.net/gml/3.2}name"
+GML_POS = ".//{http://www.opengis.net/gml/3.2}pos"
 GML_TIME_INSTANT = ".//{http://www.opengis.net/gml/3.2}TimeInstant"
 GML_TIME_POSITION = ".//{http://www.opengis.net/gml/3.2}timePosition"
 GMLCOV_POSITIONS = ".//{http://www.opengis.net/gmlcov/1.0}positions"
@@ -44,8 +45,11 @@ OMOP_UOM = ".//{http://inspire.ec.europa.eu/schemas/omop/2.9}uom"
 SWE_DATA_RECORD = ".//{http://www.opengis.net/swe/2.0}DataRecord"
 SWE_FIELD = ".//{http://www.opengis.net/swe/2.0}field"
 WFS_MEMBER = ".//{http://www.opengis.net/wfs/2.0}member"
+WFS_PARAMETER_NAME = ".//{http://xml.fmi.fi/schema/wfs/2.0}ParameterName"
+WFS_PARAMETER_VALUE = ".//{http://xml.fmi.fi/schema/wfs/2.0}ParameterValue"
 WFS_RETURN_FEATURE_TYPE = ".//{http://www.opengis.net/wfs/2.0}ReturnFeatureType"
 WFS_STORED_QUERY = ".//{http://www.opengis.net/wfs/2.0}StoredQuery"
+WFS_TIME = ".//{http://xml.fmi.fi/schema/wfs/2.0}Time"
 WFS_TITLE = ".//{http://www.opengis.net/wfs/2.0}Title"
 
 
@@ -100,6 +104,8 @@ def download_stored_query(query_id, args=None):
         from fmiopendata.radar import download_and_parse
     elif "sounding" in query_id.lower():
         from fmiopendata.sounding import download_and_parse
+    elif "lightning" in query_id.lower():
+        from fmiopendata.lightning import download_and_parse
     else:
         raise NotImplementedError("No parser available for %s" % query_id)
 
