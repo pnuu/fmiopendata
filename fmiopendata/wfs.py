@@ -106,6 +106,8 @@ def download_stored_query(query_id, args=None):
         from fmiopendata.sounding import download_and_parse
     elif "lightning" in query_id.lower():
         from fmiopendata.lightning import download_and_parse
+    elif "grid" in query_id.lower():
+        from fmiopendata.grid import download_and_parse
     else:
         raise NotImplementedError("No parser available for %s" % query_id)
 

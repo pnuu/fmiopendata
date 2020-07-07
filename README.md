@@ -6,7 +6,7 @@ Python interface for FMI open data
 
 [FMI WFS guide](https://en.ilmatieteenlaitos.fi/open-data-manual-wfs-examples-and-guidelines)
 
-### Available data
+## Available data
 This library provides two very simple scripts that list all the available data on
 FMI open data WMS and WFS services.
 
@@ -65,6 +65,9 @@ snd.soundings = download_stored_query("fmi::observations::weather::sounding::mul
 
 
 ### Download and calibrate latest radar reflectivity (dBZ) composite
+
+This parser requires the `rasterio` library to be installed.
+
 ```python
 
 from fmiopendata.wfs import download_stored_query
@@ -132,3 +135,124 @@ lightning1.multiplicity  # Multiplicity of the lightning event
 lightning1.peak_current  # Maximum current of the lightning event [kA]
 lightning1.ellipse_major  # Location accuracy of the lightning event [km]
 ```
+
+### Download and parse grid data
+
+The example below uses `fmi::forecast::harmonie::surface::grid` for demonstration.  All other
+stored query in `grid` should work.  This parser requires `eccodes` library to be installed.
+
+```python
+
+from fmiopendata.wfs import download_stored_query
+
+model_data = download_stored_query("fmi::forecast::harmonie::surface::grid",
+                                   args=["starttime=2020-07-06T18:00:00Z",
+                                         "endtime=2020-07-06T20:00:00Z",
+                                         "bbox=18,55,35,75"])
+```
+
+Here we limit both the time frame and area.  By default the WFS interface would offer all data
+fields, full globe and all time steps, which would result in a huge amount of data.  It's better
+to split the retrieval in smaller time intervals and do the downloading in parallel and start
+processing the data as soon as the download completes.
+
+The above call doesn't download any data, it just collects some metadata:
+
+```python
+
+print(model_data.data)
+# -> {datetime.datetime(2020, 7, 7, 0, 0): <fmiopendata.grid.Grid object at 0x7fda9858d2e8>,
+#     datetime.datetime(2020, 7, 7, 6, 0): <fmiopendata.grid.Grid object at 0x7fda9858d0b8>,
+#     datetime.datetime(2020, 7, 7, 12, 0): <fmiopendata.grid.Grid object at 0x7fda9858d1d0>}
+```
+
+The structure of the underlying `Grid` class is:
+
+```python
+
+Grid.data  # Parsed data, more info below
+Grid.delete_file()  # Delete the downloaded GRIB2 file
+Grid.download()  # Download the data
+Grid.end_time  # Last valid time of the data [datetime]
+Grid.init_time  # Initialization time of the data [datetime]
+Grid.latitudes  # Latitudes of the parsed data [Numpy array]
+Grid.longitudes  # Longitudes of the parsed data [Numpy array]
+Grid.parse()  # Download and parse the data
+Grid.start_time  # First valid time of the data [datetime]
+Grid.url  # The URL where the data are downloaded from
+```
+
+Now, download and parse the data from the latest run:
+
+```python
+
+latest_run = max(model_data.data.keys())  # datetime.datetime(2020, 7, 7, 12, 0)
+data = model_data[latest_run]
+# This will download the data to a temporary file, parse the data and delete the file
+data.parse(delete=True)
+```
+
+The `data.data` dictionary now has the following structure:
+
+```python
+
+# The first level has the valid times
+valid_times = data.data.keys()
+print(list(valid_times))
+# -> [datetime.datetime(2020, 7, 7, 18, 0),
+#     datetime.datetime(2020, 7, 7, 19, 0),
+#     datetime.datetime(2020, 7, 7, 20, 0)]
+```
+
+The second level has the data vertical levels, here the earliest time step is shown:
+
+```python
+earliest_step = min(valid_times)
+data_levels = data.data[earliest_step].keys()
+print(list(data_lavels))
+# -> [0, 2, 10]
+```
+
+Lets loop over these levels and print the dataset names and the units.
+
+```python
+
+for level in data_levels:
+    datasets = data.data[earliest_step][level]
+    for dset in datasets:
+        unit = datasets[dset]["units"]
+        data_array = datasets[dset]["data"]  # Numpy array of the actual data
+        print("Level: %d, dataset name: %s, data unit: %s" % (level, dset, units))
+```
+
+This will print:
+
+```
+Level: 0, dataset name: Mean sea level pressure, data unit: J m**-2
+Level: 0, dataset name: Orography, data unit: J m**-2
+Level: 0, dataset name: Surface thermal radiation downwards, data unit: J m**-2
+Level: 0, dataset name: Surface net thermal radiation, data unit: J m**-2
+Level: 0, dataset name: Surface net solar radiation, data unit: J m**-2
+Level: 2, dataset name: 2 metre temperature, data unit: J m**-2
+Level: 2, dataset name: 2 metre dewpoint temperature, data unit: J m**-2
+Level: 2, dataset name: 2 metre relative humidity, data unit: J m**-2
+Level: 10, dataset name: Mean wind direction, data unit: J m**-2
+Level: 10, dataset name: 10 metre wind speed, data unit: J m**-2
+Level: 10, dataset name: 10 metre U wind component, data unit: J m**-2
+Level: 10, dataset name: 10 metre V wind component, data unit: J m**-2
+Level: 10, dataset name: surface precipitation amount, rain, convective, data unit: J m**-2
+Level: 10, dataset name: Total Cloud Cover, data unit: J m**-2
+Level: 10, dataset name: Low cloud cover, data unit: J m**-2
+Level: 10, dataset name: Medium cloud cover, data unit: J m**-2
+Level: 10, dataset name: High cloud cover, data unit: J m**-2
+Level: 10, dataset name: Land-sea mask, data unit: J m**-2
+Level: 10, dataset name: Precipitation rate, data unit: J m**-2
+Level: 10, dataset name: Maximum wind velocity, data unit: J m**-2
+Level: 10, dataset name: 10 metre wind gust since previous post-processing, data unit: J m**-2
+Level: 10, dataset name: Surface solar radiation downwards, data unit: J m**-2
+```
+
+The whole structure `Grid.data[valid_time][level][dataset_name]` with `'data'` and `'units'`
+members is common to all `grid` type WFS data.
+
+The `data_data` array will have invalid values replaced with `np.nan`.

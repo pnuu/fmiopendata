@@ -19,7 +19,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from urllib.request import urlopen
+from urllib.request import urlopen, urlretrieve
 
 
 def read_url(url):
@@ -27,3 +27,9 @@ def read_url(url):
     with urlopen(url) as response:
         res = response.read()
     return res
+
+
+def download_to_file(url, fname):
+    """Download file from *ulr* to *fname*."""
+    outpath, http_msg = urlretrieve(url, filename=fname)
+    return outpath, http_msg

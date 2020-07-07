@@ -27,6 +27,7 @@ from setuptools import setup
 
 install_requires = ['numpy']
 extras_require = {'radar': ['rasterio'],
+                  'grid': ['eccodes'],
                   }
 all_extras = []
 for extra_deps in extras_require.values():
