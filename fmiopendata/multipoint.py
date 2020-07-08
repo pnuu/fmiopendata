@@ -33,18 +33,26 @@ TIME_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
 class MultiPoint(object):
     """Class for holding multipoint data."""
 
-    def __init__(self, xml):
+    def __init__(self, xml, query_id):
         """Initialize class."""
         self._xml = ET.fromstring(xml)
         self.data = {}
         self.location_metadata = {}
         self._location2name = {}
-        self._type2obs = {}
-        self._parse()
+        if "radionuclide-activity-concentration" in query_id:
+            self._parse_radionuclide()
+        else:
+            self._parse(self._xml)
 
-    def _parse(self):
+    def _parse_radionuclide(self):
+        """Parse radionuclide data."""
+        for member in self._xml.findall(wfs.WFS_MEMBER):
+            self._parse(member)
+
+    def _parse(self, xml):
         """Parse data."""
-        for point in self._xml.findall(wfs.GML_POINT):
+        type2obs = {}
+        for point in xml.findall(wfs.GML_POINT):
             fmisid = int(point.attrib[wfs.GML_ID].split('-')[-1])
             name = point.findtext(wfs.GML_NAME)
             location = tuple(float(p) for p in point.findtext(wfs.GML_POS).split())
@@ -54,33 +62,40 @@ class MultiPoint(object):
                                             }
             self._location2name[location] = name
 
-        positions = np.fromstring(self._xml.findtext(wfs.GMLCOV_POSITIONS), dtype=float, sep=" ")
+        positions = np.fromstring(xml.findtext(wfs.GMLCOV_POSITIONS), dtype=float, sep=" ")
         latitudes = positions[::3]
         longitudes = positions[1::3]
         times = np.array([dt.datetime.fromtimestamp(t) for t in positions[2::3]])
-        measurements = np.fromstring(self._xml.find(wfs.GML_DOUBLE_OR_NIL_REASON_TUPLE_LIST).text, dtype=float, sep=" ")
-        for field in self._xml.findall(wfs.SWE_FIELD):
+        if times.size == 0:
+            times = np.array([dt.datetime.strptime(xml.findtext(wfs.GML_TIME_POSITION), TIME_FORMAT)])
+        measurements = np.fromstring(xml.find(wfs.GML_DOUBLE_OR_NIL_REASON_TUPLE_LIST).text, dtype=float, sep=" ")
+        for field in xml.findall(wfs.SWE_FIELD):
             typ = field.attrib["name"]
-            url = field.attrib[wfs.LINK]
-            root = ET.fromstring(read_url(url))
-            name = root.findtext(wfs.OMOP_LABEL)
             try:
-                units = root.find(wfs.OMOP_UOM).attrib["uom"]
-            except AttributeError:
-                units = ''
-            self._type2obs[typ] = {"name": name, "units": units}
-        measurements = np.reshape(measurements, (len(times), len(self._type2obs)))
+                url = field.attrib[wfs.LINK]
+                root = ET.fromstring(read_url(url))
+                name = root.findtext(wfs.OMOP_LABEL)
+                try:
+                    units = root.find(wfs.OMOP_UOM).attrib["uom"]
+                except AttributeError:
+                    units = ''
+            except KeyError:
+                name = field.findtext(wfs.SWE_LABEL)
+                units = field.find(wfs.SWE_UOM).attrib['code']
+            type2obs[typ] = {"name": name, "units": units}
+        measurements = np.reshape(measurements, (len(times), len(type2obs)))
 
         for i, tim in enumerate(times):
             if tim not in self.data:
                 self.data[tim] = {}
             loc = (latitudes[i], longitudes[i])
             name = self._location2name[loc]
-            self.data[tim][name] = {}
-            for j, key in enumerate(self._type2obs.keys()):
-                self.data[tim][name][self._type2obs[key]["name"]] = {"value": measurements[i, j],
-                                                                     "units": self._type2obs[key]["units"]
-                                                                     }
+            if name not in self.data[tim]:
+                self.data[tim][name] = {}
+            for j, key in enumerate(type2obs.keys()):
+                self.data[tim][name][type2obs[key]["name"]] = {"value": measurements[i, j],
+                                                               "units": type2obs[key]["units"]
+                                                               }
 
 
 def download_and_parse(query_id, args=None):
@@ -89,4 +104,4 @@ def download_and_parse(query_id, args=None):
     if args:
         url = url + "&" + "&".join(args)
     xml = read_url(url)
-    return MultiPoint(xml)
+    return MultiPoint(xml, query_id)

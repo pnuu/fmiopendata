@@ -72,7 +72,7 @@ snd.soundings = download_stored_query("fmi::observations::weather::sounding::mul
 
 ### Download and calibrate latest radar reflectivity (dBZ) composite
 
-This parser requires the `rasterio` library to be installed.
+This parser requires the `rasterio` library to be installed.  All radar queries will work.
 
 ```python
 
@@ -331,17 +331,18 @@ print(obs.location_metadata["Jyväskylä lentoasema"])
 
 This parser supports at least the following stored queries:
 
-* `fmi::observations::weather::multipointcoverage`
-* `fmi::observations::mareograph::instant::multipointcoverage`
 * `fmi::forecast::hirlam::surface::obsstations::multipointcoverage`
 * `fmi::forecast::oaas::sealevel::point::multipointcoverage`
 * `fmi::observations::airquality::hourly::multipointcoverage`
 * `fmi::observations::mareograph::daily::multipointcoverage`
+* `fmi::observations::mareograph::instant::multipointcoverage`
 * `fmi::observations::mareograph::monthly::multipointcoverage`
 * `fmi::observations::mareograph::multipointcoverage`
 * `fmi::observations::radiation::multipointcoverage`
 * `fmi::observations::wave::multipointcoverage`
 * `fmi::observations::weather::cities::multipointcoverage`
+* `fmi::observations::weather::multipointcoverage`
+* `stuk::observations::air::radionuclide-activity-concentration::multipointcoverage`
 * `stuk::observations::external-radiation::latest::multipointcoverage`
 * `stuk::observations::external-radiation::multipointcoverage`
 * `urban::observations::airquality::hourly::multipointcoverage`
