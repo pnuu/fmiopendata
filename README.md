@@ -335,3 +335,13 @@ This parser supports at least the following stored queries:
 * `fmi::observations::mareograph::instant::multipointcoverage`
 * `fmi::forecast::hirlam::surface::obsstations::multipointcoverage`
 * `fmi::forecast::oaas::sealevel::point::multipointcoverage`
+* `fmi::observations::airquality::hourly::multipointcoverage`
+* `fmi::observations::mareograph::daily::multipointcoverage`
+* `fmi::observations::mareograph::monthly::multipointcoverage`
+* `fmi::observations::mareograph::multipointcoverage`
+* `fmi::observations::radiation::multipointcoverage`
+* `fmi::observations::wave::multipointcoverage`
+* `fmi::observations::weather::cities::multipointcoverage`
+* `stuk::observations::external-radiation::latest::multipointcoverage`
+* `stuk::observations::external-radiation::multipointcoverage`
+* `urban::observations::airquality::hourly::multipointcoverage`
