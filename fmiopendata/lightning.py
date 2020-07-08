@@ -95,12 +95,11 @@ class Lightning(object):
         times = positions[2::3]
         self.times = np.array([dt.datetime.fromtimestamp(t) for t in times])
 
-        # FUTURE: Check ordering from DataRecord
         data = np.fromstring(self._xml.find(wfs.GML_DOUBLE_OR_NIL_REASON_TUPLE_LIST).text, dtype=float, sep=" ")
-        self.multiplicity = data[::4].astype(np.uint8)
-        self.peak_current = data[1::4]
-        self.cloud_indicator = data[2::4].astype(np.uint8)
-        self.ellipse_major = data[3::4]
+        fields = [f.attrib['name'] for f in self._xml.findall(wfs.SWE_FIELD)]
+        for i, field in enumerate(fields):
+            vals = data[i::len(fields)]
+            setattr(self, field, vals)
 
 
 def download_and_parse(query_id, args=None):
