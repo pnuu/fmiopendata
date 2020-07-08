@@ -298,7 +298,8 @@ print(sorted(obs.data.keys())
 # The next level has the names of the observation stations as keys
 latest_tstep = max(obs.data.keys())
 print(sorted(obs.data[latest_tstep].keys()))
-# Will print a long list of weather station names, e.g. "Jyväskylä lentoasema", which we'll use as an example below
+# Will print a long list of weather station names, e.g. "Jyväskylä lentoasema", which we'll use
+# as an example below
 
 # On the third level we find the names of the observed parameters
 print(sorted(obs.data[latest_tstep]["Jyväskylä lentoasema"].keys()))
