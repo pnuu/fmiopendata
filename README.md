@@ -26,15 +26,11 @@ The `Query ID` is the handle that can be used to request data from WFS stored qu
 
 ## Examples
 
-[Download and parse latest soundings](#download-and-parse-latest-soundings)
-
-[Download and calibrate latest radar reflectivity (dBZ) composite](#download-and-calibrate-latest-radar-reflectivity-dBZ-composite)
-
-[Download and parse latest lightning data](#download-and-parse-latest-lightning-data)
-
-[Download and parse grid data](#download-and-parse-grid-data)
-
-[Download and parse observation data](#download-and-parse-observation-data)
+* [Download and parse latest soundings](#download-and-parse-latest-soundings)
+* [Download and calibrate latest radar reflectivity (dBZ) composite](#download-and-calibrate-latest-radar-reflectivity-dBZ-composite)
+* [Download and parse latest lightning data](#download-and-parse-latest-lightning-data)
+* [Download and parse grid data](#download-and-parse-grid-data)
+* [Download and parse observation data](#download-and-parse-observation-data)
 
 ### Download and parse latest soundings
 ```python
@@ -321,8 +317,16 @@ print(sorted(obs.data[latest_tstep]["Jyväskylä lentoasema"].keys()))
 #     'Wind speed']
 
 # And on the last level we find the value and unit of the observation
-print(osb.data[latest_tsep]["Jyväskylä lentoasema"]['Air temperature'])
+print(osb.data[latest_tsep]["Jyväskylä lentoasema"]["Air temperature"])
 # -> {'value': 18.0, 'units': 'degC'}
+```
+
+To get the location for the stations, one can use the `location_metadata` dictionary:
+
+```python
+
+print(obs.location_metadata["Jyväskylä lentoasema"])
+# -> {'fmisid': 101339, 'latitude': 62.39758, 'longitude': 25.67087}
 ```
 
 This parser supports at least the following stored queries:
@@ -330,3 +334,4 @@ This parser supports at least the following stored queries:
 * `fmi::observations::weather::multipointcoverage`
 * `fmi::observations::mareograph::instant::multipointcoverage`
 * `fmi::forecast::hirlam::surface::obsstations::multipointcoverage`
+* `fmi::forecast::oaas::sealevel::point::multipointcoverage`
