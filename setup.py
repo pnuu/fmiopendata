@@ -23,7 +23,7 @@
 """Setup for trollflow2."""
 
 from setuptools import setup
-
+from fmiopendata import __version__
 
 install_requires = ['numpy']
 extras_require = {'radar': ['rasterio'],
@@ -35,7 +35,7 @@ for extra_deps in extras_require.values():
 extras_require['all'] = list(set(all_extras))
 
 setup(name="fmiopendata",
-      version="v0.0.1",
+      version=__version__,
       description='Python library for accessing FMI open data',
       author='Panu Lahtinen',
       author_email='pnuu+git@iki.fi',
