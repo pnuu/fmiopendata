@@ -144,8 +144,8 @@ lightning1.ellipse_major  # Location accuracy of the lightning event [km]
 
 ### Download and parse grid data
 
-The example below uses `fmi::forecast::harmonie::surface::grid` for demonstration.  All other
-stored query in `grid` should work.  This parser requires `eccodes` library to be installed.
+The example below uses `fmi::forecast::harmonie::surface::grid` for demonstration.  Also other
+`grid` stored queries should work.  This parser requires `eccodes` library to be installed.
 
 ```python
 
