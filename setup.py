@@ -37,6 +37,7 @@ extras_require['all'] = list(set(all_extras))
 setup(name="fmiopendata",
       version=__version__,
       description='Python library for accessing FMI open data',
+      long_description='Python library for accessing FMI open data',
       author='Panu Lahtinen',
       author_email='pnuu+git@iki.fi',
       classifiers=["Development Status :: 4 - Beta",
