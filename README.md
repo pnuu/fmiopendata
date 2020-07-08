@@ -256,3 +256,67 @@ The whole structure `Grid.data[valid_time][level][dataset_name]` with `'data'` a
 members is common to all `grid` type WFS data.
 
 The `data_data` array will have invalid values replaced with `np.nan`.
+
+## Download and parse observation data
+```python
+
+from fmiopendata.wfs import download_stored_query
+
+obs = download_stored_query("fmi::observations::weather::multipointcoverage",
+                            args=["bbox=18,55,35,75",
+                                  "starttime=2020-07-07T12:00:00Z",
+                                  "endtime=2020-07-07T12:05:00Z"])
+```
+
+The structure of the returned `MultiPont` class is
+
+```python
+
+MultiPoint.data  # The observation data
+MultiPoint.location_metadata  # Location information for the observation locations
+```
+
+The `data` dictionary has the following structure:
+
+```python
+
+# The observation times are the primary key
+print(sorted(obs.data.keys())
+# -> [datetime.datetime(2020, 7, 7, 15, 0),
+#     datetime.datetime(2020, 7, 7, 15, 1),
+#     datetime.datetime(2020, 7, 7, 15, 2),
+#     datetime.datetime(2020, 7, 7, 15, 3),
+#     datetime.datetime(2020, 7, 7, 15, 4),
+#     datetime.datetime(2020, 7, 7, 15, 5)]
+
+# The next level has the names of the observation stations as keys
+latest_tstep = max(obs.data.keys())
+print(sorted(obs.data[latest_tstep].keys()))
+# Will print a long list of weather station names, e.g. "Jyväskylä lentoasema", which we'll use as an example below
+
+# On the third level we find the names of the observed parameters
+print(sorted(obs.data[latest_tstep]["Jyväskylä lentoasema"].keys()))
+# -> ['Air temperature',
+#     'Cloud amount',
+#     'Dew-point temperature',
+#     'Gust speed',
+#     'Horizontal visibility',
+#     'Precipitation amount',
+#     'Precipitation intensity',
+#     'Present weather (auto)',
+#     'Pressure (msl)',
+#     'Relative humidity',
+#     'Snow depth',
+#     'Wind direction',
+#     'Wind speed']
+
+# And on the last level we find the value and unit of the observation
+print(osb.data[latest_tsep]["Jyväskylä lentoasema"]['Air temperature'])
+# -> {'value': 18.0, 'units': 'degC'}
+```
+
+This parser supports at least the following stored queries:
+
+* `fmi::observations::weather::multipointcoverage`
+* `fmi::observations::mareograph::instant::multipointcoverage`
+* `fmi::forecast::hirlam::surface::obsstations::multipointcoverage`

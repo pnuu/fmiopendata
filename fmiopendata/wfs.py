@@ -31,8 +31,11 @@ GML_BEGIN_POSITION = ".//{http://www.opengis.net/gml/3.2}beginPosition"
 GML_DOUBLE_OR_NIL_REASON_TUPLE_LIST = ".//{http://www.opengis.net/gml/3.2}doubleOrNilReasonTupleList"
 GML_END_POSITION = ".//{http://www.opengis.net/gml/3.2}endPosition"
 GML_FILE_REFERENCE = ".//{http://www.opengis.net/gml/3.2}fileReference"
+GML_ID = "{http://www.opengis.net/gml/3.2}id"
+GML_IDENTIFIER = "{http://www.opengis.net/gml/3.2}identifier"
 GML_MEASURE = ".//{http://www.opengis.net/gml/3.2}Measure"
 GML_NAME = ".//{http://www.opengis.net/gml/3.2}name"
+GML_POINT = ".//{http://www.opengis.net/gml/3.2}Point"
 GML_POS = ".//{http://www.opengis.net/gml/3.2}pos"
 GML_TIME_INSTANT = ".//{http://www.opengis.net/gml/3.2}TimeInstant"
 GML_TIME_POSITION = ".//{http://www.opengis.net/gml/3.2}timePosition"
@@ -108,6 +111,8 @@ def download_stored_query(query_id, args=None):
         from fmiopendata.lightning import download_and_parse
     elif "grid" in query_id.lower():
         from fmiopendata.grid import download_and_parse
+    elif "multipointcoverage" in query_id.lower():
+        from fmiopendata.multipoint import download_and_parse
     else:
         raise NotImplementedError("No parser available for %s" % query_id)
 

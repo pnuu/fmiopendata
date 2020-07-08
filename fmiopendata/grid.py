@@ -73,7 +73,7 @@ class Grid(object):
             self.delete_file()
 
     def _parse_grib(self):
-        """Parser GRIB data."""
+        """Parser for GRIB data."""
         with eccodes.GribFile(self._fname) as grib:
             for msg in grib:
                 valid_date = msg["validityDate"]
