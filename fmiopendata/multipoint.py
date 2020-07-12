@@ -68,7 +68,7 @@ class MultiPoint(object):
         times = np.array([dt.datetime.fromtimestamp(t) for t in positions[2::3]])
         if times.size == 0:
             times = np.array([dt.datetime.strptime(xml.findtext(wfs.GML_TIME_POSITION), TIME_FORMAT)])
-        measurements = np.fromstring(xml.find(wfs.GML_DOUBLE_OR_NIL_REASON_TUPLE_LIST).text, dtype=float, sep=" ")
+        measurements = np.fromstring(xml.findtext(wfs.GML_DOUBLE_OR_NIL_REASON_TUPLE_LIST), dtype=float, sep=" ")
         for field in xml.findall(wfs.SWE_FIELD):
             typ = field.attrib["name"]
             try:

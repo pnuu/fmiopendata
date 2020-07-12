@@ -124,7 +124,7 @@ class ParseRadar(object):
             radar.time = tim
             self.times.append(tim)
             for parameter in member.findall(wfs.OM_PARAMETER):
-                val = float(parameter.find(wfs.GML_MEASURE).text)
+                val = float(parameter.findtext(wfs.GML_MEASURE))
                 name = parameter.find(wfs.OM_NAME).attrib[wfs.LINK]
                 if "linearTransformationGain" in name:
                     radar._gain = val
@@ -140,8 +140,8 @@ class ParseRadar(object):
             meta_url = member.find(wfs.SWE_DATA_RECORD).find(wfs.SWE_FIELD).attrib[wfs.LINK]
             meta = get_meta(meta_url)
             radar.unit = meta.find(wfs.OMOP_UOM).attrib["uom"]
-            radar.label = meta.find(wfs.OMOP_LABEL).text
-            radar.url = member.find(wfs.GML_FILE_REFERENCE).text
+            radar.label = meta.findtext(wfs.OMOP_LABEL)
+            radar.url = member.findtext(wfs.GML_FILE_REFERENCE)
             radar.projection = radar.url.split('srs=')[-1].split('&')[0]
             self.data.append(radar)
 

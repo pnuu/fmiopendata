@@ -60,7 +60,7 @@ class Lightning(object):
         multiplicity, peak_current, cloud_indicator, ellipse_major = [], [], [], []
         for member in self._xml.findall(wfs.WFS_MEMBER):
             tim = dt.datetime.strptime(member.findtext(wfs.WFS_TIME), TIME_FORMAT)
-            lat, lon = [float(p) for p in member.find(wfs.GML_POS).text.split()]
+            lat, lon = [float(p) for p in member.findtext(wfs.GML_POS).split()]
             if not lats or (lat != lats[-1] and lon != lons[-1]):
                 lats.append(lat)
                 lons.append(lon)
@@ -89,13 +89,13 @@ class Lightning(object):
         Version for fmi::observations::lightning::multipointcoverage query.
 
         """
-        positions = np.fromstring(self._xml.find(wfs.GMLCOV_POSITIONS).text, dtype=float, sep=" ")
+        positions = np.fromstring(self._xml.findtext(wfs.GMLCOV_POSITIONS), dtype=float, sep=" ")
         self.latitudes = positions[::3]
         self.longitudes = positions[1::3]
         times = positions[2::3]
         self.times = np.array([dt.datetime.fromtimestamp(t) for t in times])
 
-        data = np.fromstring(self._xml.find(wfs.GML_DOUBLE_OR_NIL_REASON_TUPLE_LIST).text, dtype=float, sep=" ")
+        data = np.fromstring(self._xml.findtext(wfs.GML_DOUBLE_OR_NIL_REASON_TUPLE_LIST), dtype=float, sep=" ")
         fields = [f.attrib['name'] for f in self._xml.findall(wfs.SWE_FIELD)]
         for i, field in enumerate(fields):
             vals = data[i::len(fields)]
