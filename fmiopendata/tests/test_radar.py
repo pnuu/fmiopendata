@@ -27,7 +27,7 @@ import numpy as np
 from fmiopendata.radar import download_and_parse
 
 
-def test_vrad():
+def test_single_vrad():
     """Test radar radial velocity."""
     res = download_and_parse("fmi::radar::single::vrad")
     assert len(res.data) == len(res.times)
@@ -72,7 +72,7 @@ def test_vrad():
     assert np.sum(data_mask) > 0
 
 
-def test_dbz():
+def test_single_dbz():
     """Test radar reflectivity dBZ."""
     res = download_and_parse("fmi::radar::single::dbz")
     assert len(res.data) == len(res.times)
@@ -116,7 +116,7 @@ def test_dbz():
     assert np.sum(data_mask) > 0
 
 
-def test_hclass():
+def test_single_hclass():
     """Test radar hydroclass."""
     res = download_and_parse("fmi::radar::single::hclass")
     assert len(res.data) == len(res.times)
@@ -160,7 +160,7 @@ def test_hclass():
     assert np.sum(data_mask) > 0
 
 
-def test_etop_20():
+def test_single_etop_20():
     """Test radar hydroclass."""
     res = download_and_parse("fmi::radar::single::etop_20")
     assert len(res.data) == len(res.times)
