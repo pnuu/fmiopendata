@@ -114,3 +114,47 @@ def test_dbz():
     assert data_mask[0, 0, 0] == False
     # There ought to be some masked data (no rain detected)
     assert np.sum(data_mask) > 0
+
+
+def test_hclass():
+    """Test radar hydroclass."""
+    res = download_and_parse("fmi::radar::single::hclass")
+    assert len(res.data) == len(res.times)
+
+    data = res.data[0]
+    # Check that only correct attributes are set
+    assert data.label is not None
+    assert data.max_velocity is None
+    assert data.elevation is not None
+    assert data.name == "hclass"
+    assert data.projection is not None
+    assert data.time == res.times[0]
+    assert data.unit == "Index"
+    assert data.url is not None
+    assert data.etop_threshold is None
+    assert data.data is None
+    assert data._gain is not None
+    assert data._offset is not None
+
+    # Download the data
+    data.download()
+    assert data.data is not None
+    assert data.data.dtype == np.uint8
+
+    # Calibrate the data
+    data.calibrate()
+    assert data.data.dtype == np.float64
+
+    # Check the area mask
+    area_mask = data.get_area_mask()
+    # Corners are always masked
+    assert area_mask[0, 0, 0] == True
+    # Not everything should be masked
+    assert np.sum(area_mask) < area_mask.size
+
+    # Check the data mask
+    data_mask = data.get_data_mask()
+    # The corners should not be masked in this case
+    assert data_mask[0, 0, 0] == False
+    # There ought to be some masked data (no hydrometeors detected)
+    assert np.sum(data_mask) > 0
