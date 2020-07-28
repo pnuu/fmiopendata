@@ -44,6 +44,8 @@ def test_vrad():
     assert data.url is not None
     assert data.etop_threshold is None
     assert data.data is None
+    assert data._gain is not None
+    assert data._offset is not None
 
     # Download the data
     data.download()
