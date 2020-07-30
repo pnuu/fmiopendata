@@ -22,13 +22,15 @@
 
 """Test radar parsers."""
 
-import numpy as np
+import mock
 
-from fmiopendata.radar import download_and_parse
+import numpy as np
 
 
 def test_single_vrad():
     """Test radar radial velocity."""
+    from fmiopendata.radar import download_and_parse
+
     res = download_and_parse("fmi::radar::single::vrad")
     assert len(res.data) == len(res.times)
 
@@ -90,6 +92,8 @@ def test_single_vrad():
 
 def test_single_dbz():
     """Test radar reflectivity dBZ."""
+    from fmiopendata.radar import download_and_parse
+
     res = download_and_parse("fmi::radar::single::dbz")
     assert len(res.data) == len(res.times)
 
@@ -150,6 +154,8 @@ def test_single_dbz():
 
 def test_single_hclass():
     """Test radar hydroclass."""
+    from fmiopendata.radar import download_and_parse
+
     res = download_and_parse("fmi::radar::single::hclass")
     assert len(res.data) == len(res.times)
 
@@ -210,6 +216,8 @@ def test_single_hclass():
 
 def test_single_etop_20():
     """Test radar hydroclass."""
+    from fmiopendata.radar import download_and_parse
+
     res = download_and_parse("fmi::radar::single::etop_20")
     assert len(res.data) == len(res.times)
 
@@ -270,6 +278,8 @@ def test_single_etop_20():
 
 def test_composite_dbz():
     """Test radar composite dBZ."""
+    from fmiopendata.radar import download_and_parse
+
     res = download_and_parse("fmi::radar::composite::dbz")
     assert len(res.data) == len(res.times)
 
@@ -385,6 +395,8 @@ def _check_rr(data, name=None, unit=None):
 
 def test_composite_rr():
     """Test radar composite rain rate."""
+    from fmiopendata.radar import download_and_parse
+
     res = download_and_parse("fmi::radar::composite::rr")
     assert len(res.data) == len(res.times)
 
@@ -396,6 +408,8 @@ def test_composite_rr():
 
 def test_composite_rr1h():
     """Test radar composite 1 hour accumulated rain rainfall."""
+    from fmiopendata.radar import download_and_parse
+
     res = download_and_parse("fmi::radar::composite::rr1h")
     assert len(res.data) == len(res.times)
 
@@ -407,6 +421,8 @@ def test_composite_rr1h():
 
 def test_composite_rr12h():
     """Test radar composite 12 hour accumulated rain rainfall."""
+    from fmiopendata.radar import download_and_parse
+
     res = download_and_parse("fmi::radar::composite::rr12h")
     assert len(res.data) == len(res.times)
 
@@ -418,6 +434,8 @@ def test_composite_rr12h():
 
 def test_composite_rr24h():
     """Test radar composite 24 hour accumulated rain rainfall."""
+    from fmiopendata.radar import download_and_parse
+
     res = download_and_parse("fmi::radar::composite::rr24h")
     assert len(res.data) == len(res.times)
 
@@ -425,3 +443,14 @@ def test_composite_rr24h():
     assert data.time == res.times[0]
 
     _check_rr(data, name="rr24h", unit="mm")
+
+
+@mock.patch("fmiopendata.radar.ParseRadar")
+@mock.patch("fmiopendata.radar.read_url")
+def test_args(read_url, ParseRadar):
+    """Test that arguments are passed properly."""
+    from fmiopendata.radar import download_and_parse
+
+    res = download_and_parse("foo", args=["a=1", "b=2"])
+    del res
+    assert read_url.mock_calls[0].endswith("=foo&a=1&b=2")
