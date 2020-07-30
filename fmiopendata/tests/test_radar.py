@@ -62,7 +62,7 @@ def test_single_vrad():
     # Check the data mask before calibration
     data_mask = data.get_data_mask()
     # The corners should not be masked in this case
-    assert data_mask[0, 0, 0] == False
+    assert not data_mask[0, 0, 0]
     # There ought to be some masked data (no wind detected)
     assert np.sum(data_mask) > 0
 
@@ -82,7 +82,7 @@ def test_single_vrad():
     # Check the data mask after calibration
     data_mask2 = data.get_data_mask()
     # The corners should not be masked in this case
-    assert data_mask2[0, 0, 0] == False
+    assert not data_mask2[0, 0, 0]
     # There ought to be some masked data (no wind detected)
     assert np.sum(data_mask2) > 0
     assert np.all(area_mask == area_mask2)
@@ -123,7 +123,7 @@ def test_single_dbz():
     # Check the data mask before calibration
     data_mask = data.get_data_mask()
     # The corners should not be masked in this case
-    assert data_mask[0, 0, 0] == False
+    assert not data_mask[0, 0, 0]
     # There ought to be some masked data (no rain detected)
     assert np.sum(data_mask) > 0
 
@@ -142,7 +142,7 @@ def test_single_dbz():
     # Check the data mask after calibration
     data_mask2 = data.get_data_mask()
     # The corners should not be masked in this case
-    assert data_mask2[0, 0, 0] == False
+    assert not data_mask2[0, 0, 0]
     # There ought to be some masked data (no rain detected)
     assert np.sum(data_mask2) > 0
     assert np.all(data_mask == data_mask2)
@@ -183,7 +183,7 @@ def test_single_hclass():
     # Check the data mask before calibraion
     data_mask = data.get_data_mask()
     # The corners should not be masked in this case
-    assert data_mask[0, 0, 0] == False
+    assert not data_mask[0, 0, 0]
     # There ought to be some masked data (no hydrometeors detected)
     assert np.sum(data_mask) > 0
 
@@ -202,7 +202,7 @@ def test_single_hclass():
     # Check the data mask after calibraion
     data_mask2 = data.get_data_mask()
     # The corners should not be masked in this case
-    assert data_mask2[0, 0, 0] == False
+    assert not data_mask2[0, 0, 0]
     # There ought to be some masked data (no hydrometeors detected)
     assert np.sum(data_mask2) > 0
     assert np.all(data_mask == data_mask2)
@@ -243,7 +243,7 @@ def test_single_etop_20():
     # Check the data mask before calibration
     data_mask = data.get_data_mask()
     # The corners should not be masked in this case
-    assert data_mask[0, 0, 0] == False
+    assert not data_mask[0, 0, 0]
     # There ought to be some masked data (no clouds detected)
     assert np.sum(data_mask) > 0
 
@@ -262,7 +262,7 @@ def test_single_etop_20():
     # Check the data mask after calibration
     data_mask2 = data.get_data_mask()
     # The corners should not be masked in this case
-    assert data_mask2[0, 0, 0] == False
+    assert not data_mask2[0, 0, 0]
     # There ought to be some masked data (no clouds detected)
     assert np.sum(data_mask2) > 0
     assert np.all(data_mask == data_mask2)
@@ -303,7 +303,7 @@ def test_composite_dbz():
     # Check the data mask before calibration
     data_mask = data.get_data_mask()
     # The corners should not be masked in this case
-    assert data_mask[0, 0, 0] == False
+    assert not data_mask[0, 0, 0]
     # There ought to be some masked data (no rain detected)
     assert np.sum(data_mask) > 0
 
@@ -322,7 +322,7 @@ def test_composite_dbz():
     # Check the data mask after calibration
     data_mask2 = data.get_data_mask()
     # The corners should not be masked in this case
-    assert data_mask2[0, 0, 0] == False
+    assert not data_mask2[0, 0, 0]
     # There ought to be some masked data (no rain detected)
     assert np.sum(data_mask2) > 0
     assert np.all(data_mask == data_mask2)
@@ -358,7 +358,7 @@ def _check_rr(data, name=None, unit=None):
     # Check the data mask before calibration
     data_mask = data.get_data_mask()
     # The corners should not be masked in this case
-    assert data_mask[0, 0, 0] == False
+    assert not data_mask[0, 0, 0]
     # There ought to be some masked data (no rain detected)
     assert np.sum(data_mask) > 0
 
@@ -377,7 +377,7 @@ def _check_rr(data, name=None, unit=None):
     # Check the data mask after calibration
     data_mask2 = data.get_data_mask()
     # The corners should not be masked in this case
-    assert data_mask2[0, 0, 0] == False
+    assert not data_mask2[0, 0, 0]
     # There ought to be some masked data (no rain detected)
     assert np.sum(data_mask2) > 0
     assert np.all(data_mask == data_mask2)
