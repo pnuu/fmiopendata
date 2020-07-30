@@ -55,7 +55,7 @@ def test_single_vrad():
     # Check the area mask before calibration
     area_mask = data.get_area_mask()
     # Corners are always masked
-    assert area_mask[0, 0, 0] == True
+    assert area_mask[0, 0, 0]
     # Not everything should be masked
     assert np.sum(area_mask) < area_mask.size
 
@@ -74,7 +74,7 @@ def test_single_vrad():
     # Check the area mask after calibration
     area_mask2 = data.get_area_mask()
     # Corners are always masked
-    assert area_mask2[0, 0, 0] == True
+    assert area_mask2[0, 0, 0]
     # Not everything should be masked
     assert np.sum(area_mask2) < area_mask2.size
     assert np.all(area_mask == area_mask2)
@@ -116,7 +116,7 @@ def test_single_dbz():
     # Check the area mask before calibration
     area_mask = data.get_area_mask()
     # Corners are always masked
-    assert area_mask[0, 0, 0] == True
+    assert area_mask[0, 0, 0]
     # Not everything should be masked
     assert np.sum(area_mask) < area_mask.size
 
@@ -134,7 +134,7 @@ def test_single_dbz():
     # Check the area mask after calibration
     area_mask2 = data.get_area_mask()
     # Corners are always masked
-    assert area_mask2[0, 0, 0] == True
+    assert area_mask2[0, 0, 0]
     # Not everything should be masked
     assert np.sum(area_mask2) < area_mask2.size
     assert np.all(area_mask == area_mask2)
@@ -176,7 +176,7 @@ def test_single_hclass():
     # Check the area mask before calibraion
     area_mask = data.get_area_mask()
     # Corners are always masked
-    assert area_mask[0, 0, 0] == True
+    assert area_mask[0, 0, 0]
     # Not everything should be masked
     assert np.sum(area_mask) < area_mask.size
 
@@ -194,7 +194,7 @@ def test_single_hclass():
     # Check the area mask after calibration
     area_mask2 = data.get_area_mask()
     # Corners are always masked
-    assert area_mask2[0, 0, 0] == True
+    assert area_mask2[0, 0, 0]
     # Not everything should be masked
     assert np.sum(area_mask2) < area_mask2.size
     assert np.all(area_mask == area_mask2)
@@ -236,7 +236,7 @@ def test_single_etop_20():
     # Check the area mask before calibration
     area_mask = data.get_area_mask()
     # Corners are always masked
-    assert area_mask[0, 0, 0] == True
+    assert area_mask[0, 0, 0]
     # Not everything should be masked
     assert np.sum(area_mask) < area_mask.size
 
@@ -254,7 +254,7 @@ def test_single_etop_20():
     # Check the area mask after calibration
     area_mask2 = data.get_area_mask()
     # Corners are always masked
-    assert area_mask2[0, 0, 0] == True
+    assert area_mask2[0, 0, 0]
     # Not everything should be masked
     assert np.sum(area_mask2) < area_mask2.size
     assert np.all(area_mask == area_mask2)
@@ -296,7 +296,7 @@ def test_composite_dbz():
     # Check the area mask before calibration
     area_mask = data.get_area_mask()
     # Corners are always masked
-    assert area_mask[0, 0, 0] == True
+    assert area_mask[0, 0, 0]
     # Not everything should be masked
     assert np.sum(area_mask) < area_mask.size
 
@@ -314,7 +314,7 @@ def test_composite_dbz():
     # Check the area mask after calibration
     area_mask2 = data.get_area_mask()
     # Corners are always masked
-    assert area_mask2[0, 0, 0] == True
+    assert area_mask2[0, 0, 0]
     # Not everything should be masked
     assert np.sum(area_mask2) < area_mask2.size
     assert np.all(area_mask == area_mask2)
