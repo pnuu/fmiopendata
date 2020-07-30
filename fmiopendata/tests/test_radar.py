@@ -52,24 +52,40 @@ def test_single_vrad():
     assert data.data is not None
     assert data.data.dtype == np.uint8
 
-    # Calibrate the data
-    data.calibrate()
-    assert data.data.dtype == np.float64
-    assert data.data.max() <= data.max_velocity
-
-    # Check the area mask
+    # Check the area mask before calibration
     area_mask = data.get_area_mask()
     # Corners are always masked
     assert area_mask[0, 0, 0] == True
     # Not everything should be masked
     assert np.sum(area_mask) < area_mask.size
 
-    # Check the data mask
+    # Check the data mask before calibration
     data_mask = data.get_data_mask()
     # The corners should not be masked in this case
     assert data_mask[0, 0, 0] == False
     # There ought to be some masked data (no wind detected)
     assert np.sum(data_mask) > 0
+
+    # Calibrate the data
+    data.calibrate()
+    assert data.data.dtype == np.float64
+    assert data.data.max() <= data.max_velocity
+
+    # Check the area mask after calibration
+    area_mask2 = data.get_area_mask()
+    # Corners are always masked
+    assert area_mask2[0, 0, 0] == True
+    # Not everything should be masked
+    assert np.sum(area_mask2) < area_mask2.size
+    assert np.all(area_mask == area_mask2)
+
+    # Check the data mask after calibration
+    data_mask2 = data.get_data_mask()
+    # The corners should not be masked in this case
+    assert data_mask2[0, 0, 0] == False
+    # There ought to be some masked data (no wind detected)
+    assert np.sum(data_mask2) > 0
+    assert np.all(area_mask == area_mask2)
 
 
 def test_single_dbz():
@@ -97,23 +113,39 @@ def test_single_dbz():
     assert data.data is not None
     assert data.data.dtype == np.uint8
 
-    # Calibrate the data
-    data.calibrate()
-    assert data.data.dtype == np.float64
-
-    # Check the area mask
+    # Check the area mask before calibration
     area_mask = data.get_area_mask()
     # Corners are always masked
     assert area_mask[0, 0, 0] == True
     # Not everything should be masked
     assert np.sum(area_mask) < area_mask.size
 
-    # Check the data mask
+    # Check the data mask before calibration
     data_mask = data.get_data_mask()
     # The corners should not be masked in this case
     assert data_mask[0, 0, 0] == False
     # There ought to be some masked data (no rain detected)
     assert np.sum(data_mask) > 0
+
+    # Calibrate the data
+    data.calibrate()
+    assert data.data.dtype == np.float64
+
+    # Check the area mask after calibration
+    area_mask2 = data.get_area_mask()
+    # Corners are always masked
+    assert area_mask2[0, 0, 0] == True
+    # Not everything should be masked
+    assert np.sum(area_mask2) < area_mask2.size
+    assert np.all(area_mask == area_mask2)
+
+    # Check the data mask after calibration
+    data_mask2 = data.get_data_mask()
+    # The corners should not be masked in this case
+    assert data_mask2[0, 0, 0] == False
+    # There ought to be some masked data (no rain detected)
+    assert np.sum(data_mask2) > 0
+    assert np.all(data_mask == data_mask2)
 
 
 def test_single_hclass():
@@ -141,23 +173,39 @@ def test_single_hclass():
     assert data.data is not None
     assert data.data.dtype == np.uint8
 
-    # Calibrate the data
-    data.calibrate()
-    assert data.data.dtype == np.float64
-
-    # Check the area mask
+    # Check the area mask before calibraion
     area_mask = data.get_area_mask()
     # Corners are always masked
     assert area_mask[0, 0, 0] == True
     # Not everything should be masked
     assert np.sum(area_mask) < area_mask.size
 
-    # Check the data mask
+    # Check the data mask before calibraion
     data_mask = data.get_data_mask()
     # The corners should not be masked in this case
     assert data_mask[0, 0, 0] == False
     # There ought to be some masked data (no hydrometeors detected)
     assert np.sum(data_mask) > 0
+
+    # Calibrate the data
+    data.calibrate()
+    assert data.data.dtype == np.float64
+
+    # Check the area mask after calibration
+    area_mask2 = data.get_area_mask()
+    # Corners are always masked
+    assert area_mask2[0, 0, 0] == True
+    # Not everything should be masked
+    assert np.sum(area_mask2) < area_mask2.size
+    assert np.all(area_mask == area_mask2)
+
+    # Check the data mask after calibraion
+    data_mask2 = data.get_data_mask()
+    # The corners should not be masked in this case
+    assert data_mask2[0, 0, 0] == False
+    # There ought to be some masked data (no hydrometeors detected)
+    assert np.sum(data_mask2) > 0
+    assert np.all(data_mask == data_mask2)
 
 
 def test_single_etop_20():
@@ -185,20 +233,36 @@ def test_single_etop_20():
     assert data.data is not None
     assert data.data.dtype == np.uint8
 
-    # Calibrate the data
-    data.calibrate()
-    assert data.data.dtype == np.float64
-
-    # Check the area mask
+    # Check the area mask before calibration
     area_mask = data.get_area_mask()
     # Corners are always masked
     assert area_mask[0, 0, 0] == True
     # Not everything should be masked
     assert np.sum(area_mask) < area_mask.size
 
-    # Check the data mask
+    # Check the data mask before calibration
     data_mask = data.get_data_mask()
     # The corners should not be masked in this case
     assert data_mask[0, 0, 0] == False
     # There ought to be some masked data (no clouds detected)
     assert np.sum(data_mask) > 0
+
+    # Calibrate the data
+    data.calibrate()
+    assert data.data.dtype == np.float64
+
+    # Check the area mask after calibration
+    area_mask2 = data.get_area_mask()
+    # Corners are always masked
+    assert area_mask2[0, 0, 0] == True
+    # Not everything should be masked
+    assert np.sum(area_mask2) < area_mask2.size
+    assert np.all(area_mask == area_mask2)
+
+    # Check the data mask after calibration
+    data_mask2 = data.get_data_mask()
+    # The corners should not be masked in this case
+    assert data_mask2[0, 0, 0] == False
+    # There ought to be some masked data (no clouds detected)
+    assert np.sum(data_mask2) > 0
+    assert np.all(data_mask == data_mask2)
