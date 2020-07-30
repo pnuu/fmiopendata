@@ -326,3 +326,102 @@ def test_composite_dbz():
     # There ought to be some masked data (no rain detected)
     assert np.sum(data_mask2) > 0
     assert np.all(data_mask == data_mask2)
+
+
+def _check_rr(data, name=None, unit=None):
+    """Check the rr products."""
+    # Check that only correct attributes are set
+    assert data.label is not None
+    assert data.max_velocity is None
+    assert data.elevation is None
+    assert data.name == name
+    assert data.projection is not None
+    assert data.unit == unit
+    assert data.url is not None
+    assert data.etop_threshold is None
+    assert data.data is None
+    assert data._gain is not None
+    assert data._offset is not None
+
+    # Download the data
+    data.download()
+    assert data.data is not None
+    assert data.data.dtype == np.uint16
+
+    # Check the area mask before calibration
+    area_mask = data.get_area_mask()
+    # Corners are always masked
+    assert area_mask[0, 0, 0]
+    # Not everything should be masked
+    assert np.sum(area_mask) < area_mask.size
+
+    # Check the data mask before calibration
+    data_mask = data.get_data_mask()
+    # The corners should not be masked in this case
+    assert data_mask[0, 0, 0] == False
+    # There ought to be some masked data (no rain detected)
+    assert np.sum(data_mask) > 0
+
+    # Calibrate the data
+    data.calibrate()
+    assert data.data.dtype == np.float64
+
+    # Check the area mask after calibration
+    area_mask2 = data.get_area_mask()
+    # Corners are always masked
+    assert area_mask2[0, 0, 0]
+    # Not everything should be masked
+    assert np.sum(area_mask2) < area_mask2.size
+    assert np.all(area_mask == area_mask2)
+
+    # Check the data mask after calibration
+    data_mask2 = data.get_data_mask()
+    # The corners should not be masked in this case
+    assert data_mask2[0, 0, 0] == False
+    # There ought to be some masked data (no rain detected)
+    assert np.sum(data_mask2) > 0
+    assert np.all(data_mask == data_mask2)
+
+
+def test_composite_rr():
+    """Test radar composite rain rate."""
+    res = download_and_parse("fmi::radar::composite::rr")
+    assert len(res.data) == len(res.times)
+
+    data = res.data[0]
+    assert data.time == res.times[0]
+
+    _check_rr(data, name="rr", unit="mm/h")
+
+
+def test_composite_rr1h():
+    """Test radar composite 1 hour accumulated rain rainfall."""
+    res = download_and_parse("fmi::radar::composite::rr1h")
+    assert len(res.data) == len(res.times)
+
+    data = res.data[0]
+    assert data.time == res.times[0]
+
+    _check_rr(data, name="rr1h", unit="mm")
+
+
+def test_composite_rr12h():
+    """Test radar composite 12 hour accumulated rain rainfall."""
+    res = download_and_parse("fmi::radar::composite::rr12h")
+    assert len(res.data) == len(res.times)
+
+    data = res.data[0]
+    assert data.time == res.times[0]
+
+    _check_rr(data, name="rr12h", unit="mm")
+
+
+def test_composite_rr24h():
+    """Test radar composite 24 hour accumulated rain rainfall."""
+    res = download_and_parse("fmi::radar::composite::rr24h")
+    assert len(res.data) == len(res.times)
+
+    data = res.data[0]
+    assert data.time == res.times[0]
+
+    _check_rr(data, name="rr24h", unit="mm")
