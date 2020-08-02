@@ -93,7 +93,7 @@ class ParseSoundings(object):
             data = np.fromstring(member.findtext(wfs.GML_DOUBLE_OR_NIL_REASON_TUPLE_LIST), dtype=float, sep=" ")
             fields = member.findall(wfs.SWE_FIELD)
             for i, field in enumerate(fields):
-                setattr(self, FIELD_NAMES[field.attrib["name"]], data[i::len(fields)])
+                setattr(sounding, FIELD_NAMES[field.attrib["name"]], data[i::len(fields)])
 
             self.soundings.append(sounding)
 
