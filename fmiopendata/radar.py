@@ -66,7 +66,11 @@ class Radar(object):
         """Download the data."""
         if self.data is None:
             with tempfile.NamedTemporaryFile() as fid:
-                fid.write(read_url(self.url))
+                data = read_url(self.url)
+                if len(data) < 10e3 and "ServiceException" in str(data):
+                    msg = "WMS returned an exception: %s" % str(data)
+                    raise ValueError(msg)
+                fid.write(data)
                 img = rasterio.open(fid.name)
                 self.projection = img.crs.wkt
                 self.data = img.read()
