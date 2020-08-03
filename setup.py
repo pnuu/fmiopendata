@@ -56,6 +56,6 @@ setup(name="fmiopendata",
       data_files=[],
       install_requires=install_requires,
       extras_require=extras_require,
-      tests_require=['mock'],
+      tests_require=['mock', 'rasterio', 'eccodes'],
       python_requires='>=3.4',
       )
