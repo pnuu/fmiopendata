@@ -109,5 +109,4 @@ def test_download_stored_query_notimplemented():
     import pytest
 
     with pytest.raises(NotImplementedError):
-        res = download_stored_query("foo::bar::baz")
-        del res
+        _ = download_stored_query("foo::bar::baz")
