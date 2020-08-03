@@ -21,7 +21,7 @@
 
 """Test WFS interface."""
 
-import mock
+from unittest import mock
 
 
 def test_get_capabilities():

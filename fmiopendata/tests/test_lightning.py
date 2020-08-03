@@ -23,7 +23,7 @@
 """Test lightning parsers."""
 
 import pytest
-import mock
+from unittest import mock
 
 import numpy as np
 
