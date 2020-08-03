@@ -6,12 +6,23 @@ Python interface for FMI open data
 
 [FMI WFS guide](https://en.ilmatieteenlaitos.fi/open-data-manual-wfs-examples-and-guidelines)
 
+## Installation
+
+```bash
+
+pip install fmiopendata
+```
+
+For `grid` datasets install also `eccodes`, and for `radar` datasets `rasterio` is needed.  Both
+can be installed with `pip`, although usage of `miniconda` is strongly encouraged.
+
 ## Available data
 This library provides two very simple scripts that list all the available data on
 FMI open data WMS and WFS services.
 
 Create `wms.html` that lists all the availble WMS layers:
 ```bash
+
 wms_html.py
 ```
 
@@ -19,6 +30,7 @@ The `Layer ID` strings are used to identify WMS (image) datasets. Examples to be
 
 Create `wfs.html` that lists all the availble WFS layers:
 ```bash
+
 wfs_html.py
 ```
 
@@ -145,7 +157,8 @@ lightning1.ellipse_major  # Location accuracy of the lightning event [km]
 ### Download and parse grid data
 
 The example below uses `fmi::forecast::harmonie::surface::grid` for demonstration.  Also other
-`grid` stored queries should work.  This parser requires `eccodes` library to be installed.
+`grid` stored queries should work, as long as the data are available in GRIB format.
+This parser requires `eccodes` library to be installed.
 
 ```python
 
@@ -160,9 +173,9 @@ model_data = download_stored_query("fmi::forecast::harmonie::surface::grid",
 Here we limit both the time frame and area.  By default the WFS interface would offer all data
 fields, full globe and all time steps, which would result in a huge amount of data.  It's better
 to split the retrieval in smaller time intervals and do the downloading in parallel and start
-processing the data as soon as the download completes.
+processing the each chunk of data as soon as the download completes.
 
-The above call doesn't download any data, it just collects some metadata:
+The above call doesn't download any data actual, it just collects some metadata:
 
 ```python
 
@@ -171,6 +184,8 @@ print(model_data.data)
 #     datetime.datetime(2020, 7, 7, 6, 0): <fmiopendata.grid.Grid object at 0x7fda9858d0b8>,
 #     datetime.datetime(2020, 7, 7, 12, 0): <fmiopendata.grid.Grid object at 0x7fda9858d1d0>}
 ```
+
+Here the dictionary keys are the model initialization times.
 
 The structure of the underlying `Grid` class is:
 
@@ -210,7 +225,7 @@ print(list(valid_times))
 #     datetime.datetime(2020, 7, 7, 20, 0)]
 ```
 
-The second level has the data vertical levels, here the earliest time step is shown:
+The second level of the dictionary has the data vertical levels, here the earliest time step is shown:
 
 ```python
 earliest_step = min(valid_times)
@@ -261,7 +276,7 @@ Level: 10, dataset name: Surface solar radiation downwards, data unit: J m**-2
 The whole structure `Grid.data[valid_time][level][dataset_name]` with `'data'` and `'units'`
 members is common to all `grid` type WFS data.
 
-The `data_data` array will have invalid values replaced with `np.nan`.
+The data arrays will have invalid values replaced with `np.nan`.
 
 ## Download and parse observation data
 ```python
@@ -274,7 +289,7 @@ obs = download_stored_query("fmi::observations::weather::multipointcoverage",
                                   "endtime=2020-07-07T12:05:00Z"])
 ```
 
-The structure of the returned `MultiPont` class is
+The structure of the returned `MultiPoint` class is
 
 ```python
 
