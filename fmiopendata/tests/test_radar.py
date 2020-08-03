@@ -25,6 +25,7 @@
 import mock
 
 import numpy as np
+import pytest
 
 
 def test_single_vrad():
@@ -143,6 +144,7 @@ def test_composite_rr1h():
     _check_radar(data, name="rr1h", unit="mm", dtype=np.uint16)
 
 
+@pytest.mark.xfail(raises=ValueError, reason="Broken WMS layer")
 def test_composite_rr12h():
     """Test radar composite 12 hour accumulated rain rainfall."""
     from fmiopendata.radar import download_and_parse
