@@ -4,7 +4,7 @@ python:
   - "3.7"
   - "3.8"
 install:
-  - pip install -U codecov pytest pytest-cov pyyaml rasterio numpy rasterio
+  - pip install -U codecov pytest pytest-cov pyyaml rasterio numpy eccodes
 script:
   - pytest --cov=./
 after_success:
