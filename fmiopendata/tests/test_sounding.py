@@ -22,7 +22,7 @@
 
 """Test sounding parser."""
 
-import mock
+from unittest import mock
 
 
 def test_sounding():
