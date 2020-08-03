@@ -65,7 +65,7 @@ def get_req_xml(req):
 
 def get_capabilities():
     """Get WFS cababilities."""
-    xml = get_req_xml("getCababilities")
+    xml = get_req_xml("getCapabilities")
 
     return xml
 
