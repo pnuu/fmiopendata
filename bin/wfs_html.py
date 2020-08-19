@@ -33,23 +33,27 @@ def write_title(fid, query):
     fid.write("<h2>%s</h2>" % query["title"])
 
 
-def write_name(fid, name):
-    """Write name of the query."""
-    fid.write("<li>Query ID: %s</li>" % name)
-
-
-def write_return_type(fid, query):
-    """Write return type of the query."""
-    fid.write("<li>Query return type: %s</li>" % query["return_type"])
-
-
-def write_params(fid, query_id):
+def write_description(fid, query_id):
     """Write available query parameters."""
-    xml = ET.fromstring(read_url(wfs.STORED_QUERY_URL + query_id))
-    fid.write("<li>Data fields (used with 'param=' item in the url):</li>")
+    xml = ET.fromstring(read_url(wfs.BASE_URL + "DescribeStoredQueries&storedquery_id=" + query_id))
+    fid.write("<p>")
+    fid.write(xml.findtext(wfs.WFS_ABSTRACT).strip())
+    fid.write("</p>")
     fid.write("<ul>")
-    for param in xml.find(wfs.SWE_DATA_RECORD).getchildren():
+    fid.write("<li>Query ID: %s</li>" % query_id)
+    fid.write("<li>Available arguments:</li>")
+    fid.write("<ul>")
+    params = xml.findall(wfs.WFS_PARAMETER)
+    for i, param in enumerate(params):
         fid.write("<li>%s</li>" % param.attrib["name"])
+        fid.write("<ul>")
+        param_title = param.findtext(wfs.WFS_TITLE)
+        fid.write("<li>%s</li>" % param_title)
+        param_abstract = param.findtext(wfs.WFS_ABSTRACT).strip()
+        fid.write("<li>%s</li>" % param_abstract)
+        fid.write("</ul>")
+    fid.write("</ul>")
+    fid.write("</ul>")
     fid.write("</ul>")
 
 
@@ -61,12 +65,7 @@ def write_html(fname, queries):
         for key in sorted(queries):
             query = queries[key]
             write_title(fid, query)
-            fid.write("<ul>")
-            write_name(fid, key)
-            write_return_type(fid, query)
-            if "grid" in key:
-                write_params(fid, key)
-            fid.write("</ul>")
+            write_description(fid, key)
         fid.write("</body></html>")
 
 
