@@ -89,7 +89,7 @@ def write_description_md(fid, query_id):
     xml = ET.fromstring(read_url(wfs.BASE_URL + "DescribeStoredQueries&storedquery_id=" + query_id))
     fid.write(xml.findtext(wfs.WFS_ABSTRACT).strip())
     fid.write("\n\n")
-    fid.write("* Query ID: %s\n" % query_id)
+    fid.write("* Query ID: `%s`\n" % query_id)
     fid.write("* Available arguments:\n")
     params = xml.findall(wfs.WFS_PARAMETER)
     for i, param in enumerate(params):
