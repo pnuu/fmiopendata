@@ -69,6 +69,38 @@ def write_html(fname, queries):
         fid.write("</body></html>")
 
 
+def write_title_md(fid, query):
+    """Write title of the query."""
+    fid.write("## %s\n\n" % query["title"])
+
+
+def write_md(fname, queries):
+    """Save markdown page showing the WFS stored queries in markdown."""
+    with open(fname, 'w') as fid:
+        fid.write("# Available WFS stored queries in FMI open data.\n\n")
+        for key in sorted(queries):
+            query = queries[key]
+            write_title_md(fid, query)
+            write_description_md(fid, key)
+
+
+def write_description_md(fid, query_id):
+    """Write available query parameters in markdown."""
+    xml = ET.fromstring(read_url(wfs.BASE_URL + "DescribeStoredQueries&storedquery_id=" + query_id))
+    fid.write(xml.findtext(wfs.WFS_ABSTRACT).strip())
+    fid.write("\n\n")
+    fid.write("* Query ID: %s\n" % query_id)
+    fid.write("* Available arguments:\n")
+    params = xml.findall(wfs.WFS_PARAMETER)
+    for i, param in enumerate(params):
+        fid.write("    * %s\n" % param.attrib["name"])
+        param_title = param.findtext(wfs.WFS_TITLE)
+        fid.write("        * %s\n" % param_title)
+        param_abstract = param.findtext(wfs.WFS_ABSTRACT).strip()
+        fid.write("        * %s\n" % param_abstract)
+    fid.write("\n\n")
+
+
 def main():
     """Run the script."""
     try:
@@ -77,7 +109,10 @@ def main():
         fname = "wfs.html"
 
     queries = wfs.get_stored_queries()
-    write_html(fname, queries)
+    if fname.endswith("html"):
+        write_html(fname, queries)
+    else:
+        write_md(fname, queries)
 
 
 if __name__ == "__main__":
