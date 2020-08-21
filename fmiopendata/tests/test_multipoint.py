@@ -24,10 +24,12 @@
 
 import datetime as dt
 
+START_TIME = dt.datetime(2020, 7, 7, 12, 0, 0)
+END_TIME = dt.datetime(2020, 7, 7, 12, 5, 0)
 
 ARGS = ["bbox=24,59,26,61",
-        "starttime=2020-07-07T12:00:00Z",
-        "endtime=2020-07-07T12:05:00Z"]
+        "starttime=" + START_TIME.isoformat(timespec="seconds") + "Z",
+        "endtime=" + END_TIME.isoformat(timespec="seconds") + "Z"]
 
 
 def test_multipoint_weather():
@@ -55,6 +57,12 @@ def test_multipoint_weather():
     assert isinstance(meta["fmisid"], int)
     assert isinstance(meta["latitude"], float)
     assert isinstance(meta["longitude"], float)
+
+    # Make sure the times are within the specified time frame
+    start_time = min(res.data.keys())
+    end_time = max(res.data.keys())
+    assert start_time >= START_TIME
+    assert end_time <= END_TIME
 
 
 def test_multipoint_radionuclide():

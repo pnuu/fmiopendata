@@ -24,11 +24,15 @@
 
 import pytest
 from unittest import mock
+import datetime as dt
 
 import numpy as np
 
 # Define a time period that has data
-ARGS = ["starttime=2010-08-01T12:00:00Z", "endtime=2010-08-01T12:01:00Z"]
+START_TIME = dt.datetime(2010, 8, 1, 12, 0, 0)
+END_TIME = dt.datetime(2010, 8, 1, 12, 1, 0)
+ARGS = ["starttime=" + START_TIME.isoformat(timespec="seconds") + "Z",
+        "endtime=" + END_TIME.isoformat(timespec="seconds") + "Z"]
 
 
 def test_lightning():
@@ -42,13 +46,19 @@ def test_lightning():
     assert num == len(res.longitudes) == len(res.times) == len(res.cloud_indicator)
     assert num == len(res.ellipse_major) == len(res.multiplicity) == len(res.peak_current)
 
+    # Make sure the times are within the specified time frame
+    start_time = min(res.times)
+    end_time = max(res.times)
+    assert start_time >= START_TIME
+    assert end_time <= END_TIME
+
     # The multipoint coverage format
     res2 = download_and_parse("fmi::observations::lightning::multipointcoverage", args=ARGS)
 
     # The results should be indentical
     assert np.all(res.latitudes == res2.latitudes)
     assert np.all(res.longitudes == res2.longitudes)
-    assert np.all(res.times == res.times)
+    assert np.all(res.times == res2.times)
     assert np.all(res.cloud_indicator == res2.cloud_indicator)
     assert np.all(res.ellipse_major == res2.ellipse_major)
     assert np.all(res.multiplicity == res2.multiplicity)

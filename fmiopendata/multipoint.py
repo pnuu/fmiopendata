@@ -65,7 +65,7 @@ class MultiPoint(object):
         positions = np.fromstring(xml.findtext(wfs.GMLCOV_POSITIONS), dtype=float, sep=" ")
         latitudes = positions[::3]
         longitudes = positions[1::3]
-        times = np.array([dt.datetime.fromtimestamp(t) for t in positions[2::3]])
+        times = np.array([dt.datetime.utcfromtimestamp(t) for t in positions[2::3]])
         if times.size == 0:
             times = np.array([dt.datetime.strptime(xml.findtext(wfs.GML_TIME_POSITION), TIME_FORMAT)])
         measurements = np.fromstring(xml.findtext(wfs.GML_DOUBLE_OR_NIL_REASON_TUPLE_LIST), dtype=float, sep=" ")
