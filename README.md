@@ -283,10 +283,19 @@ The data arrays will have invalid values replaced with `np.nan`.
 
 from fmiopendata.wfs import download_stored_query
 
+# Retrieve the latest hour of data from a bounding box
+end_time = dt.datetime.utcnow()
+start_time = end_time - dt.timedelta(hours=1)
+# Convert times to properly formatted strings
+start_time = start_time.isoformat(timespec="seconds") + "Z"
+# -> 2020-07-07T12:00:00Z
+end_time = end_time.isoformat(timespec="seconds") + "Z"
+# -> 2020-07-07T13:00:00Z
+
 obs = download_stored_query("fmi::observations::weather::multipointcoverage",
                             args=["bbox=18,55,35,75",
-                                  "starttime=2020-07-07T12:00:00Z",
-                                  "endtime=2020-07-07T12:05:00Z"])
+                                  "starttime=" + start_time,
+                                  "endtime=" + end_time])
 ```
 
 The structure of the returned `MultiPoint` class is
