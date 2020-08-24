@@ -20,6 +20,9 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import xml.etree.ElementTree as ET
+import sys
+if sys.version_info < (3, 6):
+    from collections import OrderedDict as dict
 
 from fmiopendata.utils import read_url
 
@@ -75,7 +78,7 @@ def get_capabilities():
 def get_stored_queries():
     """Get stored queries."""
     queries = get_req_xml("ListStoredQueries")
-    res = {}
+    res = dict()
     root = ET.fromstring(queries)
     queries = root.findall(WFS_STORED_QUERY)
     for query in queries:
@@ -84,7 +87,7 @@ def get_stored_queries():
             continue
         title = query.findtext(WFS_TITLE)
         return_type = query.findtext(WFS_RETURN_FEATURE_TYPE)
-        res[name] = {'title': title, 'return_type': return_type}
+        res[name] = dict({'title': title, 'return_type': return_type})
 
     return res
 
@@ -92,14 +95,14 @@ def get_stored_queries():
 def get_stored_query_descriptions():
     """Get stored query descriptions."""
     descriptions = get_req_xml("DescribeStoredQueries")
-    res = {}
+    res = dict()
     root = ET.fromstring(descriptions)
     for f in root.getchildren():
         if f.attrib['id'] == 'GetDataSetById':
             continue
         f_ch = f.getchildren()
-        desc = {'title': f_ch[0].text.strip(),
-                'description': f_ch[1].text.strip()}
+        desc = dict({'title': f_ch[0].text.strip(),
+                     'description': f_ch[1].text.strip()})
         res[f.attrib['id']] = desc
 
     return res

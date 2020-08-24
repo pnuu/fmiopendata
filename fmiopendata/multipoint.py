@@ -21,6 +21,9 @@
 
 import xml.etree.ElementTree as ET
 import datetime as dt
+import sys
+if sys.version_info < (3, 6):
+    from collections import OrderedDict as dict
 
 import numpy as np
 
@@ -36,9 +39,9 @@ class MultiPoint(object):
     def __init__(self, xml, query_id):
         """Initialize class."""
         self._xml = ET.fromstring(xml)
-        self.data = {}
-        self.location_metadata = {}
-        self._location2name = {}
+        self.data = dict()
+        self.location_metadata = dict()
+        self._location2name = dict()
         if "radionuclide-activity-concentration" in query_id:
             self._parse_radionuclide()
         else:
@@ -51,15 +54,15 @@ class MultiPoint(object):
 
     def _parse(self, xml):
         """Parse data."""
-        type2obs = {}
+        type2obs = dict()
         for point in xml.findall(wfs.GML_POINT):
             fmisid = int(point.attrib[wfs.GML_ID].split('-')[-1])
             name = point.findtext(wfs.GML_NAME)
             location = tuple(float(p) for p in point.findtext(wfs.GML_POS).split())
-            self.location_metadata[name] = {"fmisid": fmisid,
-                                            "latitude": location[0],
-                                            "longitude": location[1]
-                                            }
+            self.location_metadata[name] = dict({"fmisid": fmisid,
+                                                 "latitude": location[0],
+                                                 "longitude": location[1]
+                                                 })
             self._location2name[location] = name
 
         positions = np.fromstring(xml.findtext(wfs.GMLCOV_POSITIONS), dtype=float, sep=" ")
@@ -82,20 +85,20 @@ class MultiPoint(object):
             except KeyError:
                 name = field.findtext(wfs.SWE_LABEL)
                 units = field.find(wfs.SWE_UOM).attrib['code']
-            type2obs[typ] = {"name": name, "units": units}
+            type2obs[typ] = dict({"name": name, "units": units})
         measurements = np.reshape(measurements, (len(times), len(type2obs)))
 
         for i, tim in enumerate(times):
             if tim not in self.data:
-                self.data[tim] = {}
+                self.data[tim] = dict()
             loc = (latitudes[i], longitudes[i])
             name = self._location2name[loc]
             if name not in self.data[tim]:
-                self.data[tim][name] = {}
+                self.data[tim][name] = dict()
             for j, key in enumerate(type2obs.keys()):
-                self.data[tim][name][type2obs[key]["name"]] = {"value": measurements[i, j],
-                                                               "units": type2obs[key]["units"]
-                                                               }
+                self.data[tim][name][type2obs[key]["name"]] = dict({"value": measurements[i, j],
+                                                                    "units": type2obs[key]["units"]
+                                                                    })
 
 
 def download_and_parse(query_id, args=None):

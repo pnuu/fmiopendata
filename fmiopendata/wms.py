@@ -21,6 +21,9 @@
 
 import datetime as dt
 import xml.etree.ElementTree as ET
+import sys
+if sys.version_info < (3, 6):
+    from collections import OrderedDict as dict
 
 from fmiopendata.utils import read_url
 
@@ -106,7 +109,7 @@ def get_wms_layers():
 
     layers = root.findall(WMS_LAYERS)
 
-    res = {}
+    res = dict()
     for itm in layers:
         layer = WMSLayer(itm)
         if layer.name is not None:

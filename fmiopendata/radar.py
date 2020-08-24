@@ -21,8 +21,11 @@
 
 import datetime as dt
 import xml.etree.ElementTree as ET
-
 import tempfile
+import sys
+if sys.version_info < (3, 6):
+    from collections import OrderedDict as dict
+
 import rasterio
 import numpy as np
 
@@ -31,7 +34,7 @@ from fmiopendata.utils import read_url
 
 TIME_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
 
-meta_cache = {}
+meta_cache = dict()
 
 
 def get_meta(meta_url):

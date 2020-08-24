@@ -23,6 +23,9 @@ import datetime as dt
 import xml.etree.ElementTree as ET
 import os
 import tempfile
+import sys
+if sys.version_info < (3, 6):
+    from collections import OrderedDict as dict
 
 import numpy as np
 import eccodes
@@ -41,7 +44,7 @@ class Grid(object):
         self.init_time = None
         self.start_time = None
         self.end_time = None
-        self.data = {}
+        self.data = dict()
         self.latitudes = None
         self.longitudes = None
         self.url = None
@@ -88,11 +91,11 @@ class Grid(object):
                     self.latitudes = np.reshape(msg["latitudes"], (msg["Nj"], msg["Ni"]))
                     self.longitudes = np.reshape(msg["longitudes"], (msg["Nj"], msg["Ni"]))
                 if datime not in self.data:
-                    self.data[datime] = {}
+                    self.data[datime] = dict()
                 if msg["level"] not in self.data[datime]:
-                    self.data[datime][msg["level"]] = {}
+                    self.data[datime][msg["level"]] = dict()
                 level = self.data[datime][msg["level"]]
-                level[msg["name"]] = {}
+                level[msg["name"]] = dict()
                 data = np.reshape(msg["values"], (msg["Nj"], msg["Ni"]))
                 data[data == msg["missingValue"]] = np.nan
                 level[msg["name"]]["data"] = data
@@ -110,7 +113,7 @@ class ParseGrids(object):
     def __init__(self, xml):
         """Initialize class."""
         self._xml = ET.fromstring(xml)
-        self.data = {}
+        self.data = dict()
         self._parse()
 
     def _parse(self):
