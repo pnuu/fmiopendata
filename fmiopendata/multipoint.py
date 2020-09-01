@@ -52,9 +52,8 @@ class MultiPoint(object):
         for member in self._xml.findall(wfs.WFS_MEMBER):
             self._parse(member)
 
-    def _parse(self, xml):
-        """Parse data."""
-        type2obs = dict()
+    def _parse_location_metadata(self, xml):
+        """Parse location metadata."""
         for point in xml.findall(wfs.GML_POINT):
             fmisid = int(point.attrib[wfs.GML_ID].split('-')[-1])
             name = point.findtext(wfs.GML_NAME)
@@ -65,28 +64,16 @@ class MultiPoint(object):
                                                  })
             self._location2name[location] = name
 
-        positions = np.fromstring(xml.findtext(wfs.GMLCOV_POSITIONS), dtype=float, sep=" ")
+    def _parse(self, xml):
+        """Parse data."""
+        self._parse_location_metadata(xml)
+
+        type2obs = _parse_names_and_units(xml)
+        positions = _parse_positions(xml)
         latitudes = positions[::3]
         longitudes = positions[1::3]
-        times = np.array([dt.datetime.utcfromtimestamp(t) for t in positions[2::3]])
-        if times.size == 0:
-            times = np.array([dt.datetime.strptime(xml.findtext(wfs.GML_TIME_POSITION), TIME_FORMAT)])
-        measurements = np.fromstring(xml.findtext(wfs.GML_DOUBLE_OR_NIL_REASON_TUPLE_LIST), dtype=float, sep=" ")
-        for field in xml.findall(wfs.SWE_FIELD):
-            typ = field.attrib["name"]
-            try:
-                url = field.attrib[wfs.LINK]
-                root = ET.fromstring(read_url(url))
-                name = root.findtext(wfs.OMOP_LABEL)
-                try:
-                    units = root.find(wfs.OMOP_UOM).attrib["uom"]
-                except AttributeError:
-                    units = ''
-            except KeyError:
-                name = field.findtext(wfs.SWE_LABEL)
-                units = field.find(wfs.SWE_UOM).attrib['code']
-            type2obs[typ] = dict({"name": name, "units": units})
-        measurements = np.reshape(measurements, (len(times), len(type2obs)))
+        times = _parse_times(xml, positions)
+        measurements = _parse_measurements(xml, (len(times), len(type2obs)))
 
         for i, tim in enumerate(times):
             if tim not in self.data:
@@ -99,6 +86,43 @@ class MultiPoint(object):
                 self.data[tim][name][type2obs[key]["name"]] = dict({"value": measurements[i, j],
                                                                     "units": type2obs[key]["units"]
                                                                     })
+
+
+def _parse_positions(xml):
+    return np.fromstring(xml.findtext(wfs.GMLCOV_POSITIONS), dtype=float, sep=" ")
+
+
+def _parse_times(xml, positions):
+    times = np.array([dt.datetime.utcfromtimestamp(t) for t in positions[2::3]])
+    if times.size == 0:
+        times = np.array([dt.datetime.strptime(xml.findtext(wfs.GML_TIME_POSITION), TIME_FORMAT)])
+    return times
+
+
+def _parse_measurements(xml, shape):
+    measurements = np.fromstring(xml.findtext(wfs.GML_DOUBLE_OR_NIL_REASON_TUPLE_LIST), dtype=float, sep=" ")
+    return np.reshape(measurements, shape)
+
+
+def _parse_names_and_units(xml):
+    type2obs = dict()
+
+    for field in xml.findall(wfs.SWE_FIELD):
+        typ = field.attrib["name"]
+        try:
+            url = field.attrib[wfs.LINK]
+            root = ET.fromstring(read_url(url))
+            name = root.findtext(wfs.OMOP_LABEL)
+            try:
+                units = root.find(wfs.OMOP_UOM).attrib["uom"]
+            except AttributeError:
+                units = ''
+        except KeyError:
+            name = field.findtext(wfs.SWE_LABEL)
+            units = field.find(wfs.SWE_UOM).attrib['code']
+        type2obs[typ] = dict({"name": name, "units": units})
+
+    return type2obs
 
 
 def download_and_parse(query_id, args=None):
