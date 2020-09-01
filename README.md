@@ -342,7 +342,7 @@ print(sorted(obs.data[latest_tstep]["Jyväskylä lentoasema"].keys()))
 #     'Wind speed']
 
 # And on the last level we find the value and unit of the observation
-print(osb.data[latest_tsep]["Jyväskylä lentoasema"]["Air temperature"])
+print(obs.data[latest_tstep]["Jyväskylä lentoasema"]["Air temperature"])
 # -> {'value': 18.0, 'units': 'degC'}
 ```
 
