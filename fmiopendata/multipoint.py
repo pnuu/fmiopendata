@@ -69,7 +69,11 @@ class MultiPoint(object):
         self._parse_location_metadata(xml)
 
         type2obs = _parse_names_and_units(xml)
-        positions = _parse_positions(xml)
+        try:
+            positions = _parse_positions(xml)
+        except TypeError:
+            print("No observations found")
+            return
         latitudes = positions[::3]
         longitudes = positions[1::3]
         times = _parse_times(xml, positions)
