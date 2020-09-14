@@ -306,7 +306,8 @@ MultiPoint.data  # The observation data
 MultiPoint.location_metadata  # Location information for the observation locations
 ```
 
-The `data` dictionary has the following structure:
+The `data` dictionary has the following structure, which is designed to be used for
+collecting data for distinct timesteps:
 
 ```python
 
@@ -352,6 +353,39 @@ To get the location for the stations, one can use the `location_metadata` dictio
 
 print(obs.location_metadata["Jyväskylä lentoasema"])
 # -> {'fmisid': 101339, 'latitude': 62.39758, 'longitude': 25.67087}
+```
+
+It is also possible to collect the data to a structure more usable for timeseries
+analysis by adding `"timeseries=True"` to the arguments:
+
+```python
+
+from fmiopendata.wfs import download_stored_query
+
+obs = download_stored_query("fmi::observations::weather::multipointcoverage",
+                            args=["bbox=25,60,25.5,60.5",
+                                  "timeseries=True"])
+```
+
+Now the data will be organized by location:
+
+```python
+
+print(sorted(obs.data.keys()))
+# -> ['Helsinki Malmi lentokenttä',
+#     'Helsinki Vuosaari Käärmeniementie',
+#     'Helsinki Vuosaari satama',
+#     'Järvenpää Sorto',
+#     'Sipoo Eestiluoto',
+#     'Sipoo Itätoukki']
+
+# The times are as a list of datetime objects
+times = obs.data['Helsinki Malmi lentokenttä']['times']
+# Other data fields have another extra level, one for values and one for the unit
+print(len(obs.data['Helsinki Malmi lentokenttä']['t2m']['values']))
+# -> 72
+print(len(obs.data['Helsinki Malmi lentokenttä']['t2m']['values']))
+# -> 'degC'
 ```
 
 This parser supports at least the following stored queries:

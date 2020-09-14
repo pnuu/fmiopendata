@@ -36,12 +36,14 @@ TIME_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
 class MultiPoint(object):
     """Class for holding multipoint data."""
 
-    def __init__(self, xml, query_id):
+    def __init__(self, xml, query_id, timeseries=False):
         """Initialize class."""
         self._xml = ET.fromstring(xml)
         self.data = dict()
         self.location_metadata = dict()
         self._location2name = dict()
+        self._timeseries = timeseries
+
         if "radionuclide-activity-concentration" in query_id:
             self._parse_radionuclide()
         else:
@@ -79,6 +81,24 @@ class MultiPoint(object):
         times = _parse_times(xml, positions)
         measurements = _parse_measurements(xml, (len(times), len(type2obs)))
 
+        if self._timeseries:
+            self._collect_timeseries(type2obs, latitudes, longitudes, times, measurements)
+        else:
+            self._collect_non_timeseries(type2obs, latitudes, longitudes, times, measurements)
+
+    def _collect_timeseries(self, type2obs, latitudes, longitudes, times, measurements):
+        for i, tim in enumerate(times):
+            loc = (latitudes[i], longitudes[i])
+            name = self._location2name[loc]
+            if name not in self.data:
+                self.data[name] = dict(times=[])
+            self.data[name]["times"].append(tim)
+            for j, key in enumerate(type2obs.keys()):
+                if key not in self.data[name]:
+                    self.data[name][key] = {"values": [], "unit": type2obs[key]["units"]}
+                self.data[name][key]["values"].append(measurements[i, j])
+
+    def _collect_non_timeseries(self, type2obs, latitudes, longitudes, times, measurements):
         for i, tim in enumerate(times):
             if tim not in self.data:
                 self.data[tim] = dict()
@@ -131,8 +151,12 @@ def _parse_names_and_units(xml):
 
 def download_and_parse(query_id, args=None):
     """Download and parse the given stored query."""
+    timeseries = False
+    if "timeseries=True" in args:
+        timeseries = True
+        args.remove("timeseries=True")
     url = wfs.STORED_QUERY_URL + query_id
     if args:
         url = url + "&" + "&".join(args)
     xml = read_url(url)
-    return MultiPoint(xml, query_id)
+    return MultiPoint(xml, query_id, timeseries=timeseries)

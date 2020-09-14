@@ -30,6 +30,7 @@ END_TIME = dt.datetime(2020, 7, 7, 12, 5, 0)
 ARGS = ["bbox=24,59,26,61",
         "starttime=" + START_TIME.isoformat(timespec="seconds") + "Z",
         "endtime=" + END_TIME.isoformat(timespec="seconds") + "Z"]
+ARGS_TIMESERIES = ["bbox=24,59,26,61", "timeseries=True"]
 
 
 def test_multipoint_weather():
@@ -63,6 +64,27 @@ def test_multipoint_weather():
     end_time = max(res.data.keys())
     assert start_time >= START_TIME
     assert end_time <= END_TIME
+
+
+def test_multipoint_weather_timeseries():
+    """Test multipoint coverage parser for weather station data in timeseries mode."""
+    from fmiopendata.multipoint import download_and_parse
+
+    res = download_and_parse("fmi::observations::weather::multipointcoverage",
+                             args=ARGS_TIMESERIES)
+
+    for loc in res.location_metadata:
+        assert "fmisid" in res.location_metadata[loc]
+        assert "latitude" in res.location_metadata[loc]
+        assert "longitude" in res.location_metadata[loc]
+
+    for loc in res.data:
+        len_times = len(res.data[loc]["times"])
+        for measurement in res.data[loc]:
+            if measurement == "times":
+                continue
+            assert len(res.data[loc][measurement]["values"]) == len_times
+            assert "unit" in res.data[loc][measurement]
 
 
 def test_multipoint_radionuclide():
