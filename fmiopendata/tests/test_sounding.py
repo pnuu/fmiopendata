@@ -52,3 +52,17 @@ def test_args(read_url, ParseSoundings):
     res = download_and_parse("foo", args=["a=1", "b=2"])
     del res
     assert read_url.mock_calls[0].endswith("=foo&a=1&b=2")
+
+
+def test_no_data():
+    """"Test that missing data is handled properly."""
+    from fmiopendata.sounding import ParseSoundings
+
+    empty_xml = "<xml></xml>"
+
+    obs = ParseSoundings(empty_xml)
+    _check_soundings_empty(obs)
+
+
+def _check_soundings_empty(obs):
+    assert obs.soundings == []
