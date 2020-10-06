@@ -73,3 +73,27 @@ def test_unimplemented(read_url, ET):
 
     with pytest.raises(NotImplementedError):
         _ = download_and_parse("fmi::observations::lightning::nonexistent", args=ARGS)
+
+
+def test_no_data():
+    """"Test that missing data is handled properly."""
+    from fmiopendata.lightning import Lightning
+
+    empty_xml = "<xml></xml>"
+    # "::simple" data
+    obs = Lightning(empty_xml, "simple")
+    _check_lightning_empty(obs)
+
+    # "::multipointcoverage" data
+    obs = Lightning(empty_xml, "multipointcoverage")
+    _check_lightning_empty(obs)
+
+
+def _check_lightning_empty(obs):
+    np.testing.assert_equal(obs.latitudes, np.array([]))
+    np.testing.assert_equal(obs.longitudes, np.array([]))
+    np.testing.assert_equal(obs.times, np.array([]))
+    np.testing.assert_equal(obs.multiplicity, np.array([], dtype=np.uint8))
+    np.testing.assert_equal(obs.peak_current, np.array([]))
+    np.testing.assert_equal(obs.cloud_indicator, np.array([], dtype=np.uint8))
+    np.testing.assert_equal(obs.ellipse_major, np.array([]))

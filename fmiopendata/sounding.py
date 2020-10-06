@@ -83,7 +83,11 @@ class ParseSoundings(object):
             sounding.start_time = dt.datetime.strptime(member.findtext(wfs.GML_BEGIN_POSITION), TIME_FORMAT)
             sounding.end_time = dt.datetime.strptime(member.findtext(wfs.GML_END_POSITION), TIME_FORMAT)
 
-            positions = np.fromstring(member.findtext(wfs.GMLCOV_POSITIONS), dtype=float, sep=" ")
+            try:
+                positions = np.fromstring(member.findtext(wfs.GMLCOV_POSITIONS), dtype=float, sep=" ")
+            except TypeError:
+                print("No soundings found")
+                return
             sounding.lats = positions[::4]
             sounding.lons = positions[1::4]
             sounding.altitudes = positions[2::4]

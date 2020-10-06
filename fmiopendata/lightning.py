@@ -89,7 +89,12 @@ class Lightning(object):
         Version for fmi::observations::lightning::multipointcoverage query.
 
         """
-        positions = np.fromstring(self._xml.findtext(wfs.GMLCOV_POSITIONS), dtype=float, sep=" ")
+        try:
+            positions = np.fromstring(self._xml.findtext(wfs.GMLCOV_POSITIONS), dtype=float, sep=" ")
+        except TypeError:
+            print("No observations found")
+            self._set_empty_observations()
+            return
         self.latitudes = positions[::3]
         self.longitudes = positions[1::3]
         times = positions[2::3]
@@ -100,6 +105,15 @@ class Lightning(object):
         for i, field in enumerate(fields):
             vals = data[i::len(fields)]
             setattr(self, field, vals)
+
+    def _set_empty_observations(self):
+        self.latitudes = np.array([])
+        self.longitudes = np.array([])
+        self.times = np.array([])
+        self.multiplicity = np.array([], dtype=np.uint8)
+        self.peak_current = np.array([])
+        self.cloud_indicator = np.array([], dtype=np.uint8)
+        self.ellipse_major = np.array([])
 
 
 def download_and_parse(query_id, args=None):
