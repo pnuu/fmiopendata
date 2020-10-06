@@ -280,6 +280,7 @@ The data arrays will have invalid values replaced with `np.nan`.
 
 ## Download and parse observation data
 ```python
+import datetime as dt
 
 from fmiopendata.wfs import download_stored_query
 
@@ -384,7 +385,7 @@ times = obs.data['Helsinki Malmi lentokenttä']['times']
 # Other data fields have another extra level, one for values and one for the unit
 print(len(obs.data['Helsinki Malmi lentokenttä']['t2m']['values']))
 # -> 72
-print(len(obs.data['Helsinki Malmi lentokenttä']['t2m']['values']))
+print(obs.data['Helsinki Malmi lentokenttä']['t2m']['unit'])
 # -> 'degC'
 ```
 
