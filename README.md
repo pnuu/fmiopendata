@@ -175,7 +175,7 @@ fields, full globe and all time steps, which would result in a huge amount of da
 to split the retrieval in smaller time intervals and do the downloading in parallel and start
 processing the each chunk of data as soon as the download completes.
 
-The above call doesn't download any data actual, it just collects some metadata:
+The above call doesn't download any actual data, it just collects some metadata:
 
 ```python
 
