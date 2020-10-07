@@ -230,7 +230,7 @@ The second level of the dictionary has the data vertical levels, here the earlie
 ```python
 earliest_step = min(valid_times)
 data_levels = data.data[earliest_step].keys()
-print(list(data_lavels))
+print(list(data_levels))
 # -> [0, 2, 10]
 ```
 
