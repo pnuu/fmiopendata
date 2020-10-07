@@ -208,7 +208,7 @@ Now, download and parse the data from the latest run:
 ```python
 
 latest_run = max(model_data.data.keys())  # datetime.datetime(2020, 7, 7, 12, 0)
-data = model_data[latest_run]
+data = model_data.data[latest_run]
 # This will download the data to a temporary file, parse the data and delete the file
 data.parse(delete=True)
 ```
