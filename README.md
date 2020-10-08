@@ -175,7 +175,7 @@ fields, full globe and all time steps, which would result in a huge amount of da
 to split the retrieval in smaller time intervals and do the downloading in parallel and start
 processing the each chunk of data as soon as the download completes.
 
-The above call doesn't download any data actual, it just collects some metadata:
+The above call doesn't download any actual data, it just collects some metadata:
 
 ```python
 
@@ -208,7 +208,7 @@ Now, download and parse the data from the latest run:
 ```python
 
 latest_run = max(model_data.data.keys())  # datetime.datetime(2020, 7, 7, 12, 0)
-data = model_data[latest_run]
+data = model_data.data[latest_run]
 # This will download the data to a temporary file, parse the data and delete the file
 data.parse(delete=True)
 ```
@@ -230,7 +230,7 @@ The second level of the dictionary has the data vertical levels, here the earlie
 ```python
 earliest_step = min(valid_times)
 data_levels = data.data[earliest_step].keys()
-print(list(data_lavels))
+print(list(data_levels))
 # -> [0, 2, 10]
 ```
 
