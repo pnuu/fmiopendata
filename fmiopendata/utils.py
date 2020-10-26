@@ -19,14 +19,28 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from urllib.request import urlopen, urlretrieve
+from urllib.request import urlretrieve
+import warnings
+
+import requests
+import xml.etree.ElementTree as ET
+
+EXCEPTION_TEXT = './/{http://www.opengis.net/ows/1.1}ExceptionText'
 
 
 def read_url(url):
     """Read url."""
-    with urlopen(url) as response:
-        res = response.read()
-    return res
+    req = requests.get(url)
+    if not req.ok:
+        _give_warning(req.content)
+    return req.content
+
+
+def _give_warning(req_content):
+    root = ET.fromstring(req_content)
+    exceptions = '\n'.join([" - " + ex_.text for ex_ in root.findall(EXCEPTION_TEXT)])
+    exception_text = "\n\nFMI servers responded with the following errors:\n\n%s\n" % exceptions
+    warnings.warn(exception_text)
 
 
 def download_to_file(url, fname):
