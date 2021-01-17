@@ -25,11 +25,16 @@
 import datetime as dt
 
 START_TIME = dt.datetime(2020, 7, 7, 12, 0, 0)
+START_TIME_OLD = dt.datetime(1969, 7, 7)
 END_TIME = dt.datetime(2020, 7, 7, 12, 5, 0)
+END_TIME_OLD = dt.datetime(1969, 7, 17)
 
 ARGS = ["bbox=24,59,26,61",
         "starttime=" + START_TIME.isoformat(timespec="seconds") + "Z",
         "endtime=" + END_TIME.isoformat(timespec="seconds") + "Z"]
+ARGS_OLD = ["bbox=24,59,26,61",
+            "starttime=" + START_TIME_OLD.isoformat(timespec="seconds") + "Z",
+            "endtime=" + END_TIME_OLD.isoformat(timespec="seconds") + "Z"]
 ARGS_TIMESERIES = ["bbox=24,59,26,61", "timeseries=True"]
 
 
@@ -64,6 +69,19 @@ def test_multipoint_weather():
     end_time = max(res.data.keys())
     assert start_time >= START_TIME
     assert end_time <= END_TIME
+
+
+def test_old_multipoint_daily_weather():
+    """Test multipoint coverage parser for daily weather station data for pre-1970s."""
+    from fmiopendata.multipoint import download_and_parse
+
+    res = download_and_parse("fmi::observations::weather::daily::multipointcoverage",
+                             args=ARGS_OLD)
+    # Make sure the times are within the specified time frame
+    start_time = min(res.data.keys())
+    end_time = max(res.data.keys())
+    assert start_time >= START_TIME_OLD
+    assert end_time <= END_TIME_OLD
 
 
 def test_multipoint_weather_timeseries():

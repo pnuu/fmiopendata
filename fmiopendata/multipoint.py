@@ -117,7 +117,7 @@ def _parse_positions(xml):
 
 
 def _parse_times(xml, positions):
-    times = np.array([dt.datetime.utcfromtimestamp(t) for t in positions[2::3]])
+    times = np.array([dt.datetime(1970, 1, 1) + dt.timedelta(seconds=t) for t in positions[2::3]])
     if times.size == 0:
         times = np.array([dt.datetime.strptime(xml.findtext(wfs.GML_TIME_POSITION), TIME_FORMAT)])
     return times
