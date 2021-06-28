@@ -38,12 +38,15 @@ ARGS_OLD = ["bbox=24,59,26,61",
 ARGS_TIMESERIES = ["bbox=24,59,26,61", "timeseries=True"]
 
 
-def test_multipoint_weather():
-    """Test multipoint coverage parser for weather station data."""
+def test_multipoint_mareograph_default():
+    """Test multipoint coverage parser for default query of mareograph data."""
     from fmiopendata.multipoint import download_and_parse
 
-    res = download_and_parse("fmi::observations::weather::multipointcoverage",
-                             args=ARGS)
+    res = download_and_parse("fmi::observations::mareograph::multipointcoverage")
+    _verify_multipoint_common(res)
+
+
+def _verify_multipoint_common(res):
     latest = max(res.data.keys())
     assert isinstance(latest, dt.datetime)
     data = res.data[latest]
@@ -63,6 +66,15 @@ def test_multipoint_weather():
     assert isinstance(meta["fmisid"], int)
     assert isinstance(meta["latitude"], float)
     assert isinstance(meta["longitude"], float)
+
+
+def test_multipoint_weather():
+    """Test multipoint coverage parser for weather station data."""
+    from fmiopendata.multipoint import download_and_parse
+
+    res = download_and_parse("fmi::observations::weather::multipointcoverage",
+                             args=ARGS)
+    _verify_multipoint_common(res)
 
     # Make sure the times are within the specified time frame
     start_time = min(res.data.keys())
@@ -111,23 +123,4 @@ def test_multipoint_radionuclide():
 
     res = download_and_parse("stuk::observations::air::radionuclide-activity-concentration::latest::multipointcoverage",
                              args=ARGS)
-
-    latest = max(res.data.keys())
-    assert isinstance(latest, dt.datetime)
-    data = res.data[latest]
-
-    # Take the first location by alphabetic name
-    loc = min(data.keys())
-    assert isinstance(loc, str)
-    loc_data = data[loc]
-
-    # Every measurement should have a value and unit
-    for measurement in loc_data.keys():
-        assert "value" in loc_data[measurement]
-        assert "units" in loc_data[measurement]
-
-    # Check that location metadata are available
-    meta = res.location_metadata[loc]
-    assert isinstance(meta["fmisid"], int)
-    assert isinstance(meta["latitude"], float)
-    assert isinstance(meta["longitude"], float)
+    _verify_multipoint_common(res)
