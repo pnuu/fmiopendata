@@ -152,6 +152,8 @@ def _parse_names_and_units(xml):
 def download_and_parse(query_id, args=None):
     """Download and parse the given stored query."""
     timeseries = False
+    if args is None:
+        args = []
     if "timeseries=True" in args:
         timeseries = True
         args.remove("timeseries=True")
