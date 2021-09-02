@@ -1,0 +1,35 @@
+name: Run tests
+
+on:
+  - push
+  - pull_request
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+      matrix:
+        python-version: ["3.7", "3.8", "3.9"]
+        experimental: [false]
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: |
+          pip install -U pytest pytest-cov pyzmq netifaces
+      - name: Install fmiopendata
+        run: |
+          pip install --no-deps -e .
+      - name: Run tests
+        run: |
+          pytest --cov=fmiopendata fmiopendata/tests --cov-report=xml
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v1
+        with:
+          file: ./coverage.xml
+          env_vars: PYTHON_VERSION
