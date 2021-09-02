@@ -7,3 +7,5 @@ dependencies:
   - requests
   - eccodes
   - python-eccodes
+  - pytest
+  - pytest-cov
