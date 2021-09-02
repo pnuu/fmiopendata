@@ -125,7 +125,6 @@ def _parse_times(xml, positions):
 
 def _parse_measurements(xml, shape):
     measurements = np.fromstring(xml.findtext(wfs.GML_DOUBLE_OR_NIL_REASON_TUPLE_LIST), dtype=float, sep=" ")
-    import ipdb; ipdb.set_trace()
     return np.reshape(measurements, shape)
 
 
