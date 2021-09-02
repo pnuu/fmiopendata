@@ -28,6 +28,7 @@ import numpy as np
 import pytest
 
 
+@pytest.mark.xfail(raises=AssertionError, reason="Broken WMS layer")
 def test_single_vrad():
     """Test radar radial velocity."""
     from fmiopendata.radar import download_and_parse
@@ -44,6 +45,7 @@ def test_single_vrad():
     _check_radar(data, name="vrad", unit="m/s", dtype=np.uint8)
 
 
+@pytest.mark.xfail(raises=AssertionError, reason="Broken WMS layer")
 def test_single_dbz():
     """Test radar reflectivity dBZ."""
     from fmiopendata.radar import download_and_parse
@@ -60,6 +62,7 @@ def test_single_dbz():
     _check_radar(data, name="dbz", unit="dBZ", dtype=np.uint8)
 
 
+@pytest.mark.xfail(raises=AssertionError, reason="Broken WMS layer")
 def test_single_hclass():
     """Test radar hydroclass."""
     from fmiopendata.radar import download_and_parse
@@ -144,7 +147,6 @@ def test_composite_rr1h():
     _check_radar(data, name="rr1h", unit="mm", dtype=np.uint16)
 
 
-@pytest.mark.xfail(raises=ValueError, reason="Broken WMS layer")
 def test_composite_rr12h():
     """Test radar composite 12 hour accumulated rain rainfall."""
     from fmiopendata.radar import download_and_parse
