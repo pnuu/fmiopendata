@@ -1,0 +1,11 @@
+name: test-environment
+channels:
+  - conda-forge
+dependencies:
+  - rasterio
+  - numpy
+  - requests
+  - eccodes
+  - python-eccodes
+  - pytest
+  - pytest-cov
