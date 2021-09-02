@@ -26,6 +26,10 @@ jobs:
           environment-file: continuous_integration/environment.yaml
           activate-environment: test-environment
 
+      - name: Install pytest
+        run: |
+	  pip install -U pytest pytest-cov
+
       - name: Install fmiopendata
         run: |
           pip install --no-deps -e .
