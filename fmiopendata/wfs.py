@@ -97,10 +97,10 @@ def get_stored_query_descriptions():
     descriptions = get_req_xml("DescribeStoredQueries")
     res = dict()
     root = ET.fromstring(descriptions)
-    for f in root.getchildren():
+    for f in root:
         if f.attrib['id'] == 'GetDataSetById':
             continue
-        f_ch = f.getchildren()
+        f_ch = list(f)
         desc = dict({'title': f_ch[0].text.strip(),
                      'description': f_ch[1].text.strip()})
         res[f.attrib['id']] = desc
