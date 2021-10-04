@@ -99,7 +99,7 @@ Now `composites.data` is a list of the individual reflectivity composites and `c
 
 import numpy as np
 
-composite = composites[0]
+composite = composites.data[0]
 # Download the image data
 composite.download()
 # Calibrate the data from image values to dBZ
