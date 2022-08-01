@@ -23,7 +23,7 @@ from urllib.request import urlretrieve
 import warnings
 
 import requests
-import xml.etree.ElementTree as ET
+import defusedxml.ElementTree as ET
 
 EXCEPTION_TEXT = './/{http://www.opengis.net/ows/1.1}ExceptionText'
 

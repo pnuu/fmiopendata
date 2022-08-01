@@ -20,7 +20,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import datetime as dt
-import xml.etree.ElementTree as ET
+import defusedxml.ElementTree as ET
 import tempfile
 import sys
 if sys.version_info < (3, 6):
