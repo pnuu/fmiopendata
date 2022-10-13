@@ -77,7 +77,7 @@ class Grid(object):
 
     def _parse_grib(self):
         """Parser for GRIB data."""
-        with eccodes.GribFile(self._fname) as grib:
+        with eccodes.reader.FileReader(self._fname) as grib:
             for msg in grib:
                 valid_date = msg["validityDate"]
                 year = valid_date // 10000
