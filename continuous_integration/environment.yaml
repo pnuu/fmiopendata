@@ -6,6 +6,8 @@ dependencies:
   - numpy
   - requests
   - eccodes
-  - python-eccodes
   - pytest
   - pytest-cov
+  - pip
+  - pip:
+    - eccodes
