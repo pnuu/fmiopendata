@@ -13,8 +13,18 @@ Python interface for FMI open data
 pip install fmiopendata
 ```
 
-For `grid` datasets install also `eccodes`, and for `radar` datasets `rasterio` is needed.  Both
-can be installed with `pip`, although usage of `miniconda` is strongly encouraged.
+For `grid` datasets install also `eccodes`. Both the library and
+Python bindings are needed. The former is easiest to install with
+`conda` and the latter via `pip`:
+
+```bash
+
+conda install eccodes -c conda-forge
+pip install eccodes
+```
+
+For `radar` datasets `rasterio` is needed. It can be installed with
+`pip`, although usage of `miniconda` is strongly encouraged.
 
 ## Available data
 This library provides two very simple scripts that list all the available data on
