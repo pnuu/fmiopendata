@@ -57,5 +57,5 @@ setup(name="fmiopendata",
       install_requires=install_requires,
       extras_require=extras_require,
       tests_require=['rasterio', 'eccodes'],
-      python_requires='>=3.4',
+      python_requires='>=3.8',
       )
