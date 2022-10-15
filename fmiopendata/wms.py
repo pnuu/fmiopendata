@@ -20,7 +20,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import datetime as dt
-import xml.etree.ElementTree as ET
+import defusedxml.ElementTree as ET
 import sys
 if sys.version_info < (3, 6):
     from collections import OrderedDict as dict

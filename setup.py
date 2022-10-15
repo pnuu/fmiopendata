@@ -25,7 +25,7 @@
 from setuptools import setup
 from fmiopendata import __version__
 
-install_requires = ['numpy', 'requests']
+install_requires = ['numpy', 'requests', 'defusedxml']
 extras_require = {'radar': ['rasterio'],
                   'grid': ['eccodes'],
                   }
