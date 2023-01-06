@@ -178,11 +178,18 @@ This parser requires `eccodes` library to be installed.
 
 ```python
 
+import datetime as dt
 from fmiopendata.wfs import download_stored_query
 
+# Limit the time
+now = dt.datetime.utcnow()
+# Depending on the current time and availability of the model data, adjusting
+# the hours below might be necessary to get any data
+start_time = now.strftime('%Y-%m-%dT00:00:00Z')
+end_time = now.strftime('%Y-%m-%dT18:00:00Z')
 model_data = download_stored_query("fmi::forecast::harmonie::surface::grid",
-                                   args=["starttime=2020-07-06T18:00:00Z",
-                                         "endtime=2020-07-06T20:00:00Z",
+                                   args=["starttime=" + start_time,
+                                         "endtime=" + end_time,
                                          "bbox=18,55,35,75"])
 ```
 
@@ -196,9 +203,8 @@ The above call doesn't download any actual data, it just collects some metadata:
 ```python
 
 print(model_data.data)
-# -> {datetime.datetime(2020, 7, 7, 0, 0): <fmiopendata.grid.Grid object at 0x7fda9858d2e8>,
-#     datetime.datetime(2020, 7, 7, 6, 0): <fmiopendata.grid.Grid object at 0x7fda9858d0b8>,
-#     datetime.datetime(2020, 7, 7, 12, 0): <fmiopendata.grid.Grid object at 0x7fda9858d1d0>}
+# -> {datetime.datetime(2023, 1, 6, 6, 0): <fmiopendata.grid.Grid object at 0x7f8fc9aaaaa0>,
+#     datetime.datetime(2023, 1, 6, 9, 0): <fmiopendata.grid.Grid object at 0x7f8fc9aaaad0>}
 ```
 
 Here the dictionary keys are the model initialization times.
@@ -236,9 +242,16 @@ The `data.data` dictionary now has the following structure:
 # The first level has the valid times
 valid_times = data.data.keys()
 print(list(valid_times))
-# -> [datetime.datetime(2020, 7, 7, 18, 0),
-#     datetime.datetime(2020, 7, 7, 19, 0),
-#     datetime.datetime(2020, 7, 7, 20, 0)]
+# -> [datetime.datetime(2023, 1, 6, 9, 0),
+#     datetime.datetime(2023, 1, 6, 10, 0),
+#     datetime.datetime(2023, 1, 6, 11, 0),
+#     datetime.datetime(2023, 1, 6, 12, 0),
+#     datetime.datetime(2023, 1, 6, 13, 0),
+#     datetime.datetime(2023, 1, 6, 14, 0),
+#     datetime.datetime(2023, 1, 6, 15, 0),
+#     datetime.datetime(2023, 1, 6, 16, 0),
+#     datetime.datetime(2023, 1, 6, 17, 0),
+#     datetime.datetime(2023, 1, 6, 18, 0)]
 ```
 
 The second level of the dictionary has the data vertical levels, here the earliest time step is shown:
@@ -259,33 +272,33 @@ for level in data_levels:
     for dset in datasets:
         unit = datasets[dset]["units"]
         data_array = datasets[dset]["data"]  # Numpy array of the actual data
-        print("Level: %d, dataset name: %s, data unit: %s" % (level, dset, units))
+        print("Level: %d, dataset name: %s, data unit: %s" % (level, dset, unit))
 ```
 
 This will print:
 
 ```
-Level: 0, dataset name: Mean sea level pressure, data unit: J m**-2
-Level: 0, dataset name: Orography, data unit: J m**-2
-Level: 0, dataset name: Surface thermal radiation downwards, data unit: J m**-2
+Level: 0, dataset name: Mean sea level pressure, data unit: Pa
+Level: 0, dataset name: Orography, data unit: m
 Level: 0, dataset name: Surface net thermal radiation, data unit: J m**-2
 Level: 0, dataset name: Surface net solar radiation, data unit: J m**-2
-Level: 2, dataset name: 2 metre temperature, data unit: J m**-2
-Level: 2, dataset name: 2 metre dewpoint temperature, data unit: J m**-2
-Level: 2, dataset name: 2 metre relative humidity, data unit: J m**-2
-Level: 10, dataset name: Mean wind direction, data unit: J m**-2
-Level: 10, dataset name: 10 metre wind speed, data unit: J m**-2
-Level: 10, dataset name: 10 metre U wind component, data unit: J m**-2
-Level: 10, dataset name: 10 metre V wind component, data unit: J m**-2
-Level: 10, dataset name: surface precipitation amount, rain, convective, data unit: J m**-2
-Level: 10, dataset name: Total Cloud Cover, data unit: J m**-2
-Level: 10, dataset name: Low cloud cover, data unit: J m**-2
-Level: 10, dataset name: Medium cloud cover, data unit: J m**-2
-Level: 10, dataset name: High cloud cover, data unit: J m**-2
-Level: 10, dataset name: Land-sea mask, data unit: J m**-2
-Level: 10, dataset name: Precipitation rate, data unit: J m**-2
-Level: 10, dataset name: Maximum wind velocity, data unit: J m**-2
-Level: 10, dataset name: 10 metre wind gust since previous post-processing, data unit: J m**-2
+Level: 0, dataset name: Time-integrated surface direct short wave radiation flux, data unit: J m**-2
+Level: 2, dataset name: 2 metre temperature, data unit: K
+Level: 2, dataset name: 2 metre dewpoint temperature, data unit: K
+Level: 2, dataset name: 2 metre relative humidity, data unit: %
+Level: 10, dataset name: Mean wind direction, data unit: degrees
+Level: 10, dataset name: 10 metre wind speed, data unit: m s**-1
+Level: 10, dataset name: 10 metre U wind component, data unit: m s**-1
+Level: 10, dataset name: 10 metre V wind component, data unit: m s**-1
+Level: 10, dataset name: surface precipitation amount, rain, convective, data unit: kg m**-2
+Level: 10, dataset name: Convective available potential energy, data unit: J kg**-1
+Level: 10, dataset name: Total Cloud Cover, data unit: %
+Level: 10, dataset name: Low cloud cover, data unit: (0 - 1)
+Level: 10, dataset name: Medium cloud cover, data unit: (0 - 1)
+Level: 10, dataset name: High cloud cover, data unit: (0 - 1)
+Level: 10, dataset name: Global radiation flux, data unit: W m**-2
+Level: 10, dataset name: Visibility, data unit: m
+Level: 10, dataset name: 10 metre wind gust since previous post-processing, data unit: m s**-1
 Level: 10, dataset name: Surface solar radiation downwards, data unit: J m**-2
 ```
 
