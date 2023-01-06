@@ -1055,11 +1055,11 @@ This Stored Query request retrieve Helsinki multi-category ice model forecast ra
         * Encoding format for the returned dataset. Formats available are grib1, grib2 and netcdf. Default format is General Regularly-distributed Information in Binary form edition 2 (GRIB2).
 
 
-## Hirlam Pressure Grid
+## Hydrodynamic Current Model Grid
 
-Hirlam forecast model's pressure levels as a grid data encoded in GRIB format.
+Hydrodynamic forecast model provides sea currents and water temperature forecast as grid data encoded in GRIB format.
 
-* Query ID: `fmi::forecast::hirlam::pressure::grid`
+* Query ID: `fmi::forecast::hydrodyn::grid`
 * Available arguments:
     * starttime
         * Begin of the time interval
@@ -1067,6 +1067,280 @@ Hirlam forecast model's pressure levels as a grid data encoded in GRIB format.
     * endtime
         * End of time interval
         * End of time interval in ISO-format (for example 2012-02-27T00:00:00Z).
+    * bbox
+        * Bounding box of area for which to return data.
+        * Bounding box of area for which to return data (lon,lat,lon,lat). For example 21,61,22,62
+    * parameters
+        * Parameters to return
+        * Comma separated list of meteorological parameters to return.
+    * format
+        * Dataset format.
+        * Encoding format for the returned dataset. Formats available are grib1, grib2 and netcdf. Default format is grib2.
+    * levels
+        * Vertical level
+        * A comma separated list of vertical levels of sea (For exmaple 0,100,200). Available levels are 0,5,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85,90,95,100,150,200,300,400. Default level is 0.
+
+
+## Hydrodynamic Current Model Point
+
+Hydrodynamic forecast model provides sea currents and water temperature forecast. This stored query provides the data as point data encoded in multi point coverage format.
+
+* Query ID: `fmi::forecast::hydrodyn::point::multipointcoverage`
+* Available arguments:
+    * starttime
+        * Begin of the time interval
+        * Parameter begin specifies the begin of time interval in ISO-format (for example 2012-02-27T00:00:00Z).
+    * endtime
+        * End of time interval
+        * End of time interval in ISO-format (for example 2012-02-27T00:00:00Z).
+    * timestep
+        * The time step of data in minutes
+        * The time step of data in minutes. Notice that timestep is calculated from start of the ongoing hour or day.
+    * parameters
+        * Parameters to return
+        * Comma separated list of meteorological parameters to return.
+    * crs
+        * Coordinate projection to use in results
+        * Coordinate projection to use in results. For example EPSG::3067
+    * latlon
+        * Location coordinates to return data.
+        * Location coordinates to return data  (lat,lon). For example 61.2,21
+    * geoid
+        * Geoid of the location for which to return data.
+        * Geoid of the location for which to return data. (ID from geonames.org)
+    * fmisid
+        * FMI observation station identifier.
+        * Identifier of the observation station.
+    * wmo
+        * WMO code of the location for which to return data.
+        * WMO code of the location for which to return data.
+
+
+## Hydrodynamic Current Model Point
+
+Hydrodynamic forecast model provides sea currents and water temperature forecast. This stored query provides the data as point data encoded in simple feature format.
+
+* Query ID: `fmi::forecast::hydrodyn::point::simple`
+* Available arguments:
+    * starttime
+        * Begin of the time interval
+        * Parameter begin specifies the begin of time interval in ISO-format (for example 2012-02-27T00:00:00Z).
+    * endtime
+        * End of time interval
+        * End of time interval in ISO-format (for example 2012-02-27T00:00:00Z).
+    * timestep
+        * The time step of data in minutes
+        * The time step of data in minutes. Notice that timestep is calculated from start of the ongoing hour or day.
+    * parameters
+        * Parameters to return
+        * Comma separated list of meteorological parameters to return.
+    * crs
+        * Coordinate projection to use in results
+        * Coordinate projection to use in results. For example EPSG::3067
+    * latlon
+        * Location coordinates to return data.
+        * Location coordinates to return data  (lat,lon). For example 61.2,21
+    * geoid
+        * Geoid of the location for which to return data.
+        * Geoid of the location for which to return data. (ID from geonames.org)
+    * fmisid
+        * FMI observation station identifier.
+        * Identifier of the observation station.
+    * wmo
+        * WMO code of the location for which to return data.
+        * WMO code of the location for which to return data.
+
+
+## Hydrodynamic Current Model Point
+
+Hydrodynamic forecast model provides sea currents and water temperature forecast. This stored query provides the data as point data encoded in time value pair format.
+
+* Query ID: `fmi::forecast::hydrodyn::point::timevaluepair`
+* Available arguments:
+    * starttime
+        * Begin of the time interval
+        * Parameter begin specifies the begin of time interval in ISO-format (for example 2012-02-27T00:00:00Z).
+    * endtime
+        * End of time interval
+        * End of time interval in ISO-format (for example 2012-02-27T00:00:00Z).
+    * parameters
+        * Parameters to return
+        * Comma separated list of meteorological parameters to return.
+    * crs
+        * Coordinate projection to use in results
+        * Coordinate projection to use in results. For example EPSG::3067
+    * timestep
+        * The time step of data in minutes
+        * The time step of data in minutes. Notice that timestep is calculated from start of the ongoing hour or day.
+    * latlon
+        * Location coordinates to return data.
+        * Location coordinates to return data  (lat,lon). For example 61.2,21
+    * geoid
+        * Geoid of the location for which to return data.
+        * Geoid of the location for which to return data. (ID from geonames.org)
+    * fmisid
+        * FMI observation station identifier.
+        * Identifier of the observation station.
+    * wmo
+        * WMO code of the location for which to return data.
+        * WMO code of the location for which to return data.
+    * timezone
+        * Time zone
+        * Time zone of the time instant of the data point in the form Area/Location (for example America/Costa_Rica). Default value is UTC.
+
+
+## Harmonie (MEPS) Scandinavia Hybrid Weather Forecast as Grid data
+
+The stored query can be used to fetch Harmonie (MEPS) hybrid weather forecast data encoded in GRIB or NetCDF format. The model data covers the geographical area of Scandinavia and hybrid levels from 65 (near the model topography) to 12 (highest available elevation). New forecast dataset will come available every 6 hours. By default all the parameters, levels and timesteps are selected.
+
+* Query ID: `fmi::forecast::meps::hybrid::grid`
+* Available arguments:
+    * starttime
+        * Begin of the time interval
+        * Parameter begin specifies the begin of time interval in ISO-format (for example 2017-07-07T07:00:00Z).
+    * endtime
+        * End of time interval
+        * End of time interval in ISO-format (for example 2017-07-07T07:00:00Z).
+    * bbox
+        * Bounding box of area for which to return data.
+        * Bounding box of area for which to return data (lon,lat,lon,lat). For example 21,61,22,62
+    * parameters
+        * Parameters to return
+        * Comma separated list of meteorological parameters to return.
+    * levels
+        * Hybrid levels
+        * A comma separated list of levels (For example 40,30,20). By default all available levels are selected.
+    * format
+        * Dataset format.
+        * Encoding format for the returned dataset. Formats available are grib1, grib2 and netcdf. Default format is grib2.
+
+
+## Harmonie (MEPS) Hybrid Point Weather Forecast as multipointcoverage
+
+The stored query can be used to fetch Harmonie (MEPS) hybrid weather forecast data in multi point coverage format. The model data covers the geographical area of Scandinavia and heights between 13 and 10000 meters from the model topography. New forecast dataset will come available every 6 hours. Location need to be specified as place or geoid or latlon query parameters. By default data will be returned from the height of 100 meters above the model topography and 50 hours from the request time.
+
+* Query ID: `fmi::forecast::meps::hybrid::point::multipointcoverage`
+* Available arguments:
+    * starttime
+        * Begin of time interval
+        * Parameter specifies the begin of time interval in ISO 8601 format (for example 2012-02-27T00:00:00Z).
+    * endtime
+        * End of time interval
+        * Parameter specifies the end of time interval in ISO 8601 format (for example 2012-02-27T00:00:00Z).
+    * timestep
+        * The time step of data in minutes
+        * The time step of data in minutes. Notice that timestep is calculated from start of the ongoing hour or day.
+    * parameters
+        * Parameters to return
+        * Comma separated list of meteorological parameters to return.
+    * place
+        * The location for which to provide data
+        * The location for which to provide forecast. Region can be given after location name separated by comma (for example Kumpula,Kolari).
+    * latlon
+        * Location coordinates to return data.
+        * Location coordinates to return data  (lat,lon). For example 61.2,21
+    * geoid
+        * Geoid of the location for which to return data.
+        * Geoid of the location for which to return data. (ID from geonames.org)
+    * fmisid
+        * FMI observation station identifier.
+        * Identifier of the observation station.
+    * wmo
+        * WMO code of the location for which to return data.
+        * WMO code of the location for which to return data.
+    * height
+        * Height from the topography of forecast model
+        * The request parameter specifies height in meters from the topography of forecast model.
+
+
+## Harmonie (MEPS) Hybrid Point Weather Forecast as simple features
+
+The stored query can be used to fetch Harmonie (MEPS) hybrid weather forecast data in simple feature format. The model data covers the geographical area of Scandinavia and heights between 13 and 10000 meters from the model topography. New forecast dataset will come available every 6 hours. Location need to be specified as place or geoid or latlon query parameters. By default data will be returned from the height of 100 meters above the model topography and 50 hours from the request time.
+
+* Query ID: `fmi::forecast::meps::hybrid::point::simple`
+* Available arguments:
+    * starttime
+        * Begin of time interval
+        * Parameter specifies the begin of time interval in ISO 8601 format (for example 2012-02-27T00:00:00Z).
+    * endtime
+        * End of time interval
+        * Parameter specifies the end of time interval in ISO 8601 format (for example 2012-02-27T00:00:00Z).
+    * timestep
+        * The time step of data in minutes
+        * The time step of data in minutes. Notice that timestep is calculated from start of the ongoing hour or day.
+    * parameters
+        * Parameters to return
+        * Comma separated list of meteorological parameters to return.
+    * place
+        * The location for which to provide data
+        * The location for which to provide forecast. Region can be given after location name separated by comma (for example Kumpula,Kolari).
+    * latlon
+        * Location coordinates to return data.
+        * Location coordinates to return data  (lat,lon). For example 61.2,21
+    * fmisid
+        * FMI observation station identifier.
+        * Identifier of the observation station.
+    * wmo
+        * WMO code of the location for which to return data.
+        * WMO code of the location for which to return data.
+    * geoid
+        * Geoid of the location for which to return data.
+        * Geoid of the location for which to return data. (ID from geonames.org)
+    * height
+        * Height from the topography of forecast model
+        * The request parameter specifies height in meters from the topography of forecast model.
+
+
+## Harmonie (MEPS) Hybrid Point Weather Forecast as time value pairs
+
+The stored query can be used to fetch Harmonie (MEPS) hybrid weather forecast data in time value pair format. The model data covers the geographical area of Scandinavia and heights between 13 and 10000 meters from the model topography. New forecast dataset will come available every 6 hours. Location need to be specified as place or geoid or latlon query parameters. By default data will be returned from the height of 100 meters above the model topography and 50 hours from the request time.
+
+* Query ID: `fmi::forecast::meps::hybrid::point::timevaluepair`
+* Available arguments:
+    * starttime
+        * Begin of time interval
+        * Parameter specifies the begin of time interval in ISO 8601 format (for example 2012-02-27T00:00:00Z).
+    * endtime
+        * End of time interval
+        * Parameter specifies the end of time interval in ISO 8601 format (for example 2012-02-27T00:00:00Z).
+    * timestep
+        * The time step of data in minutes
+        * The time step of data in minutes. Notice that timestep is calculated from start of the ongoing hour or day.
+    * parameters
+        * Parameters to return
+        * Comma separated list of meteorological parameters to return.
+    * place
+        * The location for which to provide data
+        * The location for which to provide forecast. Region can be given after location name separated by comma (for example Kumpula,Kolari).
+    * latlon
+        * Location coordinates to return data.
+        * Location coordinates to return data  (lat,lon). For example 61.2,21
+    * geoid
+        * Geoid of the location for which to return data.
+        * Geoid of the location for which to return data. (ID from geonames.org)
+    * fmisid
+        * FMI observation station identifier.
+        * Identifier of the observation station.
+    * wmo
+        * WMO code of the location for which to return data.
+        * WMO code of the location for which to return data.
+    * height
+        * Height from the topography of forecast model
+        * The request parameter specifies height in meters from the topography of forecast model.
+
+
+## Harmonie (MEPS) Scandinavia Pressure Level Weather Forecast as Grid data
+
+The stored query can be used to fetch Harmonie (MEPS) weather forecast data from pressure levels encoded in GRIB or NetCDF format. The model data covers the geographical area of Scandinavia and pressure levels: 300, 500, 700, 850, 925, 1000 hPa. New forecast dataset will come available every 6 hours. By default all the parameters, levels and timesteps are selected.
+
+* Query ID: `fmi::forecast::meps::pressure::grid`
+* Available arguments:
+    * starttime
+        * Begin of the time interval
+        * Parameter begin specifies the begin of time interval in ISO-format (for example 2017-07-07T07:00:00Z).
+    * endtime
+        * End of time interval
+        * End of time interval in ISO-format (for example 2017-07-07T07:00:00Z).
     * bbox
         * Bounding box of area for which to return data.
         * Bounding box of area for which to return data (lon,lat,lon,lat). For example 21,61,22,62
@@ -1075,205 +1349,159 @@ Hirlam forecast model's pressure levels as a grid data encoded in GRIB format.
         * Comma separated list of meteorological parameters to return.
     * levels
         * Pressure levels
-        * A comma separated list of pressure levels (For example 1000,925,850).
+        * A comma separated list of pressure levels (For example 400,850,1000). By default all available levels are selected.
     * format
         * Dataset format.
         * Encoding format for the returned dataset. Formats available are grib1, grib2 and netcdf. Default format is grib2.
 
 
-## Hirlam weather forecast for cities in Finland as multipointcoverage
+## Harmonie (MEPS) Pressure Point Weather Forecast as multipointcoverage
 
-This stored query fetch Hirlam weather forecast for cities in Finland. The forcast is returned in multi point coverage format. By default, forcast is returned for the next 36 hours.
+The stored query can be used to fetch Harmonie (MEPS) pressure level weather forecast data in multi point coverage format. The model data covers the geographical area of Scandinavia and pressure levels 300, 500, 700, 850, 925, 1000 hPa. New forecast dataset will come available every 6 hours. Location need to be specified as place or geoid or latlon query parameters. By default data will be returned from the level of 850 hPa and 50 hours from the request time.
 
-* Query ID: `fmi::forecast::hirlam::surface::cities::multipointcoverage`
+* Query ID: `fmi::forecast::meps::pressure::point::multipointcoverage`
 * Available arguments:
     * starttime
         * Begin of time interval
-        * The parameter specifies the begin of time interval in ISO 8601 format (for example 2012-02-27T00:00:00Z).
+        * Parameter specifies the begin of time interval in ISO 8601 format (for example 2012-02-27T00:00:00Z).
     * endtime
         * End of time interval
-        * The parameter specifies the end of time interval in ISO 8601 format (for example 2012-02-27T00:00:00Z).
+        * Parameter specifies the end of time interval in ISO 8601 format (for example 2012-02-27T00:00:00Z).
     * timestep
         * The time step of data in minutes
         * The time step of data in minutes. Notice that timestep is calculated from start of the ongoing hour or day.
     * parameters
         * Parameters to return
         * Comma separated list of meteorological parameters to return.
-    * crs
-        * Coordinate projection to use in results
-        * Coordinate projection to use in results. For example EPSG::3067
+    * place
+        * The location for which to provide data
+        * The location for which to provide forecast. Region can be given after location name separated by comma (for example Kumpula,Kolari).
+    * latlon
+        * Location coordinates to return data.
+        * Location coordinates to return data  (lat,lon). For example 61.2,21
+    * geoid
+        * Geoid of the location for which to return data.
+        * Geoid of the location for which to return data. (ID from geonames.org)
+    * fmisid
+        * FMI observation station identifier.
+        * Identifier of the observation station.
+    * wmo
+        * WMO code of the location for which to return data.
+        * WMO code of the location for which to return data.
+    * pressure
+        * Pressure value
+        * The request parameter specifies level of pressure in hPa from which to return data.
 
 
-## Hirlam weather forecast for cities in Finland as simple features
+## Harmonie (MEPS) Pressure Point Weather Forecast as simple features
 
-This stored query fetch Hirlam weather forecast for cities in Finland. The forcast is returned in simple feature format. By default, forcast is returned for the next 36 hours.
+The stored query can be used to fetch Harmonie (MEPS) pressure level weather forecast data in simple feature format. The model data covers the geographical area of Scandinavia and pressure levels 300, 500, 700, 850, 925, 1000 hPa. New forecast dataset will come available every 6 hours. Location need to be specified as place or geoid or latlon query parameters. By default data will be returned from the level of 850 hPa and 50 hours from the request time.
 
-* Query ID: `fmi::forecast::hirlam::surface::cities::simple`
+* Query ID: `fmi::forecast::meps::pressure::point::simple`
 * Available arguments:
     * starttime
         * Begin of time interval
-        * The Parameter specifies the begin of time interval in ISO 8601 format (for example 2012-02-27T00:00:00Z).
+        * Parameter specifies the begin of time interval in ISO 8601 format (for example 2012-02-27T00:00:00Z).
     * endtime
         * End of time interval
-        * The Parameter specifies the end of time interval in ISO 8601 format (for example 2012-02-27T00:00:00Z).
+        * Parameter specifies the end of time interval in ISO 8601 format (for example 2012-02-27T00:00:00Z).
     * timestep
         * The time step of data in minutes
         * The time step of data in minutes. Notice that timestep is calculated from start of the ongoing hour or day.
     * parameters
         * Parameters to return
         * Comma separated list of meteorological parameters to return.
-    * crs
-        * Coordinate projection to use in results
-        * Coordinate projection to use in results. For example EPSG::3067
+    * place
+        * The location for which to provide data
+        * The location for which to provide forecast. Region can be given after location name separated by comma (for example Kumpula,Kolari).
+    * latlon
+        * Location coordinates to return data.
+        * Location coordinates to return data  (lat,lon). For example 61.2,21
+    * geoid
+        * Geoid of the location for which to return data.
+        * Geoid of the location for which to return data. (ID from geonames.org)
+    * fmisid
+        * FMI observation station identifier.
+        * Identifier of the observation station.
+    * wmo
+        * WMO code of the location for which to return data.
+        * WMO code of the location for which to return data.
+    * pressure
+        * Pressure value
+        * The request parameter specifies level of pressure in hPa from which to return data.
 
 
-## Hirlam weather forecast for cities in Finland as time value pairs
+## Harmonie (MEPS) Pressure Point Weather Forecast as time value pairs
 
-This stored query fetch Hirlam weather forecast for cities in Finland. The forcast is returned as time value pairs. By default, forcast is returned for the next 36 hours.
+The stored query can be used to fetch Harmonie (MEPS) pressure level weather forecast data in time value pair format. The model data covers the geographical area of Scandinavia and pressure levels 300, 500, 700, 850, 925, 1000 hPa. New forecast dataset will come available every 6 hours. Location need to be specified as place or geoid or latlon query parameters. By default data will be returned from the level of 850 hPa and 50 hours from the request time.
 
-* Query ID: `fmi::forecast::hirlam::surface::cities::timevaluepair`
+* Query ID: `fmi::forecast::meps::pressure::point::timevaluepair`
 * Available arguments:
     * starttime
         * Begin of time interval
-        * The parameter specifies the begin of time interval in ISO 8601 format (for example 2012-02-27T00:00:00Z).
+        * Parameter specifies the begin of time interval in ISO 8601 format (for example 2012-02-27T00:00:00Z).
     * endtime
         * End of time interval
-        * The parameter specifies the end of time interval in ISO 8601 format (for example 2012-02-27T00:00:00Z).
-    * parameters
-        * Parameters to return
-        * Comma separated list of meteorological parameters to return. By default, all parameters are returned.
+        * Parameter specifies the end of time interval in ISO 8601 format (for example 2012-02-27T00:00:00Z).
     * timestep
         * The time step of data in minutes
-        * The time step of data in minutes. Notice that timestep is calculated from start of the ongoing hour or day. Default timestep is 60 minutes.
-    * timezone
-        * Time zone
-        * Time zone of the time instant of the data point in the form Area/Location (for example America/Costa_Rica). Default value is UTC.
-
-
-## Hirlam surface level weather forecast for Finland as a grid.
-
-This Stored Query request retrieve Hirlam surface level forecast raw dataset as a grid for Finland region.
-
-* Query ID: `fmi::forecast::hirlam::surface::finland::grid`
-* Available arguments:
-    * producer
-        * Producer
-        * Model or process which provides the data.
-    * starttime
-        * Begin of the time interval
-        * Parameter starttime specifies the begin of time interval in ISO 8601 format (for example 2012-02-27T00:00:00Z).
-    * endtime
-        * End of time interval
-        * Parameter endtime specifies the end of time interval in ISO 8601 format (for example 2012-02-27T00:00:00Z).
+        * The time step of data in minutes. Notice that timestep is calculated from start of the ongoing hour or day.
     * parameters
         * Parameters to return
-        * Comma separated list of meteorological parameters to return. Default parameters are Temperature, Pressure, Humidity, DewPoint, WindUMS, WindVMS and Precipitation1h.
-    * bbox
-        * Bounding box of area for which to return data.
-        * Bounding box of area for which to return data (min Longitude, min Latitude, max Longitude, max Latitude) Default bounding box is 19.1,59.7,31.7,70.1.
-    * format
-        * Dataset format.
-        * Encoding format for the returned dataset. Formats available are grib1, grib2 and netcdf. Default format is General Regularly-distributed Information in Binary form edition 2 (GRIB2).
+        * Comma separated list of meteorological parameters to return.
+    * place
+        * The location for which to provide data
+        * The location for which to provide forecast. Region can be given after location name separated by comma (for example Kumpula,Kolari).
+    * latlon
+        * Location coordinates to return data.
+        * Location coordinates to return data  (lat,lon). For example 61.2,21
+    * geoid
+        * Geoid of the location for which to return data.
+        * Geoid of the location for which to return data. (ID from geonames.org)
+    * fmisid
+        * FMI observation station identifier.
+        * Identifier of the observation station.
+    * wmo
+        * WMO code of the location for which to return data.
+        * WMO code of the location for which to return data.
+    * pressure
+        * Pressure value
+        * The request parameter specifies level of pressure in hPa from which to return data.
 
 
-## Hirlam Surface Grid
+## Harmonie (MEPS) Scandinavia Surface Level Weather Forecast as Grid data
 
-Hirlam forecast model's surface level as grid data encoded in GRIB format.
+The stored query can be used to fetch Harmonie (MEPS) surface level weather forecast data encoded in GRIB or NetCDF format. The model data covers the geographical area of Scandinavia. New forecast dataset will come available every 6 hours. By default all the parameters and timesteps are selected.
 
-* Query ID: `fmi::forecast::hirlam::surface::grid`
+* Query ID: `fmi::forecast::meps::surface::grid`
 * Available arguments:
     * starttime
         * Begin of the time interval
-        * Parameter begin specifies the begin of time interval in ISO-format (for example 2012-02-27T00:00:00Z).
+        * Parameter begin specifies the begin of time interval in ISO-format (for example 2017-07-07T07:00:00Z).
     * endtime
         * End of time interval
-        * End of time interval in ISO-format (for example 2012-02-27T00:00:00Z).
+        * End of time interval in ISO-format (for example 2017-07-07T07:00:00Z).
     * bbox
         * Bounding box of area for which to return data.
         * Bounding box of area for which to return data (lon,lat,lon,lat). For example 21,61,22,62
     * parameters
         * Parameters to return
         * Comma separated list of meteorological parameters to return.
-		In addition to default parameters, there is 'RadiationDiffuseAccumulation'
-		parameter that is not distributed in grib2 format.
-		Default: GeopHeight,Temperature,Pressure,Humidity,WindUMS,WindVMS,MaximumWind,
-		WindGust,DewPoint,TotalCloudCover,LowCloudCover,MediumCloudCover,HighCloudCover,
-		Precipitation1h,PrecipitationAmount,RadiationGlobalAccumulation,RadiationLWAccumulation,
-		RadiationNetSurfaceLWAccumulation,RadiationNetSurfaceSWAccumulation,LandSeaMask,
-		WindSpeedMS,WindDirection,Cape
+		Default: Pressure,GeopHeight,Temperature,DewPoint,Humidity,WindDirection,
+		WindSpeedMS,WindUMS,WindVMS,PrecipitationAmount,TotalCloudCover,LowCloudCover,
+		MediumCloudCover,HighCloudCover,RadiationGlobal,RadiationGlobalAccumulation,
+		RadiationNetSurfaceLWAccumulation,RadiationNetSurfaceSWAccumulation,
+		RadiationSWAccumulation,Visibility,WindGust,Cape
     * format
         * Dataset format.
-        * Encoding format for the returned dataset. Formats available are grib1, grib2 and netcdf. Default format is General Regularly-distributed Information in Binary form edition 2 (GRIB2).
+        * Encoding format for the returned dataset. Formats available are grib2 and netcdf. Default format is grib2.
 
 
-## Hirlam weather forecast for observation stations as multipointcoverage.
+## Harmonie (MEPS) Surface Point Weather Forecast as multipointcoverage
 
-This stored query fetch Hirlam weather forecast for observation stations in Finland. The forcast is returned as multipointcoverage form. By default, forecast is returned for the next 36 hours.
+The stored query can be used to fetch Harmonie (MEPS) surface level weather forecast in multi point coverage format. The model data covers the geographical area of Scandinavia. New forecast dataset will come available every 6 hours. Location need to be specified as place or geoid or latlon query parameters. By default data will be returned 50 hours from the request time.
 
-* Query ID: `fmi::forecast::hirlam::surface::obsstations::multipointcoverage`
-* Available arguments:
-    * starttime
-        * Begin of the time interval
-        * Parameter starttime specifies the begin of time interval in ISO 8601 format (for example 2012-02-27T00:00:00Z).
-    * endtime
-        * End of time interval
-        * Parameter endtime specifies the end of time interval in ISO 8601 format (for example 2012-02-27T00:00:00Z).
-    * parameters
-        * Parameters to return
-        * Comma separated list of meteorological parameters to return. By default, all parameters are returned.
-    * timestep
-        * The time step of data in minutes
-        * The time step of data in minutes. Notice that timestep is calculated from start of the ongoing hour or day. Default timestep is 60 minutes.
-
-
-## Hirlam weather forecast for observation stations as simple feature.
-
-This stored query fetch Hirlam weather forecast for observation stations in Finland. The forcast is returned as simple feature form. By default, forecast is returned for the next 36 hours.
-
-* Query ID: `fmi::forecast::hirlam::surface::obsstations::simple`
-* Available arguments:
-    * starttime
-        * Begin of the time interval
-        * Parameter starttime specifies the begin of time interval in ISO 8601 format (for example 2012-02-27T00:00:00Z).
-    * endtime
-        * End of time interval
-        * Parameter endtime specifies the end of time interval in ISO 8601 format (for example 2012-02-27T00:00:00Z).
-    * parameters
-        * Parameters to return
-        * Comma separated list of meteorological parameters to return. By default, all parameters are returned.
-    * timestep
-        * The time step of data in minutes
-        * The time step of data in minutes. Notice that timestep is calculated from start of the ongoing hour or day. Default timestep is 60 minutes.
-
-
-## Hirlam weather forecast for observation stations as time value pairs.
-
-This stored query fetch Hirlam weather forecast for observation stations in Finland. The forcast is returned as time value pairs. By default, forecast is returned for the next 36 hours.
-
-* Query ID: `fmi::forecast::hirlam::surface::obsstations::timevaluepair`
-* Available arguments:
-    * starttime
-        * Begin of the time interval
-        * Parameter starttime specifies the begin of time interval in ISO 8601 format (for example 2012-02-27T00:00:00Z).
-    * endtime
-        * End of time interval
-        * Parameter endtime specifies the end of time interval in ISO 8601 format (for example 2012-02-27T00:00:00Z).
-    * parameters
-        * Parameters to return
-        * Comma separated list of meteorological parameters to return. By default, all parameters are returned.
-    * timestep
-        * The time step of data in minutes
-        * The time step of data in minutes. Notice that timestep is calculated from start of the ongoing hour or day. Default timestep is 60 minutes.
-    * timezone
-        * Time zone
-        * Time zone of the time instant of the data point in the form Area/Location (for example America/Costa_Rica). Default value is UTC.
-
-
-## Hirlam Point Weather Forecast as multipointcoverage
-
-Hirlam weather forecast fetched to a specific location returned in multi point coverage format. Location need to be specified as place or geoid or latlon query parameters.
-
-* Query ID: `fmi::forecast::hirlam::surface::point::multipointcoverage`
+* Query ID: `fmi::forecast::meps::surface::point::multipointcoverage`
 * Available arguments:
     * starttime
         * Begin of time interval
@@ -1287,9 +1515,6 @@ Hirlam weather forecast fetched to a specific location returned in multi point c
     * parameters
         * Parameters to return
         * Comma separated list of meteorological parameters to return.
-    * crs
-        * Coordinate projection to use in results
-        * Coordinate projection to use in results. For example EPSG::3067
     * place
         * The location for which to provide data
         * The location for which to provide forecast. Region can be given after location name separated by comma (for example Kumpula,Kolari).
@@ -1307,11 +1532,11 @@ Hirlam weather forecast fetched to a specific location returned in multi point c
         * WMO code of the location for which to return data.
 
 
-## Hirlam Point Weather Forecast as simple features
+## Harmonie (MEPS) Surface Point Weather Forecast as simple features
 
-Hirlam weather forecast fetched to a specific location returned in simple feature format. Location need to be specified as place or geoid or latlon query parameters.
+The stored query can be used to fetch Harmonie (MEPS) surface level weather forecast in simple feature format. The model data covers the geographical area of Scandinavia. New forecast dataset will come available every 6 hours. Location need to be specified as place or geoid or latlon query parameters. By default data will be returned 50 hours from the request time.
 
-* Query ID: `fmi::forecast::hirlam::surface::point::simple`
+* Query ID: `fmi::forecast::meps::surface::point::simple`
 * Available arguments:
     * starttime
         * Begin of time interval
@@ -1325,9 +1550,6 @@ Hirlam weather forecast fetched to a specific location returned in simple featur
     * parameters
         * Parameters to return
         * Comma separated list of meteorological parameters to return.
-    * crs
-        * Coordinate projection to use in results
-        * Coordinate projection to use in results. For example EPSG::3067
     * place
         * The location for which to provide data
         * The location for which to provide forecast. Region can be given after location name separated by comma (for example Kumpula,Kolari).
@@ -1345,11 +1567,11 @@ Hirlam weather forecast fetched to a specific location returned in simple featur
         * WMO code of the location for which to return data.
 
 
-## Hirlam Point Weather Forecast as time value pairs
+## Harmonie (MEPS) Surface Point Weather Forecast as time value pairs
 
-Hirlam weather forecast fetched to a specific location returned in time value pair format. Location need to be specified as place or geoid or latlon query parameters.
+The stored query can be used to fetch Harmonie (MEPS) surface level weather forecast in time value pair format. The model data covers the geographical area of Scandinavia. New forecast dataset will come available every 6 hours. Location need to be specified as place or geoid or latlon query parameters. By default data will be returned 50 hours from the request time.
 
-* Query ID: `fmi::forecast::hirlam::surface::point::timevaluepair`
+* Query ID: `fmi::forecast::meps::surface::point::timevaluepair`
 * Available arguments:
     * starttime
         * Begin of time interval
@@ -1363,9 +1585,6 @@ Hirlam weather forecast fetched to a specific location returned in time value pa
     * parameters
         * Parameters to return
         * Comma separated list of meteorological parameters to return.
-    * crs
-        * Coordinate projection to use in results
-        * Coordinate projection to use in results. For example EPSG::3067
     * place
         * The location for which to provide data
         * The location for which to provide forecast. Region can be given after location name separated by comma (for example Kumpula,Kolari).
@@ -1381,9 +1600,6 @@ Hirlam weather forecast fetched to a specific location returned in time value pa
     * wmo
         * WMO code of the location for which to return data.
         * WMO code of the location for which to return data.
-    * timezone
-        * Time zone
-        * Time zone of the time instant of the data point in the form Area/Location (for example America/Costa_Rica). Default value is UTC.
 
 
 ## OAAS Sea Level Model Point
@@ -1455,6 +1671,105 @@ OAAS forecast model provides sea level height forecast to points. This stored qu
 OAAS forecast model provides sea level height forecast to points. This stored query provides point data encoded in time value pair format.
 
 * Query ID: `fmi::forecast::oaas::sealevel::point::timevaluepair`
+* Available arguments:
+    * starttime
+        * Begin of the time interval
+        * Parameter begin specifies the begin of time interval in ISO-format (for example 2012-02-27T00:00:00Z).
+    * endtime
+        * End of time interval
+        * End of time interval in ISO-format (for example 2012-02-27T00:00:00Z).
+    * timestep
+        * The time step of data in minutes
+        * The time step of data in minutes. Notice that timestep is calculated from start of the ongoing hour or day.
+    * crs
+        * Coordinate projection to use in results
+        * Coordinate projection to use in results. For example EPSG::3067
+    * geoid
+        * Geoid of the location for which to return data.
+        * Geoid of the location for which to return data. (ID from geonames.org)
+    * latlon
+        * Location coordinates to return data.
+        * Location coordinates to return data  (lat,lon). For example 61.2,21
+    * fmisid
+        * FMI observation station identifier.
+        * Identifier of the observation station.
+    * wmo
+        * WMO code of the location for which to return data.
+        * WMO code of the location for which to return data.
+    * timezone
+        * Time zone
+        * Time zone of the time instant of the data point in the form Area/Location (for example America/Costa_Rica). Default value is UTC.
+
+
+## OAAS Sea Level Model Point
+
+OAAS forecast model provides sea level height forecast to points. This stored query provides point data encoded in multi point coverage format.
+
+* Query ID: `fmi::forecast::sealevel::point::multipointcoverage`
+* Available arguments:
+    * starttime
+        * Begin of the time interval
+        * Parameter begin specifies the begin of time interval in ISO-format (for example 2012-02-27T00:00:00Z).
+    * endtime
+        * End of time interval
+        * End of time interval in ISO-format (for example 2012-02-27T00:00:00Z).
+    * timestep
+        * The time step of data in minutes
+        * The time step of data in minutes. Notice that timestep is calculated from start of the ongoing hour or day.
+    * crs
+        * Coordinate projection to use in results
+        * Coordinate projection to use in results. For example EPSG::3067
+    * geoid
+        * Geoid of the location for which to return data.
+        * Geoid of the location for which to return data. (ID from geonames.org)
+    * fmisid
+        * FMI observation station identifier.
+        * Identifier of the observation station.
+    * wmo
+        * WMO code of the location for which to return data.
+        * WMO code of the location for which to return data.
+    * latlon
+        * Location coordinates to return data.
+        * Location coordinates to return data  (lat,lon). For example 61.2,21
+
+
+## OAAS Sea Level Model Point
+
+OAAS forecast model provides sea level height forecast to points. This stored query provides point data encoded in simple feature format.
+
+* Query ID: `fmi::forecast::sealevel::point::simple`
+* Available arguments:
+    * starttime
+        * Begin of the time interval
+        * Parameter begin specifies the begin of time interval in ISO-format (for example 2012-02-27T00:00:00Z).
+    * endtime
+        * End of time interval
+        * End of time interval in ISO-format (for example 2012-02-27T00:00:00Z).
+    * timestep
+        * The time step of data in minutes
+        * The time step of data in minutes. Notice that timestep is calculated from start of the ongoing hour or day.
+    * crs
+        * Coordinate projection to use in results
+        * Coordinate projection to use in results. For example EPSG::3067
+    * latlon
+        * Location coordinates to return data.
+        * Location coordinates to return data  (lat,lon). For example 61.2,21
+    * geoid
+        * Geoid of the location for which to return data.
+        * Geoid of the location for which to return data. (ID from geonames.org)
+    * fmisid
+        * FMI observation station identifier.
+        * Identifier of the observation station.
+    * wmo
+        * WMO code of the location for which to return data.
+        * WMO code of the location for which to return data.
+
+
+## OAAS Sea Level Model Point
+
+OAAS forecast model provides sea level height forecast to points. This stored query provides point data encoded in time value pair format.
+
+* Query ID: `fmi::forecast::sealevel::point::timevaluepair`
 * Available arguments:
     * starttime
         * Begin of the time interval

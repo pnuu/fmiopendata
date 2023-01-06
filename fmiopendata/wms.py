@@ -85,7 +85,7 @@ class WMSLayer(object):
             time_stamp += tstep
 
     def _parse_layer(self, layer):
-        for itm2 in layer.getchildren():
+        for itm2 in list(layer):
             if "Name" in itm2.tag:
                 self.name = itm2.text
             elif "Title" in itm2.tag:
