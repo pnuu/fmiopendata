@@ -87,8 +87,8 @@ More refined search results can be retrieved by passing a list of arguments that
 
 ```python
 
-snd.soundings = download_stored_query("fmi::observations::weather::sounding::multipointcoverage",
-                                      ["place=Jokioinen"])
+snd = download_stored_query("fmi::observations::weather::sounding::multipointcoverage",
+                            ["place=Jokioinen"])
 ```
 
 
