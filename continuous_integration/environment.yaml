@@ -2,6 +2,7 @@ name: test-environment
 channels:
   - conda-forge
 dependencies:
+  - defusedxml
   - rasterio
   - numpy
   - requests
