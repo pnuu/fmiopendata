@@ -123,6 +123,12 @@ mask1 = composite.get_area_mask()
 mask2 = composite.get_data_mask()
 # Mask all the invalid areas using the above masks
 composite.data[mask1 | mask2] = np.nan
+
+# Plot the data for preview
+import matplotlib.pyplot as plt
+
+plt.imshow(composite.data[0, :, :])
+plt.show()
 ```
 
 The following attributes are available in the underlaying `Radar` class for all radar data:
