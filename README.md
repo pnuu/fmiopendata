@@ -342,22 +342,21 @@ collecting data for distinct timesteps:
 ```python
 
 # The observation times are the primary key
-print(sorted(obs.data.keys())
-# -> [datetime.datetime(2020, 7, 7, 15, 0),
-#     datetime.datetime(2020, 7, 7, 15, 1),
-#     datetime.datetime(2020, 7, 7, 15, 2),
-#     datetime.datetime(2020, 7, 7, 15, 3),
-#     datetime.datetime(2020, 7, 7, 15, 4),
-#     datetime.datetime(2020, 7, 7, 15, 5)]
+print(sorted(obs.data.keys()))
+# -> [datetime.datetime(2023, 1, 6, 14, 5),
+#     datetime.datetime(2023, 1, 6, 14, 6),
+#     datetime.datetime(2023, 1, 6, 14, 7),
+# ...
+#     datetime.datetime(2023, 1, 6, 15, 4)]
 
 # The next level has the names of the observation stations as keys
 latest_tstep = max(obs.data.keys())
 print(sorted(obs.data[latest_tstep].keys()))
-# Will print a long list of weather station names, e.g. "Jyväskylä lentoasema", which we'll use
+# Will print a list of weather station names, e.g. "Kustavi Isokari", which we'll use
 # as an example below
 
 # On the third level we find the names of the observed parameters
-print(sorted(obs.data[latest_tstep]["Jyväskylä lentoasema"].keys()))
+# print(sorted(obs.data[latest_tstep]["Kustavi Isokari"].keys()))
 # -> ['Air temperature',
 #     'Cloud amount',
 #     'Dew-point temperature',
@@ -373,16 +372,16 @@ print(sorted(obs.data[latest_tstep]["Jyväskylä lentoasema"].keys()))
 #     'Wind speed']
 
 # And on the last level we find the value and unit of the observation
-print(obs.data[latest_tstep]["Jyväskylä lentoasema"]["Air temperature"])
-# -> {'value': 18.0, 'units': 'degC'}
+print(obs.data[latest_tstep]["Kustavi Isokari"]["Air temperature"])
+# -> {'value': -6.7, 'units': 'degC'}
 ```
 
 To get the location for the stations, one can use the `location_metadata` dictionary:
 
 ```python
 
-print(obs.location_metadata["Jyväskylä lentoasema"])
-# -> {'fmisid': 101339, 'latitude': 62.39758, 'longitude': 25.67087}
+print(obs.location_metadata["Kustavi Isokari"])
+# -> {'fmisid': 101059, 'latitude': 60.7222, 'longitude': 21.02681}
 ```
 
 It is also possible to collect the data to a structure more usable for timeseries
@@ -406,14 +405,13 @@ print(sorted(obs.data.keys()))
 #     'Helsinki Vuosaari Käärmeniementie',
 #     'Helsinki Vuosaari satama',
 #     'Järvenpää Sorto',
-#     'Sipoo Eestiluoto',
 #     'Sipoo Itätoukki']
 
 # The times are as a list of datetime objects
 times = obs.data['Helsinki Malmi lentokenttä']['times']
 # Other data fields have another extra level, one for values and one for the unit
 print(len(obs.data['Helsinki Malmi lentokenttä']['t2m']['values']))
-# -> 72
+# -> 71
 print(obs.data['Helsinki Malmi lentokenttä']['t2m']['unit'])
 # -> 'degC'
 ```
