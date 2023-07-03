@@ -21,9 +21,6 @@
 
 import datetime as dt
 import defusedxml.ElementTree as ET
-import sys
-if sys.version_info < (3, 6):
-    from collections import OrderedDict as dict
 
 from fmiopendata.utils import read_url
 

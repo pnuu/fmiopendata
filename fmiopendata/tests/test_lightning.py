@@ -55,7 +55,7 @@ def test_lightning():
     # The multipoint coverage format
     res2 = download_and_parse("fmi::observations::lightning::multipointcoverage", args=ARGS)
 
-    # The results should be indentical
+    # The results should be identical
     assert np.all(res.latitudes == res2.latitudes)
     assert np.all(res.longitudes == res2.longitudes)
     assert np.all(res.times == res2.times)

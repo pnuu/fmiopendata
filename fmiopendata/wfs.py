@@ -20,15 +20,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import defusedxml.ElementTree as ET
-import sys
-if sys.version_info < (3, 6):
-    from collections import OrderedDict as dict
 
 from fmiopendata.utils import read_url
 
 
-BASE_URL = "http://opendata.fmi.fi/wfs?service=WFS&request="
-STORED_QUERY_URL = "http://opendata.fmi.fi/wfs?service=WFS&version=2.0.0&request=getFeature&storedquery_id="
+BASE_URL = "https://opendata.fmi.fi/wfs?service=WFS&request="
+STORED_QUERY_URL = "https://opendata.fmi.fi/wfs?service=WFS&version=2.0.0&request=getFeature&storedquery_id="
 
 GML_BEGIN_POSITION = ".//{http://www.opengis.net/gml/3.2}beginPosition"
 GML_DOUBLE_OR_NIL_REASON_TUPLE_LIST = ".//{http://www.opengis.net/gml/3.2}doubleOrNilReasonTupleList"

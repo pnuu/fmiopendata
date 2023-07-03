@@ -30,7 +30,7 @@ For `radar` datasets `rasterio` is needed. It can be installed with
 This library provides two very simple scripts that list all the available data on
 FMI open data WMS and WFS services.
 
-Create `wms.html` that lists all the availble WMS layers:
+Create `wms.html` that lists all the available WMS layers:
 ```bash
 
 wms_html.py
@@ -38,7 +38,7 @@ wms_html.py
 
 The `Layer ID` strings are used to identify WMS (image) datasets. Examples to be added.
 
-Create `wfs.html` that lists all the availble WFS layers:
+Create `wfs.html` that lists all the available WFS layers:
 ```bash
 
 wfs_html.py
@@ -131,7 +131,7 @@ plt.imshow(composite.data[0, :, :])
 plt.show()
 ```
 
-The following attributes are available in the underlaying `Radar` class for all radar data:
+The following attributes are available in the underlying `Radar` class for all radar data:
 
 ```python
 

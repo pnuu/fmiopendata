@@ -23,9 +23,6 @@ import datetime as dt
 import defusedxml.ElementTree as ET
 import os
 import tempfile
-import sys
-if sys.version_info < (3, 6):
-    from collections import OrderedDict as dict
 
 import numpy as np
 import eccodes
