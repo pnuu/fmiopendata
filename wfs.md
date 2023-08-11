@@ -28,7 +28,7 @@ ECMWF forecast model's pressure levels as a grid data encoded in GRIB format.
 
 ## ECMWF weather forecast for cities in Finland as multipointcoverage
 
-This stored query fetch ECMWF weather forecast for cities in Finland. The forecast is returned in multi point coverage format. By default, forecast is returned for the next 36 hours.
+This stored query fetch ECMWF weather forecast for cities in Finland. The forcast is returned in multi point coverage format. By default, forcast is returned for the next 36 hours.
 
 * Query ID: `ecmwf::forecast::surface::cities::multipointcoverage`
 * Available arguments:
@@ -51,7 +51,7 @@ This stored query fetch ECMWF weather forecast for cities in Finland. The foreca
 
 ## ECMWF weather forecast for cities in Finland as simple features
 
-This stored query fetch ECMWF weather forecast for cities in Finland. The forecast is returned in simple feature format. By default, forecast is returned for the next 36 hours.
+This stored query fetch ECMWF weather forecast for cities in Finland. The forcast is returned in simple feature format. By default, forcast is returned for the next 36 hours.
 
 * Query ID: `ecmwf::forecast::surface::cities::simple`
 * Available arguments:
@@ -74,7 +74,7 @@ This stored query fetch ECMWF weather forecast for cities in Finland. The foreca
 
 ## ECMWF weather forecast for cities in Finland as time value pairs
 
-This stored query fetch ECMWF weather forecast for cities in Finland. The forecast is returned as time value pairs. By default, forecast is returned for the next 36 hours.
+This stored query fetch ECMWF weather forecast for cities in Finland. The forcast is returned as time value pairs. By default, forcast is returned for the next 36 hours.
 
 * Query ID: `ecmwf::forecast::surface::cities::timevaluepair`
 * Available arguments:
@@ -153,7 +153,7 @@ ECMWF forecast model's surface level as grid data encoded in GRIB format.
 
 ## ECMWF weather forecast for observation stations as multipointcoverage.
 
-This stored query fetch ECMWF weather forecast for observation stations in Finland. The forecast is returned as multipointcoverage form. By default, forecast is returned for the next 36 hours.
+This stored query fetch ECMWF weather forecast for observation stations in Finland. The forcast is returned as multipointcoverage form. By default, forecast is returned for the next 36 hours.
 
 * Query ID: `ecmwf::forecast::surface::obsstations::multipointcoverage`
 * Available arguments:
@@ -173,7 +173,7 @@ This stored query fetch ECMWF weather forecast for observation stations in Finla
 
 ## ECMWF weather forecast for observation stations as simple feature.
 
-This stored query fetch ECMWF weather forecast for observation stations in Finland. The forecast is returned as simple feature form. By default, forecast is returned for the next 36 hours.
+This stored query fetch ECMWF weather forecast for observation stations in Finland. The forcast is returned as simple feature form. By default, forecast is returned for the next 36 hours.
 
 * Query ID: `ecmwf::forecast::surface::obsstations::simple`
 * Available arguments:
@@ -193,7 +193,7 @@ This stored query fetch ECMWF weather forecast for observation stations in Finla
 
 ## ECMWF weather forecast for observation stations as time value pairs.
 
-This stored query fetch ECMWF weather forecast for observation stations in Finland. The forecast is returned as time value pairs. By default, forecast is returned for the next 36 hours.
+This stored query fetch ECMWF weather forecast for observation stations in Finland. The forcast is returned as time value pairs. By default, forecast is returned for the next 36 hours.
 
 * Query ID: `ecmwf::forecast::surface::obsstations::timevaluepair`
 * Available arguments:
@@ -460,6 +460,149 @@ Mean temperature and precipitation amount scenarios for three periods of thirty 
     * parameters
         * Parameters to return
         * Comma separated list of meteorological parameters to return.
+
+
+## Edited Scandinavia Weather Forecast Grid
+
+Edited Scandinavia forecast as grid data encoded in GRIB format.
+
+* Query ID: `fmi::forecast::edited::weather::scandinavia::grid`
+* Available arguments:
+    * origintime
+        * Analysis time
+        * Analysis time specifies the time of analysis in ISO-format (for example 2012-02-27T00:00:00Z).
+    * starttime
+        * Begin of the time interval
+        * Parameter begin specifies the begin of time interval in ISO-format (for example 2012-02-27T00:00:00Z).
+    * endtime
+        * End of time interval
+        * End of time interval in ISO-format (for example 2012-02-27T00:00:00Z).
+    * bbox
+        * Bounding box of area for which to return data.
+        * Bounding box of area for which to return data (lon,lat,lon,lat). For example 21,61,22,62
+    * parameters
+        * Parameters to return
+        * Comma separated list of meteorological parameters to return.
+    * format
+        * Dataset format.
+        * Encoding format for the returned dataset. Formats available are grib1, grib2 and netcdf. Default format is General Regularly-distributed Information in Binary form edition 2 (GRIB2).
+
+
+## Edited Scandinavia Point Weather Forecast as multipointcoverage
+
+Edited Scandinavia point weather forecast fetched to a specific location returned in multi point coverage format. Location need to be specified as place or geoid or latlon query parameters.
+
+* Query ID: `fmi::forecast::edited::weather::scandinavia::point::multipointcoverage`
+* Available arguments:
+    * starttime
+        * Begin of time interval
+        * Parameter specifies the begin of time interval in ISO 8601 format (for example 2012-02-27T00:00:00Z).
+    * endtime
+        * End of time interval
+        * Parameter specifies the end of time interval in ISO 8601 format (for example 2012-02-27T00:00:00Z).
+    * timestep
+        * The time step of data in minutes
+        * The time step of data in minutes. Notice that timestep is calculated from start of the ongoing hour or day.
+    * parameters
+        * Parameters to return
+        * Comma separated list of meteorological parameters to return.
+    * fmisid
+        * FMI observation station identifier.
+        * Identifier of the observation station.
+    * wmo
+        * WMO code of the location for which to return data.
+        * WMO code of the location for which to return data.
+    * crs
+        * Coordinate projection to use in results
+        * Coordinate projection to use in results. For example EPSG::3067
+    * place
+        * The location for which to provide data
+        * The location for which to provide forecast. Region can be given after location name separated by comma (for example Kumpula,Kolari).
+    * latlon
+        * Location coordinates to return data.
+        * Location coordinates to return data  (lat,lon). For example 61.2,21
+    * geoid
+        * Geoid of the location for which to return data.
+        * Geoid of the location for which to return data. (ID from geonames.org)
+
+
+## Edited Scandinavia Point Weather Forecast as simple features
+
+Edited Scandinavia point weather forecast fetched to a specific location returned in simple feature format. Location need to be specified as place or geoid or latlon query parameters.
+
+* Query ID: `fmi::forecast::edited::weather::scandinavia::point::simple`
+* Available arguments:
+    * starttime
+        * Begin of time interval
+        * Parameter specifies the begin of time interval in ISO 8601 format (for example 2012-02-27T00:00:00Z).
+    * endtime
+        * End of time interval
+        * Parameter specifies the end of time interval in ISO 8601 format (for example 2012-02-27T00:00:00Z).
+    * timestep
+        * The time step of data in minutes
+        * The time step of data in minutes. Notice that timestep is calculated from start of the ongoing hour or day.
+    * parameters
+        * Parameters to return
+        * Comma separated list of meteorological parameters to return.
+    * fmisid
+        * FMI observation station identifier.
+        * Identifier of the observation station.
+    * wmo
+        * WMO code of the location for which to return data.
+        * WMO code of the location for which to return data.
+    * crs
+        * Coordinate projection to use in results
+        * Coordinate projection to use in results. For example EPSG::3067
+    * place
+        * The location for which to provide data
+        * The location for which to provide forecast. Region can be given after location name separated by comma (for example Kumpula,Kolari).
+    * latlon
+        * Location coordinates to return data.
+        * Location coordinates to return data  (lat,lon). For example 61.2,21
+    * geoid
+        * Geoid of the location for which to return data.
+        * Geoid of the location for which to return data. (ID from geonames.org)
+
+
+## Edited Scandinavia Point Weather Forecast as time value pairs
+
+Edited Scandinavia point weather forecast fetched to a specific location returned in time value pair format. Location need to be specified as place or geoid or latlon query parameters.
+
+* Query ID: `fmi::forecast::edited::weather::scandinavia::point::timevaluepair`
+* Available arguments:
+    * starttime
+        * Begin of time interval
+        * Parameter specifies the begin of time interval in ISO 8601 format (for example 2012-02-27T00:00:00Z).
+    * endtime
+        * End of time interval
+        * Parameter specifies the end of time interval in ISO 8601 format (for example 2012-02-27T00:00:00Z).
+    * timestep
+        * The time step of data in minutes
+        * The time step of data in minutes. Notice that timestep is calculated from start of the ongoing hour or day.
+    * parameters
+        * Parameters to return
+        * Comma separated list of meteorological parameters to return.
+    * fmisid
+        * FMI observation station identifier.
+        * Identifier of the observation station.
+    * wmo
+        * WMO code of the location for which to return data.
+        * WMO code of the location for which to return data.
+    * crs
+        * Coordinate projection to use in results
+        * Coordinate projection to use in results. For example EPSG::3067
+    * place
+        * The location for which to provide data
+        * The location for which to provide forecast. Region can be given after location name separated by comma (for example Kumpula,Kolari).
+    * latlon
+        * Location coordinates to return data.
+        * Location coordinates to return data  (lat,lon). For example 61.2,21
+    * geoid
+        * Geoid of the location for which to return data.
+        * Geoid of the location for which to return data. (ID from geonames.org)
+    * timezone
+        * Time zone
+        * Time zone of the time instant of the data point in the form Area/Location (for example America/Costa_Rica). Default value is UTC.
 
 
 ## FMI-ENFUSER air quality forecast as grid
@@ -895,143 +1038,9 @@ The stored query can be used to fetch Harmonie surface level weather forecast in
         * WMO code of the location for which to return data.
 
 
-## HBM Current Model Grid
+## Helmi ice model as a grid.
 
-HBM forecast model provides sea currents and water temperature forecast as grid data encoded in GRIB format.
-
-* Query ID: `fmi::forecast::hbm::grid`
-* Available arguments:
-    * starttime
-        * Begin of the time interval
-        * Parameter begin specifies the begin of time interval in ISO-format (for example 2012-02-27T00:00:00Z).
-    * endtime
-        * End of time interval
-        * End of time interval in ISO-format (for example 2012-02-27T00:00:00Z).
-    * bbox
-        * Bounding box of area for which to return data.
-        * Bounding box of area for which to return data (lon,lat,lon,lat). For example 21,61,22,62
-    * parameters
-        * Parameters to return
-        * Comma separated list of meteorological parameters to return.
-    * format
-        * Dataset format.
-        * Encoding format for the returned dataset. Formats available are grib1, grib2 and netcdf. Default format is grib2.
-    * levels
-        * Vertical level
-        * A comma separated list of vertical levels of sea (For example 0,100,200). Available levels are 0,5,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85,90,95,100,150,200,300,400. Default level is 0.
-
-
-## HBM Current Model Point
-
-HBM forecast model provides sea currents and water temperature forecast. This stored query provides the data as point data encoded in multi point coverage format.
-
-* Query ID: `fmi::forecast::hbm::point::multipointcoverage`
-* Available arguments:
-    * starttime
-        * Begin of the time interval
-        * Parameter begin specifies the begin of time interval in ISO-format (for example 2012-02-27T00:00:00Z).
-    * endtime
-        * End of time interval
-        * End of time interval in ISO-format (for example 2012-02-27T00:00:00Z).
-    * timestep
-        * The time step of data in minutes
-        * The time step of data in minutes. Notice that timestep is calculated from start of the ongoing hour or day.
-    * parameters
-        * Parameters to return
-        * Comma separated list of meteorological parameters to return.
-    * crs
-        * Coordinate projection to use in results
-        * Coordinate projection to use in results. For example EPSG::3067
-    * latlon
-        * Location coordinates to return data.
-        * Location coordinates to return data  (lat,lon). For example 61.2,21
-    * geoid
-        * Geoid of the location for which to return data.
-        * Geoid of the location for which to return data. (ID from geonames.org)
-    * fmisid
-        * FMI observation station identifier.
-        * Identifier of the observation station.
-    * wmo
-        * WMO code of the location for which to return data.
-        * WMO code of the location for which to return data.
-
-
-## HBM Current Model Point
-
-HBM forecast model provides sea currents and water temperature forecast. This stored query provides the data as point data encoded in simple feature format.
-
-* Query ID: `fmi::forecast::hbm::point::simple`
-* Available arguments:
-    * starttime
-        * Begin of the time interval
-        * Parameter begin specifies the begin of time interval in ISO-format (for example 2012-02-27T00:00:00Z).
-    * endtime
-        * End of time interval
-        * End of time interval in ISO-format (for example 2012-02-27T00:00:00Z).
-    * timestep
-        * The time step of data in minutes
-        * The time step of data in minutes. Notice that timestep is calculated from start of the ongoing hour or day.
-    * parameters
-        * Parameters to return
-        * Comma separated list of meteorological parameters to return.
-    * crs
-        * Coordinate projection to use in results
-        * Coordinate projection to use in results. For example EPSG::3067
-    * latlon
-        * Location coordinates to return data.
-        * Location coordinates to return data  (lat,lon). For example 61.2,21
-    * geoid
-        * Geoid of the location for which to return data.
-        * Geoid of the location for which to return data. (ID from geonames.org)
-    * fmisid
-        * FMI observation station identifier.
-        * Identifier of the observation station.
-    * wmo
-        * WMO code of the location for which to return data.
-        * WMO code of the location for which to return data.
-
-
-## HBM Current Model Point
-
-HBM forecast model provides sea currents and water temperature forecast. This stored query provides the data as point data encoded in time value pair format.
-
-* Query ID: `fmi::forecast::hbm::point::timevaluepair`
-* Available arguments:
-    * starttime
-        * Begin of the time interval
-        * Parameter begin specifies the begin of time interval in ISO-format (for example 2012-02-27T00:00:00Z).
-    * endtime
-        * End of time interval
-        * End of time interval in ISO-format (for example 2012-02-27T00:00:00Z).
-    * parameters
-        * Parameters to return
-        * Comma separated list of meteorological parameters to return.
-    * crs
-        * Coordinate projection to use in results
-        * Coordinate projection to use in results. For example EPSG::3067
-    * timestep
-        * The time step of data in minutes
-        * The time step of data in minutes. Notice that timestep is calculated from start of the ongoing hour or day.
-    * latlon
-        * Location coordinates to return data.
-        * Location coordinates to return data  (lat,lon). For example 61.2,21
-    * geoid
-        * Geoid of the location for which to return data.
-        * Geoid of the location for which to return data. (ID from geonames.org)
-    * fmisid
-        * FMI observation station identifier.
-        * Identifier of the observation station.
-    * wmo
-        * WMO code of the location for which to return data.
-        * WMO code of the location for which to return data.
-    * timezone
-        * Time zone
-        * Time zone of the time instant of the data point in the form Area/Location (for example America/Costa_Rica). Default value is UTC.
-
-
-## Helsinki multi-category ice model as a grid.
-
-This Stored Query request retrieve Helsinki multi-category ice model forecast raw dataset as a grid.
+This stored query request retrieve Helsinki multi-category ice model forecast raw dataset as a grid.
 
 * Query ID: `fmi::forecast::helmi::grid`
 * Available arguments:
@@ -1078,7 +1087,7 @@ Hydrodynamic forecast model provides sea currents and water temperature forecast
         * Encoding format for the returned dataset. Formats available are grib1, grib2 and netcdf. Default format is grib2.
     * levels
         * Vertical level
-        * A comma separated list of vertical levels of sea (For example 0,100,200). Available levels are 0,5,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85,90,95,100,150,200,300,400. Default level is 0.
+        * A comma separated list of vertical levels of sea (For exmaple 0,100,200). Available levels are 0,5,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85,90,95,100,150,200,300,400. Default level is 0.
 
 
 ## Hydrodynamic Current Model Point
@@ -1602,108 +1611,9 @@ The stored query can be used to fetch Harmonie (MEPS) surface level weather fore
         * WMO code of the location for which to return data.
 
 
-## OAAS Sea Level Model Point
+## Sea Level Model Point
 
-OAAS forecast model provides sea level height forecast to points. This stored query provides point data encoded in multi point coverage format.
-
-* Query ID: `fmi::forecast::oaas::sealevel::point::multipointcoverage`
-* Available arguments:
-    * starttime
-        * Begin of the time interval
-        * Parameter begin specifies the begin of time interval in ISO-format (for example 2012-02-27T00:00:00Z).
-    * endtime
-        * End of time interval
-        * End of time interval in ISO-format (for example 2012-02-27T00:00:00Z).
-    * timestep
-        * The time step of data in minutes
-        * The time step of data in minutes. Notice that timestep is calculated from start of the ongoing hour or day.
-    * crs
-        * Coordinate projection to use in results
-        * Coordinate projection to use in results. For example EPSG::3067
-    * geoid
-        * Geoid of the location for which to return data.
-        * Geoid of the location for which to return data. (ID from geonames.org)
-    * fmisid
-        * FMI observation station identifier.
-        * Identifier of the observation station.
-    * wmo
-        * WMO code of the location for which to return data.
-        * WMO code of the location for which to return data.
-    * latlon
-        * Location coordinates to return data.
-        * Location coordinates to return data  (lat,lon). For example 61.2,21
-
-
-## OAAS Sea Level Model Point
-
-OAAS forecast model provides sea level height forecast to points. This stored query provides point data encoded in simple feature format.
-
-* Query ID: `fmi::forecast::oaas::sealevel::point::simple`
-* Available arguments:
-    * starttime
-        * Begin of the time interval
-        * Parameter begin specifies the begin of time interval in ISO-format (for example 2012-02-27T00:00:00Z).
-    * endtime
-        * End of time interval
-        * End of time interval in ISO-format (for example 2012-02-27T00:00:00Z).
-    * timestep
-        * The time step of data in minutes
-        * The time step of data in minutes. Notice that timestep is calculated from start of the ongoing hour or day.
-    * crs
-        * Coordinate projection to use in results
-        * Coordinate projection to use in results. For example EPSG::3067
-    * latlon
-        * Location coordinates to return data.
-        * Location coordinates to return data  (lat,lon). For example 61.2,21
-    * geoid
-        * Geoid of the location for which to return data.
-        * Geoid of the location for which to return data. (ID from geonames.org)
-    * fmisid
-        * FMI observation station identifier.
-        * Identifier of the observation station.
-    * wmo
-        * WMO code of the location for which to return data.
-        * WMO code of the location for which to return data.
-
-
-## OAAS Sea Level Model Point
-
-OAAS forecast model provides sea level height forecast to points. This stored query provides point data encoded in time value pair format.
-
-* Query ID: `fmi::forecast::oaas::sealevel::point::timevaluepair`
-* Available arguments:
-    * starttime
-        * Begin of the time interval
-        * Parameter begin specifies the begin of time interval in ISO-format (for example 2012-02-27T00:00:00Z).
-    * endtime
-        * End of time interval
-        * End of time interval in ISO-format (for example 2012-02-27T00:00:00Z).
-    * timestep
-        * The time step of data in minutes
-        * The time step of data in minutes. Notice that timestep is calculated from start of the ongoing hour or day.
-    * crs
-        * Coordinate projection to use in results
-        * Coordinate projection to use in results. For example EPSG::3067
-    * geoid
-        * Geoid of the location for which to return data.
-        * Geoid of the location for which to return data. (ID from geonames.org)
-    * latlon
-        * Location coordinates to return data.
-        * Location coordinates to return data  (lat,lon). For example 61.2,21
-    * fmisid
-        * FMI observation station identifier.
-        * Identifier of the observation station.
-    * wmo
-        * WMO code of the location for which to return data.
-        * WMO code of the location for which to return data.
-    * timezone
-        * Time zone
-        * Time zone of the time instant of the data point in the form Area/Location (for example America/Costa_Rica). Default value is UTC.
-
-
-## OAAS Sea Level Model Point
-
-OAAS forecast model provides sea level height forecast to points. This stored query provides point data encoded in multi point coverage format.
+The forecast model provides sea level height forecast to points. This stored query provides point data encoded in multi point coverage format.
 
 * Query ID: `fmi::forecast::sealevel::point::multipointcoverage`
 * Available arguments:
@@ -1733,9 +1643,9 @@ OAAS forecast model provides sea level height forecast to points. This stored qu
         * Location coordinates to return data  (lat,lon). For example 61.2,21
 
 
-## OAAS Sea Level Model Point
+## Sea Level Model Point
 
-OAAS forecast model provides sea level height forecast to points. This stored query provides point data encoded in simple feature format.
+The forecast model provides a sea level height forecast to points. This stored query provides point data encoded in simple feature format.
 
 * Query ID: `fmi::forecast::sealevel::point::simple`
 * Available arguments:
@@ -1765,9 +1675,9 @@ OAAS forecast model provides sea level height forecast to points. This stored qu
         * WMO code of the location for which to return data.
 
 
-## OAAS Sea Level Model Point
+## Sea Level Model Point
 
-OAAS forecast model provides sea level height forecast to points. This stored query provides point data encoded in time value pair format.
+The forecast model provides sea level height forecast to points. This stored query provides point data encoded in time value pair format.
 
 * Query ID: `fmi::forecast::sealevel::point::timevaluepair`
 * Available arguments:
@@ -2274,9 +2184,44 @@ The response contains all detected lightning strikes in Northern Europe. Observa
         * End of time interval in ISO-format (for example 2012-02-27T00:00:00Z).
 
 
+## Magnetometer Observations
+
+Magnetometer observations from 12 locations. The data is retuned in simple feature format.
+
+* Query ID: `fmi::observations::magnetometer::simple`
+* Available arguments:
+    * starttime
+        * Begin of the time interval
+        * Parameter begin specifies the begin of time interval in ISO-format (for example 2012-02-27T00:00:00Z).
+    * endtime
+        * End of time interval
+        * End of time interval in ISO-format (for example 2012-02-27T00:00:00Z).
+    * timestep
+        * The time step of data in minutes
+        * The time step of data in minutes. Notice that timestep is calculated from start of the ongoing hour or day.
+    * parameters
+        * Parameters to return
+        * Comma separated list of meteorological parameters to return.
+    * crs
+        * Coordinate projection to use in results
+        * Coordinate projection to use in results. For example EPSG::3067
+    * bbox
+        * Bounding box of area for which to return data.
+        * Bounding box of area for which to return data (lon,lat,lon,lat). For example 21,61,22,62.
+    * place
+        * The location for which to provide data
+        * The location for which to provide forecast. Region can be given after location name separated by comma (for example Utti).
+    * fmisid
+        * FMI observation station identifier.
+        * Identifier of the observation station.
+    * maxlocations
+        * Amount of locations
+        * How many observation stations are fetched around queried locations. Note that stations are only searched with 50 kilometers radius around the location (place/fmisid/geoid). By default, one location is returned.
+
+
 ## Mareograph Water Temperature Daily Statistical Values
 
-Daily water temperature average, minimum and maximum from 14 locations. By default, the data is returned from last 744 hours. The data is returned in multi point coverage format.
+Daily water temperature average, minimum and maximum from 14 locations. By default, the data is returned from last 744 hours. The data is retuned in multi point coverage format.
 
 * Query ID: `fmi::observations::mareograph::daily::multipointcoverage`
 * Available arguments:
@@ -2302,7 +2247,7 @@ Daily water temperature average, minimum and maximum from 14 locations. By defau
 
 ## Mareograph Water Temperature Daily Statistical Values
 
-Daily water temperature average, minimum and maximum from 14 locations. By default, the data is returned from last 744 hours. The data is returned in simple feature format.
+Daily water temperature average, minimum and maximum from 14 locations. By default, the data is returned from last 744 hours. The data is retuned in simple feature format.
 
 * Query ID: `fmi::observations::mareograph::daily::simple`
 * Available arguments:
@@ -2328,7 +2273,7 @@ Daily water temperature average, minimum and maximum from 14 locations. By defau
 
 ## Mareograph Water Temperature Daily Statistical Values
 
-Daily water temperature average, minimum and maximum from 14 locations. By default, the data is returned from last 744 hours. The data is returned in time value pair format.
+Daily water temperature average, minimum and maximum from 14 locations. By default, the data is returned from last 744 hours. The data is retuned in time value pair format.
 
 * Query ID: `fmi::observations::mareograph::daily::timevaluepair`
 * Available arguments:
@@ -2354,7 +2299,7 @@ Daily water temperature average, minimum and maximum from 14 locations. By defau
 
 ## Sea Level and Temperature Observations
 
-Sea level and temperature observations from 14 locations. Time step is 1 minute. The data is returned in multi point coverage format.
+Sea level and temperature observations from 14 locations. Time step is 1 minute. The data is retuned in multi point coverage format.
 
 * Query ID: `fmi::observations::mareograph::instant::multipointcoverage`
 * Available arguments:
@@ -2380,7 +2325,7 @@ Sea level and temperature observations from 14 locations. Time step is 1 minute.
 
 ## Sea Level and Temperature Observations
 
-Sea level and temperature observations from 14 locations. Time step is 1 minute. The data is returned in simple feature format.
+Sea level and temperature observations from 14 locations. Time step is 1 minute. The data is retuned in simple feature format.
 
 * Query ID: `fmi::observations::mareograph::instant::simple`
 * Available arguments:
@@ -2576,7 +2521,7 @@ Monthly water level and temperature observations of 30-year normal period 1991 -
 
 ## Mareograph Water Temperature Monthly Statistical Values
 
-Monthly water temperature average, minimum and maximum from 14 locations. By default, the data is returned from last 12 months. The data is returned in multi point coverage format.
+Monthly water temperature average, minimum and maximum from 14 locations. By default, the data is returned from last 12 months. The data is retuned in multi point coverage format.
 
 * Query ID: `fmi::observations::mareograph::monthly::multipointcoverage`
 * Available arguments:
@@ -2602,7 +2547,7 @@ Monthly water temperature average, minimum and maximum from 14 locations. By def
 
 ## Mareograph Water Temperature Monthly Statistical Values
 
-Monthly water temperature average, minimum and maximum from 14 locations. By default, the data is returned from last 12 months. The data is returned in simple feature format.
+Monthly water temperature average, minimum and maximum from 14 locations. By default, the data is returned from last 12 months. The data is retuned in simple feature format.
 
 * Query ID: `fmi::observations::mareograph::monthly::simple`
 * Available arguments:
@@ -2628,7 +2573,7 @@ Monthly water temperature average, minimum and maximum from 14 locations. By def
 
 ## Mareograph Water Temperature Monthly Statistical Values
 
-Monthly water temperature average, minimum and maximum from 14 locations. By default, the data is returned from last 12 months. The data is returned in time value pair format.
+Monthly water temperature average, minimum and maximum from 14 locations. By default, the data is returned from last 12 months. The data is retuned in time value pair format.
 
 * Query ID: `fmi::observations::mareograph::monthly::timevaluepair`
 * Available arguments:
@@ -2654,7 +2599,7 @@ Monthly water temperature average, minimum and maximum from 14 locations. By def
 
 ## Sea Level and Temperature Observations
 
-Sea level and temperature observations from 14 locations. Time step is 60 minutes. The data is returned in multi point coverage format.
+Sea level and temperature observations from 14 locations. Time step is 60 minutes. The data is retuned in multi point coverage format.
 
 * Query ID: `fmi::observations::mareograph::multipointcoverage`
 * Available arguments:
@@ -2680,7 +2625,7 @@ Sea level and temperature observations from 14 locations. Time step is 60 minute
 
 ## Sea Level and Temperature Observations
 
-Sea level and temperature observations from 14 locations. Time step is 60 minutes. The data is returned in simple feature format.
+Sea level and temperature observations from 14 locations. Time step is 60 minutes. The data is retuned in simple feature format.
 
 * Query ID: `fmi::observations::mareograph::simple`
 * Available arguments:
@@ -3145,7 +3090,7 @@ Hourly minimum, maximum and average soil values from weather stations. By defaul
 
 ## Sea Surface Temperature Observations
 
-Sea surface temperature observations from a range of measurements. Time step is variable and depends on the measurement point. The data is returned in simple feature format.
+Sea surface temperature observations from a range of measurements. Time step is variable and depends on the measurement point. The data is retuned in simple feature format.
 
 * Query ID: `fmi::observations::surfacetemperature::daily::simple`
 * Available arguments:
@@ -3171,7 +3116,7 @@ Sea surface temperature observations from a range of measurements. Time step is 
 
 ## Sea Surface Temperature Observations
 
-Sea surface temperature observations from a range of measurements. Time step is variable and depends on the measurement point. The data is returned in simple feature format.
+Sea surface temperature observations from a range of measurements. Time step is variable and depends on the measurement point. The data is retuned in simple feature format.
 
 * Query ID: `fmi::observations::surfacetemperature::monthly::simple`
 * Available arguments:
@@ -3197,7 +3142,7 @@ Sea surface temperature observations from a range of measurements. Time step is 
 
 ## Sea Surface Temperature Observations
 
-Sea surface temperature observations from a range of measurements. Time step is variable and depends on the measurement point. The data is returned in simple feature format.
+Sea surface temperature observations from a range of measurements. Time step is variable and depends on the measurement point. The data is retuned in simple feature format.
 
 * Query ID: `fmi::observations::surfacetemperature::simple`
 * Available arguments:
@@ -3696,7 +3641,7 @@ This stored query returns atmospheric dropsonde observations in multipointcovera
 
 ## Hourly Weather Observations
 
-Hourly weather observations from weather stations. Default set contains hourly air temperature average, maximum and minimum, air relative humidity average, wind speed average, minimum (10 minute average) and maximum (10 minute average), wind direction average, wind gust speed maximum (3 second average), rain accumulated, rain intensity maximum, air pressure average and the most significant weather code. By default, the data is returned from last 24 hours. At least one location parameter (geoid/place/fmisid/wmo/bbox) has to be given. The data is returned in multi point coverage format.
+Hourly weather observations from weather stations. Default set contains hourly air temperature average, maximum and minimum, air relative humidity average, wind speed average, minumum (10 minute average) and maximum (10 minute average), wind direction average, wind gust speed maximum (3 second average), rain accumulated, rain intensity maximum, air pressure average and the most significant weather code. By default, the data is returned from last 24 hours. At least one location parameter (geoid/place/fmisid/wmo/bbox) has to be given. The data is returned in multi point coverage format.
 
 * Query ID: `fmi::observations::weather::hourly::multipointcoverage`
 * Available arguments:
@@ -3737,7 +3682,7 @@ Hourly weather observations from weather stations. Default set contains hourly a
 
 ## Hourly Weather Observations
 
-Hourly weather observations from weather stations. Default set contains hourly air temperature average, maximum and minimum, air relative humidity average, wind speed average, minimum (10 minute average) and maximum (10 minute average), wind direction average, wind gust speed maximum (3 second average), rain accumulated, rain intensity maximum, air pressure average and the most significant weather code. By default, the data is returned from last 24 hours. At least one location parameter (geoid/place/fmisid/wmo/bbox) has to be given. The data is returned in simple format.
+Hourly weather observations from weather stations. Default set contains hourly air temperature average, maximum and minimum, air relative humidity average, wind speed average, minumum (10 minute average) and maximum (10 minute average), wind direction average, wind gust speed maximum (3 second average), rain accumulated, rain intensity maximum, air pressure average and the most significant weather code. By default, the data is returned from last 24 hours. At least one location parameter (geoid/place/fmisid/wmo/bbox) has to be given. The data is returned in simple format.
 
 * Query ID: `fmi::observations::weather::hourly::simple`
 * Available arguments:
@@ -3781,7 +3726,7 @@ Hourly weather observations from weather stations. Default set contains hourly a
 
 ## Hourly Weather Observations
 
-Hourly weather observations from weather stations. Default set contains hourly air temperature average, maximum and minimum, air relative humidity average, wind speed average, minimum (10 minute average) and maximum (10 minute average), wind direction average, wind gust speed maximum (3 second average), rain accumulated, rain intensity maximum, air pressure average and the most significant weather code. By default, the data is returned from last 24 hours. At least one location parameter (geoid/place/fmisid/wmo/bbox) has to be given. The data is returned in time value pair format.
+Hourly weather observations from weather stations. Default set contains hourly air temperature average, maximum and minimum, air relative humidity average, wind speed average, minumum (10 minute average) and maximum (10 minute average), wind direction average, wind gust speed maximum (3 second average), rain accumulated, rain intensity maximum, air pressure average and the most significant weather code. By default, the data is returned from last 24 hours. At least one location parameter (geoid/place/fmisid/wmo/bbox) has to be given. The data is returned in time value pair format.
 
 * Query ID: `fmi::observations::weather::hourly::timevaluepair`
 * Available arguments:
@@ -3825,7 +3770,7 @@ Hourly weather observations from weather stations. Default set contains hourly a
 
 ## Instantaneous profile observations from masts
 
-This stored query return instantaneous profile observations from masts in multipointcoverage format. By default latest observation of the available meteo parameters are returned in 10 minute resolution. At least one location has to be given.
+This stored query return instantaneous profile observations from masts in multipointcoverage format. By default latest observation of the available meteo paramters are returned in 10 minute resolution. At least one location has to be given.
 
 * Query ID: `fmi::observations::weather::mast::multipointcoverage`
 * Available arguments:
