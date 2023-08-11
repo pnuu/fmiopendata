@@ -22,9 +22,6 @@
 import datetime as dt
 import defusedxml.ElementTree as ET
 import tempfile
-import sys
-if sys.version_info < (3, 6):
-    from collections import OrderedDict as dict
 
 import rasterio
 import numpy as np
