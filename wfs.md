@@ -28,7 +28,7 @@ ECMWF forecast model's pressure levels as a grid data encoded in GRIB format.
 
 ## ECMWF weather forecast for cities in Finland as multipointcoverage
 
-This stored query fetch ECMWF weather forecast for cities in Finland. The forcast is returned in multi point coverage format. By default, forcast is returned for the next 36 hours.
+This stored query fetch ECMWF weather forecast for cities in Finland. The forecast is returned in multi point coverage format. By default, forecast is returned for the next 36 hours.
 
 * Query ID: `ecmwf::forecast::surface::cities::multipointcoverage`
 * Available arguments:
@@ -51,7 +51,7 @@ This stored query fetch ECMWF weather forecast for cities in Finland. The forcas
 
 ## ECMWF weather forecast for cities in Finland as simple features
 
-This stored query fetch ECMWF weather forecast for cities in Finland. The forcast is returned in simple feature format. By default, forcast is returned for the next 36 hours.
+This stored query fetch ECMWF weather forecast for cities in Finland. The forecast is returned in simple feature format. By default, forecast is returned for the next 36 hours.
 
 * Query ID: `ecmwf::forecast::surface::cities::simple`
 * Available arguments:
@@ -74,7 +74,7 @@ This stored query fetch ECMWF weather forecast for cities in Finland. The forcas
 
 ## ECMWF weather forecast for cities in Finland as time value pairs
 
-This stored query fetch ECMWF weather forecast for cities in Finland. The forcast is returned as time value pairs. By default, forcast is returned for the next 36 hours.
+This stored query fetch ECMWF weather forecast for cities in Finland. The forecast is returned as time value pairs. By default, forecast is returned for the next 36 hours.
 
 * Query ID: `ecmwf::forecast::surface::cities::timevaluepair`
 * Available arguments:
@@ -153,7 +153,7 @@ ECMWF forecast model's surface level as grid data encoded in GRIB format.
 
 ## ECMWF weather forecast for observation stations as multipointcoverage.
 
-This stored query fetch ECMWF weather forecast for observation stations in Finland. The forcast is returned as multipointcoverage form. By default, forecast is returned for the next 36 hours.
+This stored query fetch ECMWF weather forecast for observation stations in Finland. The forecast is returned as multipointcoverage form. By default, forecast is returned for the next 36 hours.
 
 * Query ID: `ecmwf::forecast::surface::obsstations::multipointcoverage`
 * Available arguments:
@@ -173,7 +173,7 @@ This stored query fetch ECMWF weather forecast for observation stations in Finla
 
 ## ECMWF weather forecast for observation stations as simple feature.
 
-This stored query fetch ECMWF weather forecast for observation stations in Finland. The forcast is returned as simple feature form. By default, forecast is returned for the next 36 hours.
+This stored query fetch ECMWF weather forecast for observation stations in Finland. The forecast is returned as simple feature form. By default, forecast is returned for the next 36 hours.
 
 * Query ID: `ecmwf::forecast::surface::obsstations::simple`
 * Available arguments:
@@ -193,7 +193,7 @@ This stored query fetch ECMWF weather forecast for observation stations in Finla
 
 ## ECMWF weather forecast for observation stations as time value pairs.
 
-This stored query fetch ECMWF weather forecast for observation stations in Finland. The forcast is returned as time value pairs. By default, forecast is returned for the next 36 hours.
+This stored query fetch ECMWF weather forecast for observation stations in Finland. The forecast is returned as time value pairs. By default, forecast is returned for the next 36 hours.
 
 * Query ID: `ecmwf::forecast::surface::obsstations::timevaluepair`
 * Available arguments:
@@ -1087,7 +1087,7 @@ Hydrodynamic forecast model provides sea currents and water temperature forecast
         * Encoding format for the returned dataset. Formats available are grib1, grib2 and netcdf. Default format is grib2.
     * levels
         * Vertical level
-        * A comma separated list of vertical levels of sea (For exmaple 0,100,200). Available levels are 0,5,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85,90,95,100,150,200,300,400. Default level is 0.
+        * A comma separated list of vertical levels of sea (For example 0,100,200). Available levels are 0,5,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85,90,95,100,150,200,300,400. Default level is 0.
 
 
 ## Hydrodynamic Current Model Point
@@ -2186,7 +2186,7 @@ The response contains all detected lightning strikes in Northern Europe. Observa
 
 ## Magnetometer Observations
 
-Magnetometer observations from 12 locations. The data is retuned in simple feature format.
+Magnetometer observations from 12 locations. The data is returned in simple feature format.
 
 * Query ID: `fmi::observations::magnetometer::simple`
 * Available arguments:
@@ -2221,7 +2221,7 @@ Magnetometer observations from 12 locations. The data is retuned in simple featu
 
 ## Mareograph Water Temperature Daily Statistical Values
 
-Daily water temperature average, minimum and maximum from 14 locations. By default, the data is returned from last 744 hours. The data is retuned in multi point coverage format.
+Daily water temperature average, minimum and maximum from 14 locations. By default, the data is returned from last 744 hours. The data is returned in multi point coverage format.
 
 * Query ID: `fmi::observations::mareograph::daily::multipointcoverage`
 * Available arguments:
@@ -2247,7 +2247,7 @@ Daily water temperature average, minimum and maximum from 14 locations. By defau
 
 ## Mareograph Water Temperature Daily Statistical Values
 
-Daily water temperature average, minimum and maximum from 14 locations. By default, the data is returned from last 744 hours. The data is retuned in simple feature format.
+Daily water temperature average, minimum and maximum from 14 locations. By default, the data is returned from last 744 hours. The data is returned in simple feature format.
 
 * Query ID: `fmi::observations::mareograph::daily::simple`
 * Available arguments:
@@ -2273,7 +2273,7 @@ Daily water temperature average, minimum and maximum from 14 locations. By defau
 
 ## Mareograph Water Temperature Daily Statistical Values
 
-Daily water temperature average, minimum and maximum from 14 locations. By default, the data is returned from last 744 hours. The data is retuned in time value pair format.
+Daily water temperature average, minimum and maximum from 14 locations. By default, the data is returned from last 744 hours. The data is returned in time value pair format.
 
 * Query ID: `fmi::observations::mareograph::daily::timevaluepair`
 * Available arguments:
@@ -2299,7 +2299,7 @@ Daily water temperature average, minimum and maximum from 14 locations. By defau
 
 ## Sea Level and Temperature Observations
 
-Sea level and temperature observations from 14 locations. Time step is 1 minute. The data is retuned in multi point coverage format.
+Sea level and temperature observations from 14 locations. Time step is 1 minute. The data is returned in multi point coverage format.
 
 * Query ID: `fmi::observations::mareograph::instant::multipointcoverage`
 * Available arguments:
@@ -2325,7 +2325,7 @@ Sea level and temperature observations from 14 locations. Time step is 1 minute.
 
 ## Sea Level and Temperature Observations
 
-Sea level and temperature observations from 14 locations. Time step is 1 minute. The data is retuned in simple feature format.
+Sea level and temperature observations from 14 locations. Time step is 1 minute. The data is returned in simple feature format.
 
 * Query ID: `fmi::observations::mareograph::instant::simple`
 * Available arguments:
@@ -2521,7 +2521,7 @@ Monthly water level and temperature observations of 30-year normal period 1991 -
 
 ## Mareograph Water Temperature Monthly Statistical Values
 
-Monthly water temperature average, minimum and maximum from 14 locations. By default, the data is returned from last 12 months. The data is retuned in multi point coverage format.
+Monthly water temperature average, minimum and maximum from 14 locations. By default, the data is returned from last 12 months. The data is returned in multi point coverage format.
 
 * Query ID: `fmi::observations::mareograph::monthly::multipointcoverage`
 * Available arguments:
@@ -2547,7 +2547,7 @@ Monthly water temperature average, minimum and maximum from 14 locations. By def
 
 ## Mareograph Water Temperature Monthly Statistical Values
 
-Monthly water temperature average, minimum and maximum from 14 locations. By default, the data is returned from last 12 months. The data is retuned in simple feature format.
+Monthly water temperature average, minimum and maximum from 14 locations. By default, the data is returned from last 12 months. The data is returned in simple feature format.
 
 * Query ID: `fmi::observations::mareograph::monthly::simple`
 * Available arguments:
@@ -2573,7 +2573,7 @@ Monthly water temperature average, minimum and maximum from 14 locations. By def
 
 ## Mareograph Water Temperature Monthly Statistical Values
 
-Monthly water temperature average, minimum and maximum from 14 locations. By default, the data is returned from last 12 months. The data is retuned in time value pair format.
+Monthly water temperature average, minimum and maximum from 14 locations. By default, the data is returned from last 12 months. The data is returned in time value pair format.
 
 * Query ID: `fmi::observations::mareograph::monthly::timevaluepair`
 * Available arguments:
@@ -2599,7 +2599,7 @@ Monthly water temperature average, minimum and maximum from 14 locations. By def
 
 ## Sea Level and Temperature Observations
 
-Sea level and temperature observations from 14 locations. Time step is 60 minutes. The data is retuned in multi point coverage format.
+Sea level and temperature observations from 14 locations. Time step is 60 minutes. The data is returned in multi point coverage format.
 
 * Query ID: `fmi::observations::mareograph::multipointcoverage`
 * Available arguments:
@@ -2625,7 +2625,7 @@ Sea level and temperature observations from 14 locations. Time step is 60 minute
 
 ## Sea Level and Temperature Observations
 
-Sea level and temperature observations from 14 locations. Time step is 60 minutes. The data is retuned in simple feature format.
+Sea level and temperature observations from 14 locations. Time step is 60 minutes. The data is returned in simple feature format.
 
 * Query ID: `fmi::observations::mareograph::simple`
 * Available arguments:
@@ -3090,7 +3090,7 @@ Hourly minimum, maximum and average soil values from weather stations. By defaul
 
 ## Sea Surface Temperature Observations
 
-Sea surface temperature observations from a range of measurements. Time step is variable and depends on the measurement point. The data is retuned in simple feature format.
+Sea surface temperature observations from a range of measurements. Time step is variable and depends on the measurement point. The data is returned in simple feature format.
 
 * Query ID: `fmi::observations::surfacetemperature::daily::simple`
 * Available arguments:
@@ -3116,7 +3116,7 @@ Sea surface temperature observations from a range of measurements. Time step is 
 
 ## Sea Surface Temperature Observations
 
-Sea surface temperature observations from a range of measurements. Time step is variable and depends on the measurement point. The data is retuned in simple feature format.
+Sea surface temperature observations from a range of measurements. Time step is variable and depends on the measurement point. The data is returned in simple feature format.
 
 * Query ID: `fmi::observations::surfacetemperature::monthly::simple`
 * Available arguments:
@@ -3142,7 +3142,7 @@ Sea surface temperature observations from a range of measurements. Time step is 
 
 ## Sea Surface Temperature Observations
 
-Sea surface temperature observations from a range of measurements. Time step is variable and depends on the measurement point. The data is retuned in simple feature format.
+Sea surface temperature observations from a range of measurements. Time step is variable and depends on the measurement point. The data is returned in simple feature format.
 
 * Query ID: `fmi::observations::surfacetemperature::simple`
 * Available arguments:
@@ -3641,7 +3641,7 @@ This stored query returns atmospheric dropsonde observations in multipointcovera
 
 ## Hourly Weather Observations
 
-Hourly weather observations from weather stations. Default set contains hourly air temperature average, maximum and minimum, air relative humidity average, wind speed average, minumum (10 minute average) and maximum (10 minute average), wind direction average, wind gust speed maximum (3 second average), rain accumulated, rain intensity maximum, air pressure average and the most significant weather code. By default, the data is returned from last 24 hours. At least one location parameter (geoid/place/fmisid/wmo/bbox) has to be given. The data is returned in multi point coverage format.
+Hourly weather observations from weather stations. Default set contains hourly air temperature average, maximum and minimum, air relative humidity average, wind speed average, minimum (10 minute average) and maximum (10 minute average), wind direction average, wind gust speed maximum (3 second average), rain accumulated, rain intensity maximum, air pressure average and the most significant weather code. By default, the data is returned from last 24 hours. At least one location parameter (geoid/place/fmisid/wmo/bbox) has to be given. The data is returned in multi point coverage format.
 
 * Query ID: `fmi::observations::weather::hourly::multipointcoverage`
 * Available arguments:
@@ -3682,7 +3682,7 @@ Hourly weather observations from weather stations. Default set contains hourly a
 
 ## Hourly Weather Observations
 
-Hourly weather observations from weather stations. Default set contains hourly air temperature average, maximum and minimum, air relative humidity average, wind speed average, minumum (10 minute average) and maximum (10 minute average), wind direction average, wind gust speed maximum (3 second average), rain accumulated, rain intensity maximum, air pressure average and the most significant weather code. By default, the data is returned from last 24 hours. At least one location parameter (geoid/place/fmisid/wmo/bbox) has to be given. The data is returned in simple format.
+Hourly weather observations from weather stations. Default set contains hourly air temperature average, maximum and minimum, air relative humidity average, wind speed average, minimum (10 minute average) and maximum (10 minute average), wind direction average, wind gust speed maximum (3 second average), rain accumulated, rain intensity maximum, air pressure average and the most significant weather code. By default, the data is returned from last 24 hours. At least one location parameter (geoid/place/fmisid/wmo/bbox) has to be given. The data is returned in simple format.
 
 * Query ID: `fmi::observations::weather::hourly::simple`
 * Available arguments:
@@ -3726,7 +3726,7 @@ Hourly weather observations from weather stations. Default set contains hourly a
 
 ## Hourly Weather Observations
 
-Hourly weather observations from weather stations. Default set contains hourly air temperature average, maximum and minimum, air relative humidity average, wind speed average, minumum (10 minute average) and maximum (10 minute average), wind direction average, wind gust speed maximum (3 second average), rain accumulated, rain intensity maximum, air pressure average and the most significant weather code. By default, the data is returned from last 24 hours. At least one location parameter (geoid/place/fmisid/wmo/bbox) has to be given. The data is returned in time value pair format.
+Hourly weather observations from weather stations. Default set contains hourly air temperature average, maximum and minimum, air relative humidity average, wind speed average, minimum (10 minute average) and maximum (10 minute average), wind direction average, wind gust speed maximum (3 second average), rain accumulated, rain intensity maximum, air pressure average and the most significant weather code. By default, the data is returned from last 24 hours. At least one location parameter (geoid/place/fmisid/wmo/bbox) has to be given. The data is returned in time value pair format.
 
 * Query ID: `fmi::observations::weather::hourly::timevaluepair`
 * Available arguments:
@@ -3770,7 +3770,7 @@ Hourly weather observations from weather stations. Default set contains hourly a
 
 ## Instantaneous profile observations from masts
 
-This stored query return instantaneous profile observations from masts in multipointcoverage format. By default latest observation of the available meteo paramters are returned in 10 minute resolution. At least one location has to be given.
+This stored query return instantaneous profile observations from masts in multipointcoverage format. By default latest observation of the available meteo parameters are returned in 10 minute resolution. At least one location has to be given.
 
 * Query ID: `fmi::observations::weather::mast::multipointcoverage`
 * Available arguments:
