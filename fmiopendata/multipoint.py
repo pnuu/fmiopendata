@@ -91,9 +91,9 @@ class MultiPoint(object):
                 self.data[name] = dict(times=[])
             self.data[name]["times"].append(tim)
             for j, key in enumerate(type2obs.keys()):
-                if key not in self.data[name]:
-                    self.data[name][key] = {"values": [], "unit": type2obs[key]["units"]}
-                self.data[name][key]["values"].append(measurements[i, j])
+                if type2obs[key]["name"] not in self.data[name]:
+                    self.data[name][type2obs[key]["name"]] = {"values": [], "unit": type2obs[key]["units"]}
+                self.data[name][type2obs[key]["name"]]["values"].append(measurements[i, j])
 
     def _collect_non_timeseries(self, type2obs, latitudes, longitudes, times, measurements):
         for i, tim in enumerate(times):
