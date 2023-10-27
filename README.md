@@ -356,7 +356,7 @@ print(sorted(obs.data[latest_tstep].keys()))
 # as an example below
 
 # On the third level we find the names of the observed parameters
-# print(sorted(obs.data[latest_tstep]["Kustavi Isokari"].keys()))
+print(sorted(obs.data[latest_tstep]["Kustavi Isokari"].keys()))
 # -> ['Air temperature',
 #     'Cloud amount',
 #     'Dew-point temperature',
@@ -412,7 +412,7 @@ times = obs.data['Helsinki Malmi lentokenttä']['times']
 # Other data fields have another extra level, one for values and one for the unit
 print(len(obs.data['Helsinki Malmi lentokenttä']['t2m']['values']))
 # -> 71
-print(obs.data['Helsinki Malmi lentokenttä']['t2m']['unit'])
+print(obs.data['Helsinki Malmi lentokenttä']['Air temperature']['unit'])
 # -> 'degC'
 ```
 
