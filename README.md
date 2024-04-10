@@ -410,7 +410,7 @@ print(sorted(obs.data.keys()))
 # The times are as a list of datetime objects
 times = obs.data['Helsinki Malmi lentokenttä']['times']
 # Other data fields have another extra level, one for values and one for the unit
-print(len(obs.data['Helsinki Malmi lentokenttä']['t2m']['values']))
+print(len(obs.data['Helsinki Malmi lentokenttä']['Air temperature']['values']))
 # -> 71
 print(obs.data['Helsinki Malmi lentokenttä']['Air temperature']['unit'])
 # -> 'degC'
