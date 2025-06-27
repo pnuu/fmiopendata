@@ -41,6 +41,7 @@ def test_sounding():
     assert num == len(snd.lats) == len(snd.altitudes) == len(snd.times)
     assert num == len(snd.pressures) == len(snd.temperatures) == len(snd.dew_points)
     assert num == len(snd.wind_speeds) == len(snd.wind_directions)
+    assert num == len(snd.relative_humidities) == len(snd.absolute_humidities)
 
 
 @mock.patch("fmiopendata.sounding.ParseSoundings")

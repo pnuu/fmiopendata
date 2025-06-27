@@ -33,6 +33,8 @@ FIELD_NAMES = {"PAP_PT1S_AVG": "pressures",
                "WDP_PT1S_AVG": "wind_directions",
                "TAP_PT1S_AVG": "temperatures",
                "TDP_PT1S_AVG": "dew_points",
+               "RHP_PT1S_AVG": "relative_humidities",
+               "UAP_PT1S_AVG": "absolute_humidities",
                }
 
 
@@ -55,6 +57,8 @@ class Sounding(object):
         self.dew_points = None
         self.wind_speeds = None
         self.wind_directions = None
+        self.relative_humidities = None
+        self.absolute_humidities = None
 
 
 class ParseSoundings(object):
