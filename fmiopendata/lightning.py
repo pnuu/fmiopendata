@@ -56,15 +56,17 @@ class Lightning(object):
         Version for fmi::observations::lightning::simple query.
 
         """
-        lats, lons, times = [], [], []
+        lats, lons, times, flash_ids = [], [], [], []
         multiplicity, peak_current, cloud_indicator, ellipse_major = [], [], [], []
         for member in self._xml.findall(wfs.WFS_MEMBER):
+            flash_id = _get_flash_id(member)
             tim = dt.datetime.strptime(member.findtext(wfs.WFS_TIME), TIME_FORMAT)
             lat, lon = [float(p) for p in member.findtext(wfs.GML_POS).split()]
-            if not lats or (lat != lats[-1] and lon != lons[-1]):
+            if flash_id not in flash_ids:
                 lats.append(lat)
                 lons.append(lon)
                 times.append(tim)
+                flash_ids.append(flash_id)
             param = member.findtext(wfs.WFS_PARAMETER_NAME)
             val = member.findtext(wfs.WFS_PARAMETER_VALUE)
             if param == "multiplicity":
@@ -114,6 +116,17 @@ class Lightning(object):
         self.peak_current = np.array([])
         self.cloud_indicator = np.array([], dtype=np.uint8)
         self.ellipse_major = np.array([])
+
+
+def _get_flash_id(member):
+    # <BsWfs:BsWfsElement gml:id="BsWfsElement.921.1">
+    bs_wfs_element = member.find(wfs.WFS_BS_WFS_ELEMENT)
+    # "BsWfsElement.921.1"
+    full_id = bs_wfs_element.attrib[wfs.GML_ID]
+    # 921
+    flash_id = int(full_id.split(".")[1])
+
+    return flash_id
 
 
 def download_and_parse(query_id, args=None):
