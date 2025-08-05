@@ -133,7 +133,9 @@ def _parse_names_and_units(xml):
         try:
             url = field.attrib[wfs.LINK]
             root = ET.fromstring(read_url(url))
-            name = root.findtext(wfs.OMOP_LABEL)
+            # fallback to something if OMOP label is not found
+            # this happens when FMI has not provided proper metadata for a field
+            name = root.findtext(wfs.OMOP_LABEL) or typ
             try:
                 units = root.find(wfs.OMOP_UOM).attrib["uom"]
             except AttributeError:

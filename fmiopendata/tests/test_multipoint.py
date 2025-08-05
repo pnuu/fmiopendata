@@ -37,6 +37,17 @@ ARGS_OLD = ["bbox=24,59,26,61",
             "endtime=" + END_TIME_OLD.isoformat(timespec="seconds") + "Z"]
 ARGS_TIMESERIES = ["bbox=24,59,26,61", "timeseries=True"]
 
+forecast_start = dt.datetime.now()
+forecast_end = forecast_start + dt.timedelta(hours=1)
+
+ARGS_FORECAST = [
+    "bbox=24,59,26,61",
+    "starttime=" + forecast_start.isoformat(timespec="seconds") + "Z",
+    "endtime=" + forecast_end.isoformat(timespec="seconds") + "Z",
+    "place=Helsinki",
+    "parameters=PoP",  # PoP is missing metadata as of September 2025
+]
+
 
 def test_multipoint_mareograph_default():
     """Test multipoint coverage parser for default query of mareograph data."""
@@ -124,3 +135,17 @@ def test_multipoint_radionuclide():
     res = download_and_parse("stuk::observations::air::radionuclide-activity-concentration::latest::multipointcoverage",
                              args=ARGS)
     _verify_multipoint_common(res)
+
+
+def test_multipoint_missing_metadata_for_field():
+    from fmiopendata.multipoint import download_and_parse
+
+    res = download_and_parse(
+        "fmi::forecast::edited::weather::scandinavia::point::multipointcoverage",
+        args=ARGS_FORECAST,
+    )
+
+    for step, step_data in res.data.items():
+        for loc, data in step_data.items():
+            keys = data.keys()
+            assert None not in keys, f"None in parsed keys {keys} for {step} and {loc}"
