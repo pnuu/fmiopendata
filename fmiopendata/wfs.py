@@ -27,6 +27,14 @@ from fmiopendata.utils import read_url
 BASE_URL = "https://opendata.fmi.fi/wfs?service=WFS&request="
 STORED_QUERY_URL = "https://opendata.fmi.fi/wfs?service=WFS&version=2.0.0&request=getFeature&storedquery_id="
 
+EF_BELONGS_TO = ".//{http://inspire.ec.europa.eu/schemas/ef/4.0}belongsTo"
+EF_ENVIRONMENTAL_MONITORING_FACILITY = (
+    ".//{http://inspire.ec.europa.eu/schemas/ef/4.0}EnvironmentalMonitoringFacility"
+)
+EF_NAME = ".//{http://inspire.ec.europa.eu/schemas/ef/4.0}name"
+EF_INSPIRE_ID = ".//{http://inspire.ec.europa.eu/schemas/ef/4.0}inspireId"
+EF_MOBILE = ".//{http://inspire.ec.europa.eu/schemas/ef/4.0}mobile"
+EF_MEASUREMENT_REGIME = ".//{http://inspire.ec.europa.eu/schemas/ef/4.0}measurementRegime"
 GML_BEGIN_POSITION = ".//{http://www.opengis.net/gml/3.2}beginPosition"
 GML_DOUBLE_OR_NIL_REASON_TUPLE_LIST = ".//{http://www.opengis.net/gml/3.2}doubleOrNilReasonTupleList"
 GML_END_POSITION = ".//{http://www.opengis.net/gml/3.2}endPosition"
@@ -38,8 +46,11 @@ GML_NAME = ".//{http://www.opengis.net/gml/3.2}name"
 GML_POINT = ".//{http://www.opengis.net/gml/3.2}Point"
 GML_POS = ".//{http://www.opengis.net/gml/3.2}pos"
 GML_TIME_INSTANT = ".//{http://www.opengis.net/gml/3.2}TimeInstant"
+GML_TIME_PERIOD = ".//{http://www.opengis.net/gml/3.2}TimePeriod"
 GML_TIME_POSITION = ".//{http://www.opengis.net/gml/3.2}timePosition"
 GMLCOV_POSITIONS = ".//{http://www.opengis.net/gmlcov/1.0}positions"
+INS_BASE_LOCAL_ID = ".//{http://inspire.ec.europa.eu/schemas/base/3.3}localId"
+INS_BASE_NAMESPACE = ".//{http://inspire.ec.europa.eu/schemas/base/3.3}namespace"
 LINK = "{http://www.w3.org/1999/xlink}href"
 OM_NAME = ".//{http://www.opengis.net/om/2.0}name"
 OM_PARAMETER = ".//{http://www.opengis.net/om/2.0}parameter"
@@ -59,6 +70,7 @@ WFS_RETURN_FEATURE_TYPE = ".//{http://www.opengis.net/wfs/2.0}ReturnFeatureType"
 WFS_STORED_QUERY = ".//{http://www.opengis.net/wfs/2.0}StoredQuery"
 WFS_TIME = ".//{http://xml.fmi.fi/schema/wfs/2.0}Time"
 WFS_TITLE = ".//{http://www.opengis.net/wfs/2.0}Title"
+XLINK_TITLE = "{http://www.w3.org/1999/xlink}title"
 
 
 def get_req_xml(req):
@@ -118,6 +130,8 @@ def download_stored_query(query_id, args=None):
         from fmiopendata.grid import download_and_parse
     elif "multipointcoverage" in query_id.lower():
         from fmiopendata.multipoint import download_and_parse
+    elif "station" in query_id.lower():
+        from fmiopendata.station import download_and_parse
     else:
         raise NotImplementedError("No parser available for %s" % query_id)
 
