@@ -53,6 +53,7 @@ The `Query ID` is the handle that can be used to request data from WFS stored qu
 * [Download and parse latest lightning data](#download-and-parse-latest-lightning-data)
 * [Download and parse grid data](#download-and-parse-grid-data)
 * [Download and parse observation data](#download-and-parse-observation-data)
+* [Download and parse station metadata](#download-and-parse-station-metadata)
 
 ### Download and parse latest soundings
 ```python
@@ -416,8 +417,78 @@ print(obs.data['Helsinki Malmi lentokenttä']['Air temperature']['unit'])
 # -> 'degC'
 ```
 
+### Download and parse station metadata
+
+```python
+from fmiopendata.wfs import download_stored_query
+
+stations = download_stored_query("fmi::ef::stations")
+```
+
+The structure of the returned `Station` class is
+
+```python
+Station.data  # The station metadata
+```
+
+The `data` dictionary has the following structure:
+
+```python
+{
+    station: {
+        'id': gml_id,
+        'fmisid': fmisid,
+        'geoid': geoid,
+        'wmo': wmo_id,
+        'name': station_name,
+        'region': region,
+        'country': country,
+        'station_type': [station_type1, station_type2, ...],  # List of network types
+        'latitude': latitude,
+        'longitude': longitude,
+        'start_time': begin_datetime,
+        'end_time': end_datetime,
+        'inspire_local_id': inspire_local_id,
+        'inspire_namespace': inspire_namespace,
+        'measurement_regime': measurement_regime,
+        'mobile': mobile  # Boolean
+    },
+    ...
+}
+```
+
+The following queries can be used to retrieve station data:
+
+```python
+
+# Get a specific station by its ID
+station_id = '100971'
+station = stations.get_station_by_id(station_id)
+print(station['name'])  # -> 'Helsinki Kaisaniemi'
+print(station['station_type'])  # -> ['Ilmastoasema']
+
+# Get a single station by its name
+station_name = 'Helsinki Kaisaniemi'
+station = stations.get_station_by_name(station_name)
+
+# Get all stations of a specific network type
+station_type = 'Ilmastoasema'
+climate_stations = stations.get_stations_by_type(station_type)
+
+# Get all stations in a specific country
+country = 'Finland'
+finnish_stations = stations.get_stations_by_country(country)
+
+# Get all stations in a specific region
+region = 'Helsinki'
+helsinki_stations = stations.get_stations_by_region(region)
+```
+
+## Supported stored queries
+
 This parser supports at least the following stored queries:
 
+* `fmi::ef::stations`
 * `fmi::forecast::hirlam::surface::obsstations::multipointcoverage`
 * `fmi::forecast::oaas::sealevel::point::multipointcoverage`
 * `fmi::observations::airquality::hourly::multipointcoverage`
