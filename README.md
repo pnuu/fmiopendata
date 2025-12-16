@@ -308,7 +308,7 @@ members is common to all `grid` type WFS data.
 
 The data arrays will have invalid values replaced with `np.nan`.
 
-## Download and parse observation data
+### Download and parse observation data
 ```python
 import datetime as dt
 
