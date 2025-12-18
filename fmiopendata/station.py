@@ -306,13 +306,7 @@ def download_and_parse(
 
 
 if __name__ == "__main__":
-    START_TIME = dt.datetime(1829, 1, 1, 0, 0, 0)
-    END_TIME = dt.datetime(2025, 7, 7, 12, 5, 0)
-
-    ARGS = [
-        "starttime=" + START_TIME.isoformat(timespec="seconds") + "Z",
-        "endtime=" + END_TIME.isoformat(timespec="seconds") + "Z",
-    ]
+    ARGS = []
 
     # Example usage
     station_data = download_and_parse("fmi::ef::stations", args=ARGS)
