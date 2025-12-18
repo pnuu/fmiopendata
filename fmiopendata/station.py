@@ -195,20 +195,16 @@ class Station(object):
 
                 if begin_elem is not None and begin_elem.text:
                     try:
-                        station_data["start_time"] = dt.datetime.strptime(
-                            begin_elem.text, TIME_FORMAT
-                        )
+                        station_data["start_time"] = begin_elem.text
                     except ValueError:
                         pass
 
                 if end_elem is not None:
                     if end_elem.get("indeterminatePosition") == "now":
-                        station_data["end_time"] = dt.datetime.now()
+                        station_data["end_time"] = dt.datetime.now().strftime(TIME_FORMAT)
                     elif end_elem.text:
                         try:
-                            station_data["end_time"] = dt.datetime.strptime(
-                                end_elem.text, TIME_FORMAT
-                            )
+                            station_data["end_time"] = end_elem.text
                         except ValueError:
                             pass
 
@@ -230,7 +226,7 @@ class Station(object):
         """Parse time data from GML positions."""
         times = np.array(
             [
-                dt.datetime(1970, 1, 1) + dt.timedelta(seconds=t)
+                (dt.datetime(1970, 1, 1) + dt.timedelta(seconds=t)).strftime(TIME_FORMAT)
                 for t in positions[2::3]
             ]
         )
@@ -240,7 +236,7 @@ class Station(object):
                     dt.datetime.strptime(
                         xml.findtext(wfs.GML_TIME_POSITION),
                         TIME_FORMAT
-                    )
+                    ).strftime(TIME_FORMAT)
                 ]
             )
         return times

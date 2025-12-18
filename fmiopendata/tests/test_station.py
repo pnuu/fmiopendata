@@ -29,6 +29,7 @@ import warnings
 
 START_TIME = dt.datetime(1829, 1, 1, 0, 0, 0)
 END_TIME = dt.datetime(2025, 7, 7, 12, 5, 0)
+TIME_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
 
 ARGS = [
     "starttime=" + START_TIME.isoformat(timespec="seconds") + "Z",
@@ -132,13 +133,21 @@ class TestStationParser:
             # Check start_time if it exists
             if station_data["start_time"] is not None:
                 assert isinstance(
-                    station_data["start_time"], dt.datetime
+                    dt.datetime.strptime(
+                        station_data["start_time"],
+                        TIME_FORMAT
+                    ),
+                    dt.datetime
                 ), "Start time should be a datetime"
 
             # Check end_time if it exists
             if station_data["end_time"] is not None:
                 assert isinstance(
-                    station_data["end_time"], dt.datetime
+                    dt.datetime.strptime(
+                        station_data["end_time"],
+                        TIME_FORMAT
+                    ),
+                    dt.datetime
                 ), "End time should be a datetime"
 
     def test_get_station_by_id(self):
