@@ -129,9 +129,11 @@ objects and is used mainly by the `bin/` scripts.
 catalogue. They are installed as the console scripts `wfs_html.py` and `wms_html.py`
 (the names keep the `.py` they have always had) through `[project.scripts]` in
 `pyproject.toml`, so their `main()` must stay importable. Both write HTML, or
-Markdown if the output filename does not end in `html`; the checked-in `wfs.md` and
-`wms.md` are the Markdown ones. Both catalogues are large and generated — regenerate
-them rather than editing by hand.
+Markdown if the output filename does not end in `html`. The HTML default is
+deliberate — it opens in any browser locally — and the checked-in `wfs.md` and
+`wms.md` are Markdown so that GitHub renders them; the `*_html.py` names are not a
+leftover, so don't "fix" either. Both catalogues are large and generated —
+regenerate them rather than editing by hand.
 
 ## Conventions
 

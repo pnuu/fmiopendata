@@ -49,15 +49,18 @@ wfs_html.py
 
 The `Query ID` is the handle that can be used to request data from WFS stored queries. See examples below.
 
-Both scripts take the output file name as an argument, and write Markdown
-instead of HTML when it does not end in `html`:
+Both scripts take the output file name as an argument.  They default to HTML,
+which any browser renders locally, and write Markdown instead when the name does
+not end in `html` - that is what the catalogues kept in this repository are, so
+that GitHub renders them:
 ```bash
 
 wms_html.py wms.md
 wfs_html.py wfs.md
 ```
 
-The `wfs.md` and `wms.md` catalogues in this repository are made this way.
+The `wfs.md` and `wms.md` catalogues in this repository are made this way, and
+are worth regenerating now and then: FMI adds and retires layers and queries.
 
 ## Errors and missing data
 
