@@ -62,12 +62,13 @@ class MultiPoint(object):
         for point in xml.findall(namespaces.GML_POINT):
             fmisid = int(point.attrib[namespaces.GML_ID].split('-')[-1])
             name = point.findtext(namespaces.GML_NAME)
-            location = tuple(float(p) for p in point.findtext(namespaces.GML_POS).split())
+            # A position can carry an elevation after the coordinates
+            latitude, longitude = (float(p) for p in point.findtext(namespaces.GML_POS).split()[:2])
             self.location_metadata[name] = dict({"fmisid": fmisid,
-                                                 "latitude": location[0],
-                                                 "longitude": location[1]
+                                                 "latitude": latitude,
+                                                 "longitude": longitude
                                                  })
-            self._location2name[_location_key(*location)] = name
+            self._location2name[_location_key(latitude, longitude)] = name
 
     def _name_for_location(self, latitude, longitude):
         """Get the name of the station at the given coordinates."""
