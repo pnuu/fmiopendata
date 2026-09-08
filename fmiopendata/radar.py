@@ -28,7 +28,7 @@ import defusedxml.ElementTree as ET
 import rasterio
 import numpy as np
 
-from fmiopendata import wfs
+from fmiopendata import namespaces, wfs
 from fmiopendata.utils import read_cached_xml, read_url
 
 TIME_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
@@ -134,19 +134,19 @@ class ParseRadar(object):
 
     def _parse(self):
         """Parse XML."""
-        for member in self._xml.findall(wfs.WFS_MEMBER):
+        for member in self._xml.findall(namespaces.WFS_MEMBER):
             radar = Radar()
-            times = member.findall(wfs.GML_TIME_INSTANT)
+            times = member.findall(namespaces.GML_TIME_INSTANT)
             if not times:
                 warnings.warn("Skipping a radar dataset that has no measurement time")
                 continue
-            tim = dt.datetime.strptime(times[0].findtext(wfs.GML_TIME_POSITION),
+            tim = dt.datetime.strptime(times[0].findtext(namespaces.GML_TIME_POSITION),
                                        TIME_FORMAT)
             radar.time = tim
             self.times.append(tim)
-            for parameter in member.findall(wfs.OM_PARAMETER):
-                val = float(parameter.findtext(wfs.GML_MEASURE))
-                name = parameter.find(wfs.OM_NAME).attrib[wfs.LINK]
+            for parameter in member.findall(namespaces.OM_PARAMETER):
+                val = float(parameter.findtext(namespaces.GML_MEASURE))
+                name = parameter.find(namespaces.OM_NAME).attrib[namespaces.LINK]
                 if "linearTransformationGain" in name:
                     radar._gain = val
                 elif "linearTransformationOffset" in name:
@@ -157,12 +157,12 @@ class ParseRadar(object):
                     radar.elevation = val
                 elif "maxVel" in name:
                     radar.max_velocity = val
-            radar.name = member.find(wfs.SWE_DATA_RECORD).find(wfs.SWE_FIELD).attrib["name"]
-            meta_url = member.find(wfs.SWE_DATA_RECORD).find(wfs.SWE_FIELD).attrib[wfs.LINK]
+            radar.name = member.find(namespaces.SWE_DATA_RECORD).find(namespaces.SWE_FIELD).attrib["name"]
+            meta_url = member.find(namespaces.SWE_DATA_RECORD).find(namespaces.SWE_FIELD).attrib[namespaces.LINK]
             meta = get_meta(meta_url)
-            radar.unit = meta.find(wfs.OMOP_UOM).attrib["uom"]
-            radar.label = meta.findtext(wfs.OMOP_LABEL)
-            radar.url = member.findtext(wfs.GML_FILE_REFERENCE)
+            radar.unit = meta.find(namespaces.OMOP_UOM).attrib["uom"]
+            radar.label = meta.findtext(namespaces.OMOP_LABEL)
+            radar.url = member.findtext(namespaces.GML_FILE_REFERENCE)
             # The CRS the image is requested in; the WKT description of the same
             # projection is filled in from the image itself when it is downloaded
             radar.projection = radar.url.split('srs=')[-1].split('&')[0]

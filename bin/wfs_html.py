@@ -24,7 +24,7 @@ import defusedxml.ElementTree as ET
 
 import sys
 
-from fmiopendata import wfs
+from fmiopendata import namespaces, wfs
 from fmiopendata.utils import read_url
 
 
@@ -37,19 +37,19 @@ def write_description(fid, query_id):
     """Write available query parameters."""
     xml = ET.fromstring(read_url(wfs.BASE_URL + "DescribeStoredQueries&storedquery_id=" + query_id))
     fid.write("<p>")
-    fid.write(xml.findtext(wfs.WFS_ABSTRACT).strip())
+    fid.write(xml.findtext(namespaces.WFS_ABSTRACT).strip())
     fid.write("</p>")
     fid.write("<ul>")
     fid.write("<li>Query ID: %s</li>" % query_id)
     fid.write("<li>Available arguments:</li>")
     fid.write("<ul>")
-    params = xml.findall(wfs.WFS_PARAMETER)
+    params = xml.findall(namespaces.WFS_PARAMETER)
     for i, param in enumerate(params):
         fid.write("<li>%s</li>" % param.attrib["name"])
         fid.write("<ul>")
-        param_title = param.findtext(wfs.WFS_TITLE)
+        param_title = param.findtext(namespaces.WFS_TITLE)
         fid.write("<li>%s</li>" % param_title)
-        param_abstract = param.findtext(wfs.WFS_ABSTRACT).strip()
+        param_abstract = param.findtext(namespaces.WFS_ABSTRACT).strip()
         fid.write("<li>%s</li>" % param_abstract)
         fid.write("</ul>")
     fid.write("</ul>")
@@ -87,16 +87,16 @@ def write_md(fname, queries):
 def write_description_md(fid, query_id):
     """Write available query parameters in markdown."""
     xml = ET.fromstring(read_url(wfs.BASE_URL + "DescribeStoredQueries&storedquery_id=" + query_id))
-    fid.write(xml.findtext(wfs.WFS_ABSTRACT).strip())
+    fid.write(xml.findtext(namespaces.WFS_ABSTRACT).strip())
     fid.write("\n\n")
     fid.write("* Query ID: `%s`\n" % query_id)
     fid.write("* Available arguments:\n")
-    params = xml.findall(wfs.WFS_PARAMETER)
+    params = xml.findall(namespaces.WFS_PARAMETER)
     for i, param in enumerate(params):
         fid.write("    * %s\n" % param.attrib["name"])
-        param_title = param.findtext(wfs.WFS_TITLE)
+        param_title = param.findtext(namespaces.WFS_TITLE)
         fid.write("        * %s\n" % param_title)
-        param_abstract = param.findtext(wfs.WFS_ABSTRACT).strip()
+        param_abstract = param.findtext(namespaces.WFS_ABSTRACT).strip()
         fid.write("        * %s\n" % param_abstract)
     fid.write("\n\n")
 

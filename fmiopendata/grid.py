@@ -29,7 +29,7 @@ import defusedxml.ElementTree as ET
 import numpy as np
 import eccodes
 
-from fmiopendata import wfs
+from fmiopendata import namespaces, wfs
 from fmiopendata.utils import read_url, download_to_file
 
 TIME_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
@@ -152,12 +152,12 @@ class ParseGrids(object):
 
     def _parse(self):
         """Parse grid data."""
-        for member in self._xml.findall(wfs.WFS_MEMBER):
+        for member in self._xml.findall(namespaces.WFS_MEMBER):
             grid = Grid()
-            grid.init_time = dt.datetime.strptime(member.findtext(wfs.GML_TIME_POSITION), TIME_FORMAT)
-            grid.start_time = dt.datetime.strptime(member.findtext(wfs.GML_BEGIN_POSITION), TIME_FORMAT)
-            grid.end_time = dt.datetime.strptime(member.findtext(wfs.GML_END_POSITION), TIME_FORMAT)
-            grid.url = member.findtext(wfs.GML_FILE_REFERENCE)
+            grid.init_time = dt.datetime.strptime(member.findtext(namespaces.GML_TIME_POSITION), TIME_FORMAT)
+            grid.start_time = dt.datetime.strptime(member.findtext(namespaces.GML_BEGIN_POSITION), TIME_FORMAT)
+            grid.end_time = dt.datetime.strptime(member.findtext(namespaces.GML_END_POSITION), TIME_FORMAT)
+            grid.url = member.findtext(namespaces.GML_FILE_REFERENCE)
             self.data[grid.init_time] = grid
 
 

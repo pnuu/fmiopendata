@@ -23,6 +23,42 @@ from importlib import import_module
 
 import defusedxml.ElementTree as ET
 
+from fmiopendata.namespaces import (  # noqa: F401  the constants are re-exported
+    GMLCOV_POSITIONS,
+    GML_BEGIN_POSITION,
+    GML_DOUBLE_OR_NIL_REASON_TUPLE_LIST,
+    GML_END_POSITION,
+    GML_FILE_REFERENCE,
+    GML_ID,
+    GML_IDENTIFIER,
+    GML_MEASURE,
+    GML_NAME,
+    GML_POINT,
+    GML_POS,
+    GML_TIME_INSTANT,
+    GML_TIME_POSITION,
+    LINK,
+    OMOP_LABEL,
+    OMOP_UOM,
+    OM_NAME,
+    OM_PARAMETER,
+    SWE_DATA_RECORD,
+    SWE_FIELD,
+    SWE_LABEL,
+    SWE_UOM,
+    WFS_ABSTRACT,
+    WFS_ABSTRACT_ELEMENT,
+    WFS_BS_WFS_ELEMENT,
+    WFS_MEMBER,
+    WFS_PARAMETER,
+    WFS_PARAMETER_NAME,
+    WFS_PARAMETER_VALUE,
+    WFS_RETURN_FEATURE_TYPE,
+    WFS_STORED_QUERY,
+    WFS_TIME,
+    WFS_TITLE,
+    WFS_TITLE_ELEMENT,
+)
 from fmiopendata.utils import read_url
 
 
@@ -38,41 +74,6 @@ PARSERS = (("radar", "fmiopendata.radar"),
            ("grid", "fmiopendata.grid"),
            ("multipointcoverage", "fmiopendata.multipoint"),
            )
-
-GML_BEGIN_POSITION = ".//{http://www.opengis.net/gml/3.2}beginPosition"
-GML_DOUBLE_OR_NIL_REASON_TUPLE_LIST = ".//{http://www.opengis.net/gml/3.2}doubleOrNilReasonTupleList"
-GML_END_POSITION = ".//{http://www.opengis.net/gml/3.2}endPosition"
-GML_FILE_REFERENCE = ".//{http://www.opengis.net/gml/3.2}fileReference"
-GML_ID = "{http://www.opengis.net/gml/3.2}id"
-GML_IDENTIFIER = ".//{http://www.opengis.net/gml/3.2}identifier"
-GML_MEASURE = ".//{http://www.opengis.net/gml/3.2}Measure"
-GML_NAME = ".//{http://www.opengis.net/gml/3.2}name"
-GML_POINT = ".//{http://www.opengis.net/gml/3.2}Point"
-GML_POS = ".//{http://www.opengis.net/gml/3.2}pos"
-GML_TIME_INSTANT = ".//{http://www.opengis.net/gml/3.2}TimeInstant"
-GML_TIME_POSITION = ".//{http://www.opengis.net/gml/3.2}timePosition"
-GMLCOV_POSITIONS = ".//{http://www.opengis.net/gmlcov/1.0}positions"
-LINK = "{http://www.w3.org/1999/xlink}href"
-OM_NAME = ".//{http://www.opengis.net/om/2.0}name"
-OM_PARAMETER = ".//{http://www.opengis.net/om/2.0}parameter"
-OMOP_LABEL = ".//{http://inspire.ec.europa.eu/schemas/omop/2.9}label"
-OMOP_UOM = ".//{http://inspire.ec.europa.eu/schemas/omop/2.9}uom"
-SWE_DATA_RECORD = ".//{http://www.opengis.net/swe/2.0}DataRecord"
-SWE_FIELD = ".//{http://www.opengis.net/swe/2.0}field"
-SWE_LABEL = ".//{http://www.opengis.net/swe/2.0}label"
-SWE_UOM = ".//{http://www.opengis.net/swe/2.0}uom"
-WFS_ABSTRACT = ".//{http://www.opengis.net/wfs/2.0}Abstract"
-WFS_ABSTRACT_ELEMENT = "{http://www.opengis.net/wfs/2.0}Abstract"
-WFS_BS_WFS_ELEMENT = ".//{http://xml.fmi.fi/schema/wfs/2.0}BsWfsElement"
-WFS_MEMBER = ".//{http://www.opengis.net/wfs/2.0}member"
-WFS_PARAMETER = ".//{http://www.opengis.net/wfs/2.0}Parameter"
-WFS_PARAMETER_NAME = ".//{http://xml.fmi.fi/schema/wfs/2.0}ParameterName"
-WFS_PARAMETER_VALUE = ".//{http://xml.fmi.fi/schema/wfs/2.0}ParameterValue"
-WFS_RETURN_FEATURE_TYPE = ".//{http://www.opengis.net/wfs/2.0}ReturnFeatureType"
-WFS_STORED_QUERY = ".//{http://www.opengis.net/wfs/2.0}StoredQuery"
-WFS_TIME = ".//{http://xml.fmi.fi/schema/wfs/2.0}Time"
-WFS_TITLE = ".//{http://www.opengis.net/wfs/2.0}Title"
-WFS_TITLE_ELEMENT = "{http://www.opengis.net/wfs/2.0}Title"
 
 
 def get_req_xml(req):

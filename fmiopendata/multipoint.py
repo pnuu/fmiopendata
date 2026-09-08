@@ -26,7 +26,7 @@ import defusedxml.ElementTree as ET
 
 import numpy as np
 
-from fmiopendata import wfs
+from fmiopendata import namespaces, wfs
 from fmiopendata.utils import epoch_to_datetime, read_cached_xml, read_url
 
 TIME_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
@@ -52,15 +52,15 @@ class MultiPoint(object):
 
     def _parse_radionuclide(self):
         """Parse radionuclide data."""
-        for member in self._xml.findall(wfs.WFS_MEMBER):
+        for member in self._xml.findall(namespaces.WFS_MEMBER):
             self._parse(member)
 
     def _parse_location_metadata(self, xml):
         """Parse location metadata."""
-        for point in xml.findall(wfs.GML_POINT):
-            fmisid = int(point.attrib[wfs.GML_ID].split('-')[-1])
-            name = point.findtext(wfs.GML_NAME)
-            location = tuple(float(p) for p in point.findtext(wfs.GML_POS).split())
+        for point in xml.findall(namespaces.GML_POINT):
+            fmisid = int(point.attrib[namespaces.GML_ID].split('-')[-1])
+            name = point.findtext(namespaces.GML_NAME)
+            location = tuple(float(p) for p in point.findtext(namespaces.GML_POS).split())
             self.location_metadata[name] = dict({"fmisid": fmisid,
                                                  "latitude": location[0],
                                                  "longitude": location[1]
@@ -81,7 +81,7 @@ class MultiPoint(object):
 
     def _parse(self, xml):
         """Parse data."""
-        positions_txt = xml.findtext(wfs.GMLCOV_POSITIONS)
+        positions_txt = xml.findtext(namespaces.GMLCOV_POSITIONS)
         if positions_txt is None:
             warnings.warn("No observations found")
             return
@@ -146,32 +146,32 @@ def _parse_positions(positions_txt):
 def _parse_times(xml, positions):
     times = np.array([epoch_to_datetime(t) for t in positions[2::3]])
     if times.size == 0:
-        times = np.array([dt.datetime.strptime(xml.findtext(wfs.GML_TIME_POSITION), TIME_FORMAT)])
+        times = np.array([dt.datetime.strptime(xml.findtext(namespaces.GML_TIME_POSITION), TIME_FORMAT)])
     return times
 
 
 def _parse_measurements(xml, shape):
-    measurements = np.fromstring(xml.findtext(wfs.GML_DOUBLE_OR_NIL_REASON_TUPLE_LIST), dtype=float, sep=" ")
+    measurements = np.fromstring(xml.findtext(namespaces.GML_DOUBLE_OR_NIL_REASON_TUPLE_LIST), dtype=float, sep=" ")
     return np.reshape(measurements, shape)
 
 
 def _parse_names_and_units(xml):
     type2obs = dict()
 
-    for field in xml.findall(wfs.SWE_FIELD):
+    for field in xml.findall(namespaces.SWE_FIELD):
         typ = field.attrib["name"]
-        url = field.attrib.get(wfs.LINK)
+        url = field.attrib.get(namespaces.LINK)
         if url is None:
             # The label and unit are given inline
-            name = field.findtext(wfs.SWE_LABEL)
-            units = field.find(wfs.SWE_UOM).attrib['code']
+            name = field.findtext(namespaces.SWE_LABEL)
+            units = field.find(namespaces.SWE_UOM).attrib['code']
         else:
             # They are in a separate metadata document.  The same document is
             # referred to by every member of a response, so it is cached.
             root = read_cached_xml(url)
-            name = root.findtext(wfs.OMOP_LABEL)
+            name = root.findtext(namespaces.OMOP_LABEL)
             try:
-                units = root.find(wfs.OMOP_UOM).attrib["uom"]
+                units = root.find(namespaces.OMOP_UOM).attrib["uom"]
             except AttributeError:
                 units = ''
         type2obs[typ] = dict({"name": name, "units": units})

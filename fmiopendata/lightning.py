@@ -26,7 +26,7 @@ import defusedxml.ElementTree as ET
 
 import numpy as np
 
-from fmiopendata import wfs
+from fmiopendata import namespaces, wfs
 from fmiopendata.utils import epoch_to_datetime, read_url
 
 TIME_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
@@ -72,16 +72,16 @@ class Lightning(object):
 
         """
         flashes = dict()
-        for member in self._xml.findall(wfs.WFS_MEMBER):
+        for member in self._xml.findall(namespaces.WFS_MEMBER):
             flash_id = _get_flash_id(member)
             if flash_id not in flashes:
                 flashes[flash_id] = {
-                    "time": dt.datetime.strptime(member.findtext(wfs.WFS_TIME), TIME_FORMAT),
-                    "location": [float(p) for p in member.findtext(wfs.GML_POS).split()],
+                    "time": dt.datetime.strptime(member.findtext(namespaces.WFS_TIME), TIME_FORMAT),
+                    "location": [float(p) for p in member.findtext(namespaces.GML_POS).split()],
                 }
-            param = member.findtext(wfs.WFS_PARAMETER_NAME)
+            param = member.findtext(namespaces.WFS_PARAMETER_NAME)
             if param in PARAMETERS:
-                flashes[flash_id][param] = float(member.findtext(wfs.WFS_PARAMETER_VALUE))
+                flashes[flash_id][param] = float(member.findtext(namespaces.WFS_PARAMETER_VALUE))
 
         if not flashes:
             warnings.warn("No observations found")
@@ -98,8 +98,8 @@ class Lightning(object):
         Version for fmi::observations::lightning::multipointcoverage query.
 
         """
-        positions_txt = self._xml.findtext(wfs.GMLCOV_POSITIONS)
-        data_txt = self._xml.findtext(wfs.GML_DOUBLE_OR_NIL_REASON_TUPLE_LIST)
+        positions_txt = self._xml.findtext(namespaces.GMLCOV_POSITIONS)
+        data_txt = self._xml.findtext(namespaces.GML_DOUBLE_OR_NIL_REASON_TUPLE_LIST)
         if positions_txt is None or data_txt is None:
             warnings.warn("No observations found")
             self._set_empty_observations()
@@ -111,7 +111,7 @@ class Lightning(object):
         self.times = np.array([epoch_to_datetime(t) for t in times])
 
         data = np.fromstring(data_txt, dtype=float, sep=" ")
-        fields = [f.attrib['name'] for f in self._xml.findall(wfs.SWE_FIELD)]
+        fields = [f.attrib['name'] for f in self._xml.findall(namespaces.SWE_FIELD)]
         for i, field in enumerate(fields):
             if field in RESERVED_ATTRIBUTES:
                 warnings.warn("Ignoring field %s, it would replace the flash "
@@ -146,9 +146,9 @@ def _collect_parameter(flashes, param, dtype):
 
 def _get_flash_id(member):
     # <BsWfs:BsWfsElement gml:id="BsWfsElement.921.1">
-    bs_wfs_element = member.find(wfs.WFS_BS_WFS_ELEMENT)
+    bs_wfs_element = member.find(namespaces.WFS_BS_WFS_ELEMENT)
     # "BsWfsElement.921.1"
-    full_id = bs_wfs_element.attrib[wfs.GML_ID]
+    full_id = bs_wfs_element.attrib[namespaces.GML_ID]
     # 921
     flash_id = int(full_id.split(".")[1])
 

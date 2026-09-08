@@ -26,7 +26,7 @@ import defusedxml.ElementTree as ET
 
 import numpy as np
 
-from fmiopendata import wfs
+from fmiopendata import namespaces, wfs
 from fmiopendata.utils import epoch_to_datetime, read_url
 
 TIME_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
@@ -112,9 +112,9 @@ class ParseSoundings(object):
 
     def _parse(self):
         """Parse sounding data."""
-        for member in self._xml.findall(wfs.WFS_MEMBER):
+        for member in self._xml.findall(namespaces.WFS_MEMBER):
             sounding = Sounding()
-            for name in member.findall(wfs.GML_NAME):
+            for name in member.findall(namespaces.GML_NAME):
                 try:
                     if name.attrib["codeSpace"] == "http://xml.fmi.fi/namespace/locationcode/wmo":
                         sounding.id = name.text
@@ -123,18 +123,18 @@ class ParseSoundings(object):
                 except KeyError:
                     continue
 
-            sounding.nominal_time = dt.datetime.strptime(member.findtext(wfs.GML_TIME_POSITION), TIME_FORMAT)
-            sounding.start_time = dt.datetime.strptime(member.findtext(wfs.GML_BEGIN_POSITION), TIME_FORMAT)
-            sounding.end_time = dt.datetime.strptime(member.findtext(wfs.GML_END_POSITION), TIME_FORMAT)
+            sounding.nominal_time = dt.datetime.strptime(member.findtext(namespaces.GML_TIME_POSITION), TIME_FORMAT)
+            sounding.start_time = dt.datetime.strptime(member.findtext(namespaces.GML_BEGIN_POSITION), TIME_FORMAT)
+            sounding.end_time = dt.datetime.strptime(member.findtext(namespaces.GML_END_POSITION), TIME_FORMAT)
 
-            positions_txt = member.findtext(wfs.GMLCOV_POSITIONS)
+            positions_txt = member.findtext(namespaces.GMLCOV_POSITIONS)
             if positions_txt is None:
                 warnings.warn("No data for the sounding from %s at %s" %
                               (sounding.name, sounding.nominal_time))
                 continue
             positions = np.fromstring(positions_txt, dtype=float, sep=" ")
-            data = np.fromstring(member.findtext(wfs.GML_DOUBLE_OR_NIL_REASON_TUPLE_LIST), dtype=float, sep=" ")
-            fields = member.findall(wfs.SWE_FIELD)
+            data = np.fromstring(member.findtext(namespaces.GML_DOUBLE_OR_NIL_REASON_TUPLE_LIST), dtype=float, sep=" ")
+            fields = member.findall(namespaces.SWE_FIELD)
             positions, data = _align_locations_and_measurements(positions, data, len(fields), sounding)
 
             sounding.lats = positions[::POSITION_ITEMS]
