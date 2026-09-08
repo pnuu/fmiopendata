@@ -24,6 +24,12 @@ from importlib import import_module
 import defusedxml.ElementTree as ET
 
 from fmiopendata.namespaces import (  # noqa: F401  the constants are re-exported
+    EF_BELONGS_TO,
+    EF_ENVIRONMENTAL_MONITORING_FACILITY,
+    EF_INSPIRE_ID,
+    EF_MEASUREMENT_REGIME,
+    EF_MOBILE,
+    EF_NAME,
     GMLCOV_POSITIONS,
     GML_BEGIN_POSITION,
     GML_DOUBLE_OR_NIL_REASON_TUPLE_LIST,
@@ -36,7 +42,10 @@ from fmiopendata.namespaces import (  # noqa: F401  the constants are re-exporte
     GML_POINT,
     GML_POS,
     GML_TIME_INSTANT,
+    GML_TIME_PERIOD,
     GML_TIME_POSITION,
+    INS_BASE_LOCAL_ID,
+    INS_BASE_NAMESPACE,
     LINK,
     OMOP_LABEL,
     OMOP_UOM,
@@ -58,6 +67,7 @@ from fmiopendata.namespaces import (  # noqa: F401  the constants are re-exporte
     WFS_TIME,
     WFS_TITLE,
     WFS_TITLE_ELEMENT,
+    XLINK_TITLE,
 )
 from fmiopendata.utils import read_url
 
@@ -67,12 +77,14 @@ STORED_QUERY_URL = "https://opendata.fmi.fi/wfs?service=WFS&version=2.0.0&reques
 
 # The parser of a stored query is chosen by the first of these patterns that the
 # query id contains.  The order matters: sounding and lightning queries are also
-# served as multipoint coverages, so the specific formats are looked for first.
+# served as multipoint coverages, and some multipoint queries are about stations,
+# so the more specific patterns are looked for first.
 PARSERS = (("radar", "fmiopendata.radar"),
            ("sounding", "fmiopendata.sounding"),
            ("lightning", "fmiopendata.lightning"),
            ("grid", "fmiopendata.grid"),
            ("multipointcoverage", "fmiopendata.multipoint"),
+           ("station", "fmiopendata.station"),
            )
 
 
