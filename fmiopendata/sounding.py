@@ -30,6 +30,8 @@ from fmiopendata import wfs
 from fmiopendata.utils import epoch_to_datetime, read_url
 
 TIME_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
+# Each measurement location is given as latitude, longitude, altitude and time
+POSITION_ITEMS = 4
 FIELD_NAMES = {"PAP_PT1S_AVG": "pressures",
                "WSP_PT1S_AVG": "wind_speeds",
                "WDP_PT1S_AVG": "wind_directions",
@@ -61,6 +63,27 @@ class Sounding(object):
         self.wind_directions = None
         self.relative_humidities = None
         self.absolute_humidities = None
+
+
+def _align_locations_and_measurements(positions, data, num_fields, sounding):
+    """Cut *positions* and *data* down to the number of levels both of them describe.
+
+    The service sometimes sends a location list and a measurement list of different
+    lengths.  Slicing them as they are pairs measurements with the wrong locations
+    without anything noticing, so the longer one is cut instead and the caller is
+    told that data were dropped.
+    """
+    num_locations = positions.size // POSITION_ITEMS
+    num_levels = data.size // num_fields
+    if num_locations == num_levels and data.size % num_fields == 0:
+        return positions, data
+
+    num = min(num_locations, num_levels)
+    warnings.warn("The sounding from %s at %s has %d locations but %d measurement "
+                  "levels, using the first %d of both" %
+                  (sounding.name, sounding.nominal_time, num_locations, num_levels, num))
+
+    return positions[:POSITION_ITEMS * num], data[:num_fields * num]
 
 
 def _attribute_name(field_name):
@@ -110,14 +133,16 @@ class ParseSoundings(object):
                               (sounding.name, sounding.nominal_time))
                 continue
             positions = np.fromstring(positions_txt, dtype=float, sep=" ")
-            sounding.lats = positions[::4]
-            sounding.lons = positions[1::4]
-            sounding.altitudes = positions[2::4]
-            times = positions[3::4]
-            sounding.times = np.array([epoch_to_datetime(t) for t in times])
-
             data = np.fromstring(member.findtext(wfs.GML_DOUBLE_OR_NIL_REASON_TUPLE_LIST), dtype=float, sep=" ")
             fields = member.findall(wfs.SWE_FIELD)
+            positions, data = _align_locations_and_measurements(positions, data, len(fields), sounding)
+
+            sounding.lats = positions[::POSITION_ITEMS]
+            sounding.lons = positions[1::POSITION_ITEMS]
+            sounding.altitudes = positions[2::POSITION_ITEMS]
+            times = positions[3::POSITION_ITEMS]
+            sounding.times = np.array([epoch_to_datetime(t) for t in times])
+
             for i, field in enumerate(fields):
                 setattr(sounding, _attribute_name(field.attrib["name"]), data[i::len(fields)])
 
