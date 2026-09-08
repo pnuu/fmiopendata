@@ -21,6 +21,7 @@
 
 import datetime as dt
 import warnings
+from functools import lru_cache
 
 import defusedxml
 import defusedxml.ElementTree as ET
@@ -29,11 +30,23 @@ import requests
 EXCEPTION_TEXT = './/{http://www.opengis.net/ows/1.1}ExceptionText'
 CHUNK_SIZE = 1024 * 1024
 EPOCH = dt.datetime(1970, 1, 1)
+CACHE_SIZE = 128
 
 
 def epoch_to_datetime(seconds):
     """Convert *seconds* since the Unix epoch to a naive UTC datetime."""
     return EPOCH + dt.timedelta(seconds=float(seconds))
+
+
+@lru_cache(maxsize=CACHE_SIZE)
+def read_cached_xml(url):
+    """Read and parse the XML document at *url*, remembering the parsed tree.
+
+    Metadata documents describing observation types and units are referred to over
+    and over again within a single response, so they are worth caching.  The cache
+    is bounded, and can be emptied with ``read_cached_xml.cache_clear()``.
+    """
+    return ET.fromstring(read_url(url))
 
 
 def read_url(url):

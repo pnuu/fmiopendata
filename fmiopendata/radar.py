@@ -27,20 +27,14 @@ import rasterio
 import numpy as np
 
 from fmiopendata import wfs
-from fmiopendata.utils import read_url
+from fmiopendata.utils import read_cached_xml, read_url
 
 TIME_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
-
-meta_cache = dict()
 
 
 def get_meta(meta_url):
     """Get metadata from *meta_url*."""
-    meta = meta_cache.get(meta_url)
-    if meta is None:
-        meta = ET.fromstring(read_url(meta_url))
-        meta_cache[meta_url] = meta
-    return meta
+    return read_cached_xml(meta_url)
 
 
 class Radar(object):
