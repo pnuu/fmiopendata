@@ -64,4 +64,9 @@ htmlcov
 
 # vi / vim swp files
 *.swp
+
+# editor backup files
+*~
 .DS_STORE
+
+.cache

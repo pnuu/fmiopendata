@@ -13,6 +13,9 @@ Python interface for FMI open data
 pip install fmiopendata
 ```
 
+This installs the libraries every parser needs: `numpy`, `requests` and
+`defusedxml`.
+
 For `grid` datasets install also `eccodes`. Both the library and
 Python bindings are needed. The former is easiest to install with
 `conda` and the latter via `pip`:
@@ -46,6 +49,28 @@ wfs_html.py
 
 The `Query ID` is the handle that can be used to request data from WFS stored queries. See examples below.
 
+Both scripts take the output file name as an argument.  They default to HTML,
+which any browser renders locally, and write Markdown instead when the name does
+not end in `html` - that is what the catalogues kept in this repository are, so
+that GitHub renders them:
+```bash
+
+wms_html.py wms.md
+wfs_html.py wfs.md
+```
+
+The `wfs.md` and `wms.md` catalogues in this repository are made this way, and
+are worth regenerating now and then: FMI adds and retires layers and queries.
+
+## Errors and missing data
+
+A request the services refuse does not raise: `fmiopendata` warns with the
+message the service sent and carries on, and the parser then usually returns an
+empty result.  A query that returns nothing warns as well.  So do the cases
+where a response is not self consistent, such as a sounding whose measurements
+and locations do not match.  Attributes for data a product does not carry are
+left as `None`, which is worth checking before using them.
+
 ## Examples
 
 * [Download and parse latest soundings](#download-and-parse-latest-soundings)
@@ -53,6 +78,7 @@ The `Query ID` is the handle that can be used to request data from WFS stored qu
 * [Download and parse latest lightning data](#download-and-parse-latest-lightning-data)
 * [Download and parse grid data](#download-and-parse-grid-data)
 * [Download and parse observation data](#download-and-parse-observation-data)
+* [Download and parse station metadata](#download-and-parse-station-metadata)
 
 ### Download and parse latest soundings
 ```python
@@ -141,7 +167,8 @@ Radar.etop_threshold  # Reflectivity limit for `etop` datasets
 Radar.label  # Clear-text name for the data
 Radar.max_velocity  # Maximum wind speed for `vrad` datasets
 Radar.name  # Name of the dataset
-Radar.projection  # WKT projection string for the dataset
+Radar.projection  # CRS identifier of the dataset, e.g. "EPSG:3067"
+Radar.projection_wkt  # WKT projection string, if .download() has been called
 Radar.time  # Nominal measurement time of the dataset
 Radar.unit  # Unit of the calibrated data
 Radar.url  # Direct download URL for the data
@@ -182,7 +209,7 @@ import datetime as dt
 from fmiopendata.wfs import download_stored_query
 
 # Limit the time
-now = dt.datetime.utcnow()
+now = dt.datetime.now(dt.timezone.utc)
 # Depending on the current time and availability of the model data, adjusting
 # the hours below might be necessary to get any data
 start_time = now.strftime('%Y-%m-%dT00:00:00Z')
@@ -307,19 +334,19 @@ members is common to all `grid` type WFS data.
 
 The data arrays will have invalid values replaced with `np.nan`.
 
-## Download and parse observation data
+### Download and parse observation data
 ```python
 import datetime as dt
 
 from fmiopendata.wfs import download_stored_query
 
 # Retrieve the latest hour of data from a bounding box
-end_time = dt.datetime.utcnow()
+end_time = dt.datetime.now(dt.timezone.utc)
 start_time = end_time - dt.timedelta(hours=1)
 # Convert times to properly formatted strings
-start_time = start_time.isoformat(timespec="seconds") + "Z"
+start_time = start_time.strftime("%Y-%m-%dT%H:%M:%SZ")
 # -> 2020-07-07T12:00:00Z
-end_time = end_time.isoformat(timespec="seconds") + "Z"
+end_time = end_time.strftime("%Y-%m-%dT%H:%M:%SZ")
 # -> 2020-07-07T13:00:00Z
 
 obs = download_stored_query("fmi::observations::weather::multipointcoverage",
@@ -385,7 +412,9 @@ print(obs.location_metadata["Kustavi Isokari"])
 ```
 
 It is also possible to collect the data to a structure more usable for timeseries
-analysis by adding `"timeseries=True"` to the arguments:
+analysis by adding `"timeseries=True"` to the arguments.  This one is read by
+`fmiopendata` itself rather than sent to the service, so it has to be written
+exactly like that, and the argument list you pass in is left as it was:
 
 ```python
 
@@ -416,8 +445,78 @@ print(obs.data['Helsinki Malmi lentokenttä']['Air temperature']['unit'])
 # -> 'degC'
 ```
 
+### Download and parse station metadata
+
+```python
+from fmiopendata.wfs import download_stored_query
+
+stations = download_stored_query("fmi::ef::stations")
+```
+
+The structure of the returned `Station` class is
+
+```python
+Station.data  # The station metadata
+```
+
+The `data` dictionary has the following structure:
+
+```python
+{
+    station: {
+        'id': gml_id,
+        'fmisid': fmisid,
+        'geoid': geoid,
+        'wmo': wmo_id,
+        'name': station_name,
+        'region': region,
+        'country': country,
+        'station_type': [station_type1, station_type2, ...],  # List of network types
+        'latitude': latitude,
+        'longitude': longitude,
+        'start_time': begin_datetime,
+        'end_time': end_datetime,
+        'inspire_local_id': inspire_local_id,
+        'inspire_namespace': inspire_namespace,
+        'measurement_regime': measurement_regime,
+        'mobile': mobile  # Boolean
+    },
+    ...
+}
+```
+
+The following queries can be used to retrieve station data:
+
+```python
+
+# Get a specific station by its ID
+station_id = '100971'
+station = stations.get_station_by_id(station_id)
+print(station['name'])  # -> 'Helsinki Kaisaniemi'
+print(station['station_type'])  # -> ['Ilmastoasema']
+
+# Get a single station by its name
+station_name = 'Helsinki Kaisaniemi'
+station = stations.get_station_by_name(station_name)
+
+# Get all stations of a specific network type
+station_type = 'Ilmastoasema'
+climate_stations = stations.get_stations_by_type(station_type)
+
+# Get all stations in a specific country
+country = 'Finland'
+finnish_stations = stations.get_stations_by_country(country)
+
+# Get all stations in a specific region
+region = 'Helsinki'
+helsinki_stations = stations.get_stations_by_region(region)
+```
+
+## Supported stored queries
+
 This parser supports at least the following stored queries:
 
+* `fmi::ef::stations`
 * `fmi::forecast::hirlam::surface::obsstations::multipointcoverage`
 * `fmi::forecast::oaas::sealevel::point::multipointcoverage`
 * `fmi::observations::airquality::hourly::multipointcoverage`
@@ -433,3 +532,28 @@ This parser supports at least the following stored queries:
 * `stuk::observations::external-radiation::latest::multipointcoverage`
 * `stuk::observations::external-radiation::multipointcoverage`
 * `urban::observations::airquality::hourly::multipointcoverage`
+
+## Development
+
+Run the tests with
+
+```bash
+
+pytest fmiopendata/tests
+```
+
+Most of the tests download from the FMI services, so they need a network
+connection and they fail when a stored query or a WMS layer is broken at the
+other end.  The ones that do not are marked, and can be run on their own:
+
+```bash
+
+pytest -m "not network" fmiopendata/tests
+```
+
+The style checks are run with
+
+```bash
+
+pre-commit run --all-files
+```

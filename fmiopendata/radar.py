@@ -20,27 +20,23 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import datetime as dt
-import defusedxml.ElementTree as ET
 import tempfile
+import warnings
+
+import defusedxml.ElementTree as ET
 
 import rasterio
 import numpy as np
 
-from fmiopendata import wfs
-from fmiopendata.utils import read_url
+from fmiopendata import namespaces, wfs
+from fmiopendata.utils import read_cached_xml, read_url
 
 TIME_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
-
-meta_cache = dict()
 
 
 def get_meta(meta_url):
     """Get metadata from *meta_url*."""
-    meta = meta_cache.get(meta_url)
-    if meta is None:
-        meta = ET.fromstring(read_url(meta_url))
-        meta_cache[meta_url] = meta
-    return meta
+    return read_cached_xml(meta_url)
 
 
 class Radar(object):
@@ -54,10 +50,12 @@ class Radar(object):
         self.elevation = None
         self.etop_threshold = None
         self.projection = None
+        self.projection_wkt = None
         self.max_velocity = None
         self.url = None
         self.data = None
         self._dtype = None
+        self._calibrated = False
         self.name = None
         self.label = None
         self.unit = None
@@ -71,41 +69,57 @@ class Radar(object):
                     msg = "WMS returned an exception: %s" % str(data)
                     raise ValueError(msg)
                 fid.write(data)
-                img = rasterio.open(fid.name)
-                self.projection = img.crs.wkt
-                self.data = img.read()
-                self._dtype = self.data.dtype
+                # The image is read back through the file name, so make sure the
+                # data have actually reached the file before it is opened
+                fid.flush()
+                with rasterio.open(fid.name) as img:
+                    self.projection_wkt = img.crs.wkt
+                    self.data = img.read()
+                    self._dtype = self.data.dtype
 
     def get_area_mask(self):
         """Get a mask for areas outside the detection range."""
         self.download()
-        if self.data.dtype == np.uint8:
-            value = 255
-        elif self.data.dtype == np.uint16:
-            value = 65535
-        else:
-            if self._dtype == np.uint8:
-                max_val = 255
-            else:
-                max_val = 65535
-            value = max_val * self._gain + self._offset
-        return self.data == value
+        return self.data == self._value_of(self._raw_area_value())
 
     def get_data_mask(self):
         """Get a mask for invalid data."""
         self.download()
-        if self.data.dtype in (np.uint8, np.uint16):
-            value = 0
-        else:
-            value = 0 * self._gain + self._offset
-        return self.data == value
+        return self.data == self._value_of(0)
+
+    def _raw_area_value(self):
+        """Get the raw count that marks an area outside the detection range."""
+        if not np.issubdtype(self._dtype, np.integer):
+            raise ValueError("Cannot tell which value marks the area outside the "
+                             "detection range in %s data" % self._dtype)
+        return np.iinfo(self._dtype).max
+
+    def _can_calibrate(self):
+        """Tell whether the data can be turned into physical values."""
+        return bool(self._gain) and self._offset is not None
+
+    def _value_of(self, raw_value):
+        """Get the value a raw count has in the data as it is now."""
+        if not (self._calibrated and self._can_calibrate()):
+            return raw_value
+        return raw_value * self._gain + self._offset
 
     def calibrate(self):
-        """Calibrate the data."""
+        """Calibrate the data.
+
+        Calling this again does nothing: applying the gain and offset a second time
+        would turn the data into plausible looking nonsense.
+        """
         self.download()
-        if self._gain:
+        if self._calibrated:
+            return
+        if self._can_calibrate():
             self.data = self.data * self._gain
             self.data += self._offset
+        elif self._gain is not None or self._offset is not None:
+            warnings.warn("The dataset gives only one of the linear transformation "
+                          "gain and offset, leaving the data as they are", stacklevel=2)
+        self._calibrated = True
 
 
 class ParseRadar(object):
@@ -120,16 +134,19 @@ class ParseRadar(object):
 
     def _parse(self):
         """Parse XML."""
-        for member in self._xml.findall(wfs.WFS_MEMBER):
+        for member in self._xml.findall(namespaces.WFS_MEMBER):
             radar = Radar()
-            times = member.findall(wfs.GML_TIME_INSTANT)
-            tim = dt.datetime.strptime(times[0].findtext(wfs.GML_TIME_POSITION),
+            times = member.findall(namespaces.GML_TIME_INSTANT)
+            if not times:
+                warnings.warn("Skipping a radar dataset that has no measurement time", stacklevel=2)
+                continue
+            tim = dt.datetime.strptime(times[0].findtext(namespaces.GML_TIME_POSITION),
                                        TIME_FORMAT)
             radar.time = tim
             self.times.append(tim)
-            for parameter in member.findall(wfs.OM_PARAMETER):
-                val = float(parameter.findtext(wfs.GML_MEASURE))
-                name = parameter.find(wfs.OM_NAME).attrib[wfs.LINK]
+            for parameter in member.findall(namespaces.OM_PARAMETER):
+                val = float(parameter.findtext(namespaces.GML_MEASURE))
+                name = parameter.find(namespaces.OM_NAME).attrib[namespaces.LINK]
                 if "linearTransformationGain" in name:
                     radar._gain = val
                 elif "linearTransformationOffset" in name:
@@ -140,12 +157,14 @@ class ParseRadar(object):
                     radar.elevation = val
                 elif "maxVel" in name:
                     radar.max_velocity = val
-            radar.name = member.find(wfs.SWE_DATA_RECORD).find(wfs.SWE_FIELD).attrib["name"]
-            meta_url = member.find(wfs.SWE_DATA_RECORD).find(wfs.SWE_FIELD).attrib[wfs.LINK]
+            radar.name = member.find(namespaces.SWE_DATA_RECORD).find(namespaces.SWE_FIELD).attrib["name"]
+            meta_url = member.find(namespaces.SWE_DATA_RECORD).find(namespaces.SWE_FIELD).attrib[namespaces.LINK]
             meta = get_meta(meta_url)
-            radar.unit = meta.find(wfs.OMOP_UOM).attrib["uom"]
-            radar.label = meta.findtext(wfs.OMOP_LABEL)
-            radar.url = member.findtext(wfs.GML_FILE_REFERENCE)
+            radar.unit = meta.find(namespaces.OMOP_UOM).attrib["uom"]
+            radar.label = meta.findtext(namespaces.OMOP_LABEL)
+            radar.url = member.findtext(namespaces.GML_FILE_REFERENCE)
+            # The CRS the image is requested in; the WKT description of the same
+            # projection is filled in from the image itself when it is downloaded
             radar.projection = radar.url.split('srs=')[-1].split('&')[0]
             self.data.append(radar)
 

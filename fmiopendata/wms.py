@@ -20,13 +20,19 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import datetime as dt
+import re
+import warnings
+
 import defusedxml.ElementTree as ET
 
 from fmiopendata.utils import read_url
 
 WMS_BASE = "https://openwms.fmi.fi/geoserver/wms?request=GetCapabilities"
 WMS_LAYERS = './/{http://www.opengis.net/wms}Layer'
+# The WMS capabilities give the times with fractional seconds, unlike the WFS
+# documents the parsers read
 TIME_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
+STEP_UNITS = {"H": "hour", "M": "minute", "S": "second"}
 
 
 def get_wms_cababilities():
@@ -45,10 +51,31 @@ class WMSLayer(object):
         self.abstract = None
         self.crs = []
         self.bbox = []
-        self.times = []
+        self.start_time = None
+        self.end_time = None
+        self.time_step = None
         self.elevations = None
         self.time_step_str = None
         self._parse_layer(layer)
+
+    @property
+    def times(self):
+        """All the times the layer is available for.
+
+        The capabilities can advertise years of data at a one minute step, so the
+        times are generated when they are asked for rather than while the layers are
+        being listed.  Use iter_times() to go through them one at a time.
+        """
+        return list(self.iter_times())
+
+    def iter_times(self):
+        """Iterate over the times the layer is available for."""
+        if self.time_step is None:
+            return
+        time_stamp = self.start_time
+        while time_stamp <= self.end_time:
+            yield time_stamp
+            time_stamp += self.time_step
 
     def __repr__(self):
         """Print WMS layer info."""
@@ -56,47 +83,72 @@ class WMSLayer(object):
             return self.name + " - no timesteps"
         if self.elevations is None:
             return self.name + " - " + self.time_step_str
-        return self.name + " - " + self.time_step_str + ", elavations: " + ', '.join(self.elevations)
+        return self.name + " - " + self.time_step_str + ", elevations: " + ', '.join(self.elevations)
 
     def _get_times(self, txt):
-        """Get timestamps."""
+        """Get the time range the layer is available for."""
         start_time, end_time, step = txt.split('/')
-        start_time = dt.datetime.strptime(start_time, TIME_FORMAT)
-        end_time = dt.datetime.strptime(end_time, TIME_FORMAT)
-        step = step.strip('PT')
-        if step[-1] == 'H':
-            tstep = dt.timedelta(hours=int(step[:-1]))
-            self.time_step_str = step[:-1] + " hour time step"
-        elif step[-1] == 'M':
-            tstep = dt.timedelta(minutes=int(step[:-1]))
-            self.time_step_str = step[:-1] + " minute time step"
-        elif step[-1] == 'S':
-            tstep = dt.timedelta(seconds=int(step[:-1]))
-            self.time_step_str = step[:-1] + " second time step"
-        else:
+        self.time_step, self.time_step_str = _parse_step(step)
+        if self.time_step is None:
             return
-
-        time_stamp = start_time
-        while time_stamp <= end_time:
-            self.times.append(time_stamp)
-            time_stamp += tstep
+        self.start_time = dt.datetime.strptime(start_time, TIME_FORMAT)
+        self.end_time = dt.datetime.strptime(end_time, TIME_FORMAT)
 
     def _parse_layer(self, layer):
-        for itm2 in list(layer):
-            if "Name" in itm2.tag:
-                self.name = itm2.text
-            elif "Title" in itm2.tag:
-                self.title = itm2.text
-            elif "Abstract" in itm2.tag:
-                self.abstract = itm2.text
-            elif "CRS" in itm2.tag and "EPSG" in itm2.text:
-                self.crs.append(itm2.text)
-            elif "}BoundingBox" in itm2.tag and ("EPSG" in itm2.attrib['CRS'] or "CRS" in itm2.attrib['CRS']):
-                self.bbox.append(itm2.attrib)
-            elif "Dimension" in itm2.tag and itm2.attrib["name"] == "time":
-                self._get_times(itm2.text)
-            elif "Dimension" in itm2.tag and itm2.attrib["name"] == "elevation":
-                self.elevations = itm2.text.split(',')
+        """Read the layer information from the capabilities document."""
+        for element in list(layer):
+            if not isinstance(element.tag, str):
+                # A comment or a processing instruction
+                continue
+            tag = _local_name(element.tag)
+            if tag == "Name":
+                self.name = element.text
+            elif tag == "Title":
+                self.title = element.text
+            elif tag == "Abstract":
+                self.abstract = element.text
+            elif tag == "CRS":
+                if element.text and "EPSG" in element.text:
+                    self.crs.append(element.text)
+            elif tag == "BoundingBox":
+                crs = element.attrib.get("CRS", "")
+                if "EPSG" in crs or "CRS" in crs:
+                    self.bbox.append(element.attrib)
+            elif tag == "Dimension":
+                self._parse_dimension(element)
+
+    def _parse_dimension(self, element):
+        """Read a dimension of the layer."""
+        if not element.text:
+            return
+        name = element.attrib.get("name")
+        if name == "time":
+            self._get_times(element.text)
+        elif name == "elevation":
+            self.elevations = element.text.split(',')
+
+
+def _local_name(tag):
+    """Get the name of *tag* without the namespace."""
+    return tag.rsplit("}", 1)[-1]
+
+
+def _parse_step(step):
+    """Get the length of the ISO 8601 duration *step*, and a description of it.
+
+    Only the plain forms the service uses, such as "PT15M", are understood; anything
+    else is reported and left alone rather than being cut apart character by
+    character until something that looks like a unit comes out.
+    """
+    match = re.match(r"^PT(\d+)([HMS])$", step.strip())
+    if match is None:
+        warnings.warn("Cannot handle the time step %s" % step, stacklevel=2)
+        return None, None
+
+    amount = int(match.group(1))
+    unit = STEP_UNITS[match.group(2)]
+
+    return dt.timedelta(**{unit + "s": amount}), "%d %s time step" % (amount, unit)
 
 
 def get_wms_layers():

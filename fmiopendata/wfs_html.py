@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
 # Copyright (c) Panu Lahtinen
@@ -20,12 +19,22 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import defusedxml.ElementTree as ET
+"""List the WFS stored queries available in FMI open data."""
 
 import sys
 
-from fmiopendata import wfs
+import defusedxml.ElementTree as ET
+
+from fmiopendata import namespaces, wfs
 from fmiopendata.utils import read_url
+
+
+def get_text(xml, path):
+    """Get the stripped text of the first *path* match in *xml*, empty if there is none."""
+    text = xml.findtext(path)
+    if text is None:
+        return ""
+    return text.strip()
 
 
 def write_title(fid, query):
@@ -37,20 +46,18 @@ def write_description(fid, query_id):
     """Write available query parameters."""
     xml = ET.fromstring(read_url(wfs.BASE_URL + "DescribeStoredQueries&storedquery_id=" + query_id))
     fid.write("<p>")
-    fid.write(xml.findtext(wfs.WFS_ABSTRACT).strip())
+    fid.write(get_text(xml, namespaces.WFS_ABSTRACT))
     fid.write("</p>")
     fid.write("<ul>")
     fid.write("<li>Query ID: %s</li>" % query_id)
     fid.write("<li>Available arguments:</li>")
     fid.write("<ul>")
-    params = xml.findall(wfs.WFS_PARAMETER)
-    for i, param in enumerate(params):
+    params = xml.findall(namespaces.WFS_PARAMETER)
+    for param in params:
         fid.write("<li>%s</li>" % param.attrib["name"])
         fid.write("<ul>")
-        param_title = param.findtext(wfs.WFS_TITLE)
-        fid.write("<li>%s</li>" % param_title)
-        param_abstract = param.findtext(wfs.WFS_ABSTRACT).strip()
-        fid.write("<li>%s</li>" % param_abstract)
+        fid.write("<li>%s</li>" % get_text(param, namespaces.WFS_TITLE))
+        fid.write("<li>%s</li>" % get_text(param, namespaces.WFS_ABSTRACT))
         fid.write("</ul>")
     fid.write("</ul>")
     fid.write("</ul>")
@@ -61,7 +68,7 @@ def write_html(fname, queries):
     """Save HTML page showing the WFS stored queries."""
     with open(fname, 'w') as fid:
         fid.write("<html><body>")
-        fid.write("<h1>Available WFS stored queries in FMI open data.</hi>")
+        fid.write("<h1>Available WFS stored queries in FMI open data.</h1>")
         for key in sorted(queries):
             query = queries[key]
             write_title(fid, query)
@@ -87,17 +94,15 @@ def write_md(fname, queries):
 def write_description_md(fid, query_id):
     """Write available query parameters in markdown."""
     xml = ET.fromstring(read_url(wfs.BASE_URL + "DescribeStoredQueries&storedquery_id=" + query_id))
-    fid.write(xml.findtext(wfs.WFS_ABSTRACT).strip())
+    fid.write(get_text(xml, namespaces.WFS_ABSTRACT))
     fid.write("\n\n")
     fid.write("* Query ID: `%s`\n" % query_id)
     fid.write("* Available arguments:\n")
-    params = xml.findall(wfs.WFS_PARAMETER)
-    for i, param in enumerate(params):
+    params = xml.findall(namespaces.WFS_PARAMETER)
+    for param in params:
         fid.write("    * %s\n" % param.attrib["name"])
-        param_title = param.findtext(wfs.WFS_TITLE)
-        fid.write("        * %s\n" % param_title)
-        param_abstract = param.findtext(wfs.WFS_ABSTRACT).strip()
-        fid.write("        * %s\n" % param_abstract)
+        fid.write("        * %s\n" % get_text(param, namespaces.WFS_TITLE))
+        fid.write("        * %s\n" % get_text(param, namespaces.WFS_ABSTRACT))
     fid.write("\n\n")
 
 
