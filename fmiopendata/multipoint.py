@@ -130,17 +130,19 @@ def _parse_names_and_units(xml):
 
     for field in xml.findall(wfs.SWE_FIELD):
         typ = field.attrib["name"]
-        try:
-            url = field.attrib[wfs.LINK]
+        url = field.attrib.get(wfs.LINK)
+        if url is None:
+            # The label and unit are given inline
+            name = field.findtext(wfs.SWE_LABEL)
+            units = field.find(wfs.SWE_UOM).attrib['code']
+        else:
+            # They are in a separate metadata document
             root = ET.fromstring(read_url(url))
             name = root.findtext(wfs.OMOP_LABEL)
             try:
                 units = root.find(wfs.OMOP_UOM).attrib["uom"]
             except AttributeError:
                 units = ''
-        except KeyError:
-            name = field.findtext(wfs.SWE_LABEL)
-            units = field.find(wfs.SWE_UOM).attrib['code']
         type2obs[typ] = dict({"name": name, "units": units})
 
     return type2obs
