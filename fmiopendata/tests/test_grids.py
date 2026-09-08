@@ -231,3 +231,17 @@ def test_unsupported_format():
     grid.url = "https://gribby.example.com/download?producer=test"
     with pytest.raises(NotImplementedError, match="gribby.example.com"):
         grid.parse()
+
+
+def test_messages_that_share_a_key(tmp_path):
+    """Test two messages that would land on the same name, level and time."""
+    with pytest.warns(UserWarning, match="Several 2 metre temperature messages"):
+        grid = _get_grid(tmp_path, messages=(("2t", 2), ("2t", 2)))
+
+    level = grid.data[dt.datetime(2026, 9, 8, 12, 0)][2]
+    # Neither message is lost, and the later one says what it is
+    assert sorted(level) == ["2 metre temperature",
+                             "2 metre temperature (heightAboveGround, instant)"]
+    np.testing.assert_allclose(level["2 metre temperature"]["data"][0, 0], 270.0)
+    np.testing.assert_allclose(
+        level["2 metre temperature (heightAboveGround, instant)"]["data"][0, 0], 271.0)

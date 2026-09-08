@@ -117,20 +117,48 @@ class Grid(object):
                 if msg["level"] not in self.data[datime]:
                     self.data[datime][msg["level"]] = dict()
                 level = self.data[datime][msg["level"]]
-                if msg["name"] in level:
+                name = msg["name"]
+                if name in level:
+                    name = _unique_name(name, level, msg)
                     warnings.warn("Several %s messages for level %s at %s, "
-                                  "only the last one is kept" %
-                                  (msg["name"], msg["level"], datime), stacklevel=2)
-                level[msg["name"]] = dict()
+                                  "the later ones are named like \"%s\"" %
+                                  (msg["name"], msg["level"], datime, name), stacklevel=2)
                 data = np.reshape(msg["values"], (msg["Nj"], msg["Ni"]))
                 data[data == msg["missingValue"]] = np.nan
-                level[msg["name"]]["data"] = data
-                level[msg["name"]]["units"] = msg["units"]
+                level[name] = dict({"data": data, "units": msg["units"]})
 
     def delete_file(self):
         """Delete the downloaded file, if there is one."""
         if self._fname is not None and os.path.isfile(self._fname):
             os.remove(self._fname)
+
+
+def _unique_name(name, level, msg):
+    """Find a name for a message whose name is taken at this level already.
+
+    GRIB tells messages apart by more than the name, the level and the validity
+    time this library keys the data by, so two messages can land on the same key.
+    Qualify the name of the later one with what does distinguish them instead of
+    dropping it.
+    """
+    qualifiers = [_get_key(msg, key) for key in ("typeOfLevel", "stepType")]
+    qualifiers = [str(qualifier) for qualifier in qualifiers if qualifier is not None]
+
+    candidate = "%s (%s)" % (name, ", ".join(qualifiers)) if qualifiers else name
+    number = 2
+    while candidate in level:
+        candidate = "%s (%d)" % (name, number)
+        number += 1
+
+    return candidate
+
+
+def _get_key(msg, key):
+    """Get *key* of the GRIB message *msg*, or None if it does not have it."""
+    try:
+        return msg[key]
+    except (KeyError, RuntimeError, ValueError):
+        return None
 
 
 def _get_url_format(url):
