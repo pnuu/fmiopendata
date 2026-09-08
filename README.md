@@ -141,7 +141,8 @@ Radar.etop_threshold  # Reflectivity limit for `etop` datasets
 Radar.label  # Clear-text name for the data
 Radar.max_velocity  # Maximum wind speed for `vrad` datasets
 Radar.name  # Name of the dataset
-Radar.projection  # WKT projection string for the dataset
+Radar.projection  # CRS identifier of the dataset, e.g. "EPSG:3067"
+Radar.projection_wkt  # WKT projection string, if .download() has been called
 Radar.time  # Nominal measurement time of the dataset
 Radar.unit  # Unit of the calibrated data
 Radar.url  # Direct download URL for the data

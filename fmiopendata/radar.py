@@ -48,6 +48,7 @@ class Radar(object):
         self.elevation = None
         self.etop_threshold = None
         self.projection = None
+        self.projection_wkt = None
         self.max_velocity = None
         self.url = None
         self.data = None
@@ -70,7 +71,7 @@ class Radar(object):
                 # data have actually reached the file before it is opened
                 fid.flush()
                 with rasterio.open(fid.name) as img:
-                    self.projection = img.crs.wkt
+                    self.projection_wkt = img.crs.wkt
                     self.data = img.read()
                     self._dtype = self.data.dtype
 
@@ -150,6 +151,8 @@ class ParseRadar(object):
             radar.unit = meta.find(wfs.OMOP_UOM).attrib["uom"]
             radar.label = meta.findtext(wfs.OMOP_LABEL)
             radar.url = member.findtext(wfs.GML_FILE_REFERENCE)
+            # The CRS the image is requested in; the WKT description of the same
+            # projection is filled in from the image itself when it is downloaded
             radar.projection = radar.url.split('srs=')[-1].split('&')[0]
             self.data.append(radar)
 
