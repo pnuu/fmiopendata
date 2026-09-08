@@ -20,6 +20,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import datetime as dt
+import os
 import tempfile
 import warnings
 
@@ -63,19 +64,29 @@ class Radar(object):
     def download(self):
         """Download the data."""
         if self.data is None:
-            with tempfile.NamedTemporaryFile() as fid:
-                data = read_url(self.url)
-                if len(data) < 10e3 and "ServiceException" in str(data):
-                    msg = "WMS returned an exception: %s" % str(data)
-                    raise ValueError(msg)
-                fid.write(data)
-                # The image is read back through the file name, so make sure the
-                # data have actually reached the file before it is opened
-                fid.flush()
-                with rasterio.open(fid.name) as img:
-                    self.projection_wkt = img.crs.wkt
-                    self.data = img.read()
-                    self._dtype = self.data.dtype
+            data = read_url(self.url)
+            if len(data) < 10e3 and "ServiceException" in str(data):
+                msg = "WMS returned an exception: %s" % str(data)
+                raise ValueError(msg)
+            self._read_image(data)
+
+    def _read_image(self, data):
+        """Read the image in *data* through a temporary file.
+
+        The image is written and closed before rasterio opens it by name: on Windows
+        a file that is still open cannot be opened again, so reading it while holding
+        the handle fails with "file used by other process".
+        """
+        fid, fname = tempfile.mkstemp(suffix=".tif")
+        try:
+            with os.fdopen(fid, "wb") as tmp:
+                tmp.write(data)
+            with rasterio.open(fname) as img:
+                self.projection_wkt = img.crs.wkt
+                self.data = img.read()
+                self._dtype = self.data.dtype
+        finally:
+            os.remove(fname)
 
     def get_area_mask(self):
         """Get a mask for areas outside the detection range."""
