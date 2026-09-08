@@ -19,8 +19,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import defusedxml.ElementTree as ET
 import datetime as dt
+import warnings
+
+import defusedxml.ElementTree as ET
 
 import numpy as np
 
@@ -87,11 +89,12 @@ class ParseSoundings(object):
             sounding.start_time = dt.datetime.strptime(member.findtext(wfs.GML_BEGIN_POSITION), TIME_FORMAT)
             sounding.end_time = dt.datetime.strptime(member.findtext(wfs.GML_END_POSITION), TIME_FORMAT)
 
-            try:
-                positions = np.fromstring(member.findtext(wfs.GMLCOV_POSITIONS), dtype=float, sep=" ")
-            except TypeError:
-                print("No soundings found")
-                return
+            positions_txt = member.findtext(wfs.GMLCOV_POSITIONS)
+            if positions_txt is None:
+                warnings.warn("No data for the sounding from %s at %s" %
+                              (sounding.name, sounding.nominal_time))
+                continue
+            positions = np.fromstring(positions_txt, dtype=float, sep=" ")
             sounding.lats = positions[::4]
             sounding.lons = positions[1::4]
             sounding.altitudes = positions[2::4]
