@@ -128,8 +128,8 @@ class Grid(object):
                 level[msg["name"]]["units"] = msg["units"]
 
     def delete_file(self):
-        """Delete the downloaded file."""
-        if os.path.isfile(self._fname):
+        """Delete the downloaded file, if there is one."""
+        if self._fname is not None and os.path.isfile(self._fname):
             os.remove(self._fname)
 
 
