@@ -449,3 +449,28 @@ This parser supports at least the following stored queries:
 * `stuk::observations::external-radiation::latest::multipointcoverage`
 * `stuk::observations::external-radiation::multipointcoverage`
 * `urban::observations::airquality::hourly::multipointcoverage`
+
+## Development
+
+Run the tests with
+
+```bash
+
+pytest fmiopendata/tests
+```
+
+Most of the tests download from the FMI services, so they need a network
+connection and they fail when a stored query or a WMS layer is broken at the
+other end.  The ones that do not are marked, and can be run on their own:
+
+```bash
+
+pytest -m "not network" fmiopendata/tests
+```
+
+The style checks are run with
+
+```bash
+
+pre-commit run --all-files
+```
