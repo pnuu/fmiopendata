@@ -66,8 +66,8 @@ def write_times(fid, layer):
     if layer.time_step_str:
         fid.write("<li>Available times:</li>")
         fid.write("<ul>")
-        fid.write("<li>Earliest: %s</li>" % dt.datetime.strftime(min(layer.times), TIME_FORMAT))
-        fid.write("<li>Latest: %s</li>" % dt.datetime.strftime(max(layer.times), TIME_FORMAT))
+        fid.write("<li>Earliest: %s</li>" % dt.datetime.strftime(layer.start_time, TIME_FORMAT))
+        fid.write("<li>Latest: %s</li>" % dt.datetime.strftime(layer.end_time, TIME_FORMAT))
         fid.write("<li>%s</li>" % layer.time_step_str)
         fid.write("</ul>")
 

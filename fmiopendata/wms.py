@@ -49,10 +49,31 @@ class WMSLayer(object):
         self.abstract = None
         self.crs = []
         self.bbox = []
-        self.times = []
+        self.start_time = None
+        self.end_time = None
+        self.time_step = None
         self.elevations = None
         self.time_step_str = None
         self._parse_layer(layer)
+
+    @property
+    def times(self):
+        """All the times the layer is available for.
+
+        The capabilities can advertise years of data at a one minute step, so the
+        times are generated when they are asked for rather than while the layers are
+        being listed.  Use iter_times() to go through them one at a time.
+        """
+        return list(self.iter_times())
+
+    def iter_times(self):
+        """Iterate over the times the layer is available for."""
+        if self.time_step is None:
+            return
+        time_stamp = self.start_time
+        while time_stamp <= self.end_time:
+            yield time_stamp
+            time_stamp += self.time_step
 
     def __repr__(self):
         """Print WMS layer info."""
@@ -63,18 +84,13 @@ class WMSLayer(object):
         return self.name + " - " + self.time_step_str + ", elavations: " + ', '.join(self.elevations)
 
     def _get_times(self, txt):
-        """Get timestamps."""
+        """Get the time range the layer is available for."""
         start_time, end_time, step = txt.split('/')
-        start_time = dt.datetime.strptime(start_time, TIME_FORMAT)
-        end_time = dt.datetime.strptime(end_time, TIME_FORMAT)
-        tstep, self.time_step_str = _parse_step(step)
-        if tstep is None:
+        self.time_step, self.time_step_str = _parse_step(step)
+        if self.time_step is None:
             return
-
-        time_stamp = start_time
-        while time_stamp <= end_time:
-            self.times.append(time_stamp)
-            time_stamp += tstep
+        self.start_time = dt.datetime.strptime(start_time, TIME_FORMAT)
+        self.end_time = dt.datetime.strptime(end_time, TIME_FORMAT)
 
     def _parse_layer(self, layer):
         for itm2 in list(layer):
