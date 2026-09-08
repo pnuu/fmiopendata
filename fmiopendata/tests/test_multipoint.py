@@ -23,6 +23,7 @@
 """Test multipoint coverage parsers."""
 
 import datetime as dt
+from unittest import mock
 
 import pytest
 
@@ -132,3 +133,22 @@ def test_multipoint_radionuclide():
     res = download_and_parse("stuk::observations::air::radionuclide-activity-concentration::latest::multipointcoverage",
                              args=["bbox=18,55,35,75"])
     _verify_multipoint_common(res)
+
+
+def test_args_are_not_modified():
+    """Test that the caller's argument list survives the call."""
+    from fmiopendata.multipoint import download_and_parse
+
+    args = ["bbox=24,59,26,61", "timeseries=True"]
+    with mock.patch("fmiopendata.multipoint.read_url"), \
+            mock.patch("fmiopendata.multipoint.MultiPoint") as MultiPoint:
+        download_and_parse("fmi::observations::weather::multipointcoverage", args=args)
+        download_and_parse("fmi::observations::weather::multipointcoverage", args=args)
+
+    assert args == ["bbox=24,59,26,61", "timeseries=True"]
+    # The marker is meant for this library, so it is not passed on to the service ...
+    for call in MultiPoint.mock_calls:
+        assert "timeseries" not in str(call.args)
+    # ... and both calls asked for the timeseries layout
+    assert MultiPoint.call_args_list[0].kwargs["timeseries"] is True
+    assert MultiPoint.call_args_list[1].kwargs["timeseries"] is True
