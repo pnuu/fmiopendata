@@ -40,6 +40,16 @@ ARGS_OLD = ["bbox=24,59,26,61",
             "endtime=" + END_TIME_OLD.isoformat(timespec="seconds") + "Z"]
 ARGS_TIMESERIES = ["bbox=24,59,26,61", "timeseries=True"]
 
+TIME_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
+FORECAST_START = dt.datetime.now(dt.timezone.utc)
+FORECAST_END = FORECAST_START + dt.timedelta(hours=1)
+ARGS_FORECAST = ["bbox=24,59,26,61",
+                 "starttime=" + FORECAST_START.strftime(TIME_FORMAT),
+                 "endtime=" + FORECAST_END.strftime(TIME_FORMAT),
+                 "place=Helsinki",
+                 # FMI has given PoP no metadata document of its own
+                 "parameters=PoP"]
+
 
 @pytest.mark.network
 def test_multipoint_mareograph_default():
@@ -122,6 +132,21 @@ def test_multipoint_weather_timeseries():
                 continue
             assert len(res.data[loc][measurement]["values"]) == len_times
             assert "unit" in res.data[loc][measurement]
+
+
+@pytest.mark.network
+def test_multipoint_missing_metadata_for_field():
+    """Test a parameter FMI gives no label for."""
+    from fmiopendata.multipoint import download_and_parse
+
+    res = download_and_parse(
+        "fmi::forecast::edited::weather::scandinavia::point::multipointcoverage",
+        args=ARGS_FORECAST,
+    )
+
+    for step, step_data in res.data.items():
+        for loc, data in step_data.items():
+            assert None not in data, "None in parsed keys %s for %s and %s" % (list(data), step, loc)
 
 
 @pytest.mark.network
@@ -216,6 +241,18 @@ def test_timeseries_parsing():
     assert station["times"] == [FIRST_TIME, SECOND_TIME]
     assert station["Air temperature"]["values"] == [-6.7, -6.5]
     assert station["Air temperature"]["unit"] == "degC"
+
+
+def test_field_without_a_label():
+    """Test a parameter the response gives no label for."""
+    from fmiopendata.multipoint import MultiPoint
+
+    res = MultiPoint(MULTIPOINT_XML % "", "fmi::observations::weather::multipointcoverage")
+
+    # The measurements are keyed by the name of the field itself, not by None
+    station = res.data[FIRST_TIME]["Kustavi Isokari"]
+    assert None not in station
+    assert station["t2m"] == {"value": -6.7, "units": "degC"}
 
 
 def test_parameter_called_times():

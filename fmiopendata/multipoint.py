@@ -197,6 +197,10 @@ def _parse_names_and_units(xml):
                 units = root.find(namespaces.OMOP_UOM).attrib["uom"]
             except AttributeError:
                 units = ''
+        # FMI does not always give a label for a parameter.  Fall back on the name
+        # of the field itself, so that the data are keyed by something the caller
+        # can use instead of by None.
+        name = name or typ
         type2obs[typ] = dict({"name": name, "units": units})
 
     return type2obs
