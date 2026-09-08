@@ -20,6 +20,9 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import datetime as dt
+import re
+import warnings
+
 import defusedxml.ElementTree as ET
 
 from fmiopendata.utils import read_url
@@ -27,6 +30,7 @@ from fmiopendata.utils import read_url
 WMS_BASE = "https://openwms.fmi.fi/geoserver/wms?request=GetCapabilities"
 WMS_LAYERS = './/{http://www.opengis.net/wms}Layer'
 TIME_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
+STEP_UNITS = {"H": "hour", "M": "minute", "S": "second"}
 
 
 def get_wms_cababilities():
@@ -63,17 +67,8 @@ class WMSLayer(object):
         start_time, end_time, step = txt.split('/')
         start_time = dt.datetime.strptime(start_time, TIME_FORMAT)
         end_time = dt.datetime.strptime(end_time, TIME_FORMAT)
-        step = step.strip('PT')
-        if step[-1] == 'H':
-            tstep = dt.timedelta(hours=int(step[:-1]))
-            self.time_step_str = step[:-1] + " hour time step"
-        elif step[-1] == 'M':
-            tstep = dt.timedelta(minutes=int(step[:-1]))
-            self.time_step_str = step[:-1] + " minute time step"
-        elif step[-1] == 'S':
-            tstep = dt.timedelta(seconds=int(step[:-1]))
-            self.time_step_str = step[:-1] + " second time step"
-        else:
+        tstep, self.time_step_str = _parse_step(step)
+        if tstep is None:
             return
 
         time_stamp = start_time
@@ -97,6 +92,24 @@ class WMSLayer(object):
                 self._get_times(itm2.text)
             elif "Dimension" in itm2.tag and itm2.attrib["name"] == "elevation":
                 self.elevations = itm2.text.split(',')
+
+
+def _parse_step(step):
+    """Get the length of the ISO 8601 duration *step*, and a description of it.
+
+    Only the plain forms the service uses, such as "PT15M", are understood; anything
+    else is reported and left alone rather than being cut apart character by
+    character until something that looks like a unit comes out.
+    """
+    match = re.match(r"^PT(\d+)([HMS])$", step.strip())
+    if match is None:
+        warnings.warn("Cannot handle the time step %s" % step)
+        return None, None
+
+    amount = int(match.group(1))
+    unit = STEP_UNITS[match.group(2)]
+
+    return dt.timedelta(**{unit + "s": amount}), "%d %s time step" % (amount, unit)
 
 
 def get_wms_layers():
