@@ -49,8 +49,16 @@ class Grid(object):
         self._temporary_file = False
 
     def download(self, fname=None):
-        """Read the data."""
+        """Read the data.
+
+        The data are downloaded only once.  Asking afterwards for them to be placed
+        in a different file is an error, rather than a call that quietly does
+        nothing and leaves the data where they already are.
+        """
         if self._fname is not None:
+            if fname is not None and fname != self._fname:
+                raise ValueError("The data have already been downloaded to %s" %
+                                 self._fname)
             return
         if fname is None:
             fid, fname = tempfile.mkstemp(suffix=".grib")
