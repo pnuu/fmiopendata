@@ -24,7 +24,7 @@
 
 import datetime as dt
 import os
-import time
+from unittest import mock
 
 import pytest
 
@@ -74,16 +74,11 @@ def test_grid():
     shp = t2m["data"].shape
     assert shp == data.longitudes.shape == data.latitudes.shape
 
-    # Another call to .download() and .parse() should be near instantaneous, as nothing is done
-    tic = time.time()
-    data.parse()
-    toc = time.time()
-    assert toc - tic < 1e-3
-
-    tic = time.time()
-    data.download()
-    toc = time.time()
-    assert toc - tic < 1e-3
+    # Another call to .parse() and .download() does not fetch or parse anything again
+    with mock.patch("fmiopendata.grid.download_to_file") as download_to_file:
+        data.parse()
+        data.download()
+    download_to_file.assert_not_called()
 
     # Only a parser for "grib" format has been implemented
     earliest = min(res.data.keys())
