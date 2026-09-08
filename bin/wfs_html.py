@@ -61,7 +61,7 @@ def write_html(fname, queries):
     """Save HTML page showing the WFS stored queries."""
     with open(fname, 'w') as fid:
         fid.write("<html><body>")
-        fid.write("<h1>Available WFS stored queries in FMI open data.</hi>")
+        fid.write("<h1>Available WFS stored queries in FMI open data.</h1>")
         for key in sorted(queries):
             query = queries[key]
             write_title(fid, query)
