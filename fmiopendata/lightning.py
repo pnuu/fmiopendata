@@ -83,6 +83,9 @@ class Lightning(object):
             if param in PARAMETERS:
                 flashes[flash_id][param] = float(member.findtext(wfs.WFS_PARAMETER_VALUE))
 
+        if not flashes:
+            warnings.warn("No observations found")
+
         self.latitudes = np.array([flash["location"][0] for flash in flashes.values()])
         self.longitudes = np.array([flash["location"][1] for flash in flashes.values()])
         self.times = np.array([flash["time"] for flash in flashes.values()])
@@ -95,18 +98,19 @@ class Lightning(object):
         Version for fmi::observations::lightning::multipointcoverage query.
 
         """
-        try:
-            positions = np.fromstring(self._xml.findtext(wfs.GMLCOV_POSITIONS), dtype=float, sep=" ")
-        except TypeError:
-            print("No observations found")
+        positions_txt = self._xml.findtext(wfs.GMLCOV_POSITIONS)
+        data_txt = self._xml.findtext(wfs.GML_DOUBLE_OR_NIL_REASON_TUPLE_LIST)
+        if positions_txt is None or data_txt is None:
+            warnings.warn("No observations found")
             self._set_empty_observations()
             return
+        positions = np.fromstring(positions_txt, dtype=float, sep=" ")
         self.latitudes = positions[::3]
         self.longitudes = positions[1::3]
         times = positions[2::3]
         self.times = np.array([epoch_to_datetime(t) for t in times])
 
-        data = np.fromstring(self._xml.findtext(wfs.GML_DOUBLE_OR_NIL_REASON_TUPLE_LIST), dtype=float, sep=" ")
+        data = np.fromstring(data_txt, dtype=float, sep=" ")
         fields = [f.attrib['name'] for f in self._xml.findall(wfs.SWE_FIELD)]
         for i, field in enumerate(fields):
             if field in RESERVED_ATTRIBUTES:
