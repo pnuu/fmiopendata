@@ -243,6 +243,18 @@ def test_timeseries_parsing():
     assert station["Air temperature"]["unit"] == "degC"
 
 
+def test_field_without_a_label():
+    """Test a parameter the response gives no label for."""
+    from fmiopendata.multipoint import MultiPoint
+
+    res = MultiPoint(MULTIPOINT_XML % "", "fmi::observations::weather::multipointcoverage")
+
+    # The measurements are keyed by the name of the field itself, not by None
+    station = res.data[FIRST_TIME]["Kustavi Isokari"]
+    assert None not in station
+    assert station["t2m"] == {"value": -6.7, "units": "degC"}
+
+
 def test_parameter_called_times():
     """Test a parameter that would replace the measurement times."""
     from fmiopendata.multipoint import MultiPoint
