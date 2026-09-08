@@ -81,7 +81,7 @@ class WMSLayer(object):
             return self.name + " - no timesteps"
         if self.elevations is None:
             return self.name + " - " + self.time_step_str
-        return self.name + " - " + self.time_step_str + ", elavations: " + ', '.join(self.elevations)
+        return self.name + " - " + self.time_step_str + ", elevations: " + ', '.join(self.elevations)
 
     def _get_times(self, txt):
         """Get the time range the layer is available for."""
