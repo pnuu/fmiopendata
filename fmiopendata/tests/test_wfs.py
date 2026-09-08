@@ -23,6 +23,8 @@
 
 from unittest import mock
 
+import pytest
+
 
 def test_get_capabilities():
     """Test downloading WFS capabilities."""
@@ -106,7 +108,6 @@ def test_download_stored_query_multipointcoverage():
 def test_download_stored_query_notimplemented():
     """Test that proper error is raised for invalid request."""
     from fmiopendata.wfs import download_stored_query
-    import pytest
 
     with pytest.raises(NotImplementedError):
         _ = download_stored_query("foo::bar::baz")

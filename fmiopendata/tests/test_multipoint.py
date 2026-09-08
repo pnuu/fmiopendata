@@ -121,6 +121,7 @@ def test_multipoint_radionuclide():
     """Test multipoint coverage parser for radionuclide data."""
     from fmiopendata.multipoint import download_and_parse
 
+    # The query returns the latest measurements, so it takes no time range
     res = download_and_parse("stuk::observations::air::radionuclide-activity-concentration::latest::multipointcoverage",
-                             args=ARGS)
+                             args=["bbox=18,55,35,75"])
     _verify_multipoint_common(res)

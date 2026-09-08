@@ -80,7 +80,7 @@ def test_single_hclass():
 
 
 def test_single_etop_20():
-    """Test radar hydroclass."""
+    """Test radar echo top height."""
     from fmiopendata.radar import download_and_parse
 
     res = download_and_parse("fmi::radar::single::etop_20")

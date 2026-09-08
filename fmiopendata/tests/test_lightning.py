@@ -76,7 +76,7 @@ def test_unimplemented(read_url, ET):
 
 
 def test_no_data():
-    """"Test that missing data is handled properly."""
+    """Test that missing data is handled properly."""
     from fmiopendata.lightning import Lightning
 
     empty_xml = "<xml></xml>"

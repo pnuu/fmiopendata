@@ -56,7 +56,7 @@ def test_args(read_url, ParseSoundings):
 
 
 def test_no_data():
-    """"Test that missing data is handled properly."""
+    """Test that missing data is handled properly."""
     from fmiopendata.sounding import ParseSoundings
 
     empty_xml = "<xml></xml>"
