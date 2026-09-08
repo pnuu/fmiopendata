@@ -19,8 +19,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import defusedxml.ElementTree as ET
 import datetime as dt
+import warnings
+
+import defusedxml.ElementTree as ET
 
 import numpy as np
 
@@ -28,12 +30,14 @@ from fmiopendata import wfs
 from fmiopendata.utils import epoch_to_datetime, read_url
 
 TIME_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
-# Parameters of the "simple" format, and the type they are presented in
-SIMPLE_PARAMETERS = {"multiplicity": np.uint8,
+# Parameters of both formats, and the type the "simple" format presents them in
+PARAMETERS = {"multiplicity": np.uint8,
                      "peak_current": None,
                      "cloud_indicator": np.uint8,
                      "ellipse_major": None,
                      }
+# Attributes holding the flash locations and times, which a field must not replace
+RESERVED_ATTRIBUTES = ("latitudes", "longitudes", "times")
 
 
 class Lightning(object):
@@ -76,13 +80,13 @@ class Lightning(object):
                     "location": [float(p) for p in member.findtext(wfs.GML_POS).split()],
                 }
             param = member.findtext(wfs.WFS_PARAMETER_NAME)
-            if param in SIMPLE_PARAMETERS:
+            if param in PARAMETERS:
                 flashes[flash_id][param] = float(member.findtext(wfs.WFS_PARAMETER_VALUE))
 
         self.latitudes = np.array([flash["location"][0] for flash in flashes.values()])
         self.longitudes = np.array([flash["location"][1] for flash in flashes.values()])
         self.times = np.array([flash["time"] for flash in flashes.values()])
-        for param, dtype in SIMPLE_PARAMETERS.items():
+        for param, dtype in PARAMETERS.items():
             setattr(self, param, _collect_parameter(flashes, param, dtype))
 
     def _parse_multipoint(self):
@@ -105,8 +109,14 @@ class Lightning(object):
         data = np.fromstring(self._xml.findtext(wfs.GML_DOUBLE_OR_NIL_REASON_TUPLE_LIST), dtype=float, sep=" ")
         fields = [f.attrib['name'] for f in self._xml.findall(wfs.SWE_FIELD)]
         for i, field in enumerate(fields):
-            vals = data[i::len(fields)]
-            setattr(self, field, vals)
+            if field in RESERVED_ATTRIBUTES:
+                warnings.warn("Ignoring field %s, it would replace the flash "
+                              "locations or times" % field)
+                continue
+            if field not in PARAMETERS:
+                warnings.warn("Unknown lightning field %s, it is available as .%s" %
+                              (field, field))
+            setattr(self, field, data[i::len(fields)])
 
     def _set_empty_observations(self):
         self.latitudes = np.array([])
