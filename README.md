@@ -59,6 +59,15 @@ wfs_html.py wfs.md
 
 The `wfs.md` and `wms.md` catalogues in this repository are made this way.
 
+## Errors and missing data
+
+A request the services refuse does not raise: `fmiopendata` warns with the
+message the service sent and carries on, and the parser then usually returns an
+empty result.  A query that returns nothing warns as well.  So do the cases
+where a response is not self consistent, such as a sounding whose measurements
+and locations do not match.  Attributes for data a product does not carry are
+left as `None`, which is worth checking before using them.
+
 ## Examples
 
 * [Download and parse latest soundings](#download-and-parse-latest-soundings)
