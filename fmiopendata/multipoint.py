@@ -91,7 +91,7 @@ class MultiPoint(object):
 
         self._parse_location_metadata(xml)
 
-        type2obs = _parse_names_and_units(xml)
+        type2obs = parse_names_and_units(xml)
         positions = _parse_positions(positions_txt)
         latitudes = positions[::3]
         longitudes = positions[1::3]
@@ -179,7 +179,8 @@ def _parse_measurements(xml, shape):
     return np.reshape(measurements, shape)
 
 
-def _parse_names_and_units(xml):
+def parse_names_and_units(xml):
+    """Get the name and unit of every observed parameter described in *xml*."""
     type2obs = dict()
 
     for field in xml.findall(namespaces.SWE_FIELD):
