@@ -93,21 +93,42 @@ class WMSLayer(object):
         self.end_time = dt.datetime.strptime(end_time, TIME_FORMAT)
 
     def _parse_layer(self, layer):
-        for itm2 in list(layer):
-            if "Name" in itm2.tag:
-                self.name = itm2.text
-            elif "Title" in itm2.tag:
-                self.title = itm2.text
-            elif "Abstract" in itm2.tag:
-                self.abstract = itm2.text
-            elif "CRS" in itm2.tag and "EPSG" in itm2.text:
-                self.crs.append(itm2.text)
-            elif "}BoundingBox" in itm2.tag and ("EPSG" in itm2.attrib['CRS'] or "CRS" in itm2.attrib['CRS']):
-                self.bbox.append(itm2.attrib)
-            elif "Dimension" in itm2.tag and itm2.attrib["name"] == "time":
-                self._get_times(itm2.text)
-            elif "Dimension" in itm2.tag and itm2.attrib["name"] == "elevation":
-                self.elevations = itm2.text.split(',')
+        """Read the layer information from the capabilities document."""
+        for element in list(layer):
+            if not isinstance(element.tag, str):
+                # A comment or a processing instruction
+                continue
+            tag = _local_name(element.tag)
+            if tag == "Name":
+                self.name = element.text
+            elif tag == "Title":
+                self.title = element.text
+            elif tag == "Abstract":
+                self.abstract = element.text
+            elif tag == "CRS":
+                if element.text and "EPSG" in element.text:
+                    self.crs.append(element.text)
+            elif tag == "BoundingBox":
+                crs = element.attrib.get("CRS", "")
+                if "EPSG" in crs or "CRS" in crs:
+                    self.bbox.append(element.attrib)
+            elif tag == "Dimension":
+                self._parse_dimension(element)
+
+    def _parse_dimension(self, element):
+        """Read a dimension of the layer."""
+        if not element.text:
+            return
+        name = element.attrib.get("name")
+        if name == "time":
+            self._get_times(element.text)
+        elif name == "elevation":
+            self.elevations = element.text.split(',')
+
+
+def _local_name(tag):
+    """Get the name of *tag* without the namespace."""
+    return tag.rsplit("}", 1)[-1]
 
 
 def _parse_step(step):
