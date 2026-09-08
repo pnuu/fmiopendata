@@ -23,6 +23,7 @@
 """Test radar parsers."""
 
 import datetime as dt
+import os
 from unittest import mock
 
 import numpy as np
@@ -361,6 +362,49 @@ def test_small_image_is_read_completely():
     np.testing.assert_array_equal(data.data[0], COUNTS)
     assert "3067" in data.projection_wkt
     assert data.projection == "EPSG:3067"
+
+
+def _download_recording_temporary_files(data, names, image=None):
+    """Download *data*, recording in *names* the temporary files it goes through."""
+    import tempfile
+
+    real_mkstemp = tempfile.mkstemp
+
+    def recording_mkstemp(*args, **kwargs):
+        fid, fname = real_mkstemp(*args, **kwargs)
+        names.append(fname)
+        return fid, fname
+
+    if image is None:
+        image = _geotiff(COUNTS, np.uint8)
+    with mock.patch("tempfile.mkstemp", side_effect=recording_mkstemp), \
+            mock.patch("fmiopendata.radar.read_url", return_value=image):
+        data.download()
+
+
+def test_the_image_file_is_cleaned_up():
+    """Test that reading the image leaves nothing behind."""
+    data = _parse_radar()
+
+    names = []
+    _download_recording_temporary_files(data, names)
+
+    assert len(names) == 1
+    assert not os.path.exists(names[0])
+    np.testing.assert_array_equal(data.data[0], COUNTS)
+
+
+def test_the_image_file_is_cleaned_up_after_a_failure():
+    """Test that a failure to read the image does not leave the file behind."""
+    data = _parse_radar()
+
+    names = []
+    with mock.patch("fmiopendata.radar.rasterio.open", side_effect=RuntimeError("no")):
+        with pytest.raises(RuntimeError):
+            _download_recording_temporary_files(data, names)
+
+    assert len(names) == 1
+    assert not os.path.exists(names[0])
 
 
 def test_calibration_and_masks():
