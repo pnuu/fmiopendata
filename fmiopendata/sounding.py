@@ -63,6 +63,21 @@ class Sounding(object):
         self.absolute_humidities = None
 
 
+def _attribute_name(field_name):
+    """Get the Sounding attribute the FMI *field_name* is stored in.
+
+    An unknown field is kept under a name derived from the field itself rather than
+    discarded, so that a new FMI parameter costs one undocumented attribute instead
+    of the whole download.
+    """
+    try:
+        return FIELD_NAMES[field_name]
+    except KeyError:
+        warnings.warn("Unknown sounding field %s, it is available as .%s" %
+                      (field_name, field_name.lower()))
+        return field_name.lower()
+
+
 class ParseSoundings(object):
     """Collect sounding data."""
 
@@ -104,7 +119,7 @@ class ParseSoundings(object):
             data = np.fromstring(member.findtext(wfs.GML_DOUBLE_OR_NIL_REASON_TUPLE_LIST), dtype=float, sep=" ")
             fields = member.findall(wfs.SWE_FIELD)
             for i, field in enumerate(fields):
-                setattr(sounding, FIELD_NAMES[field.attrib["name"]], data[i::len(fields)])
+                setattr(sounding, _attribute_name(field.attrib["name"]), data[i::len(fields)])
 
             self.soundings.append(sounding)
 
