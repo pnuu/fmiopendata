@@ -49,6 +49,16 @@ wfs_html.py
 
 The `Query ID` is the handle that can be used to request data from WFS stored queries. See examples below.
 
+Both scripts take the output file name as an argument, and write Markdown
+instead of HTML when it does not end in `html`:
+```bash
+
+wms_html.py wms.md
+wfs_html.py wfs.md
+```
+
+The `wfs.md` and `wms.md` catalogues in this repository are made this way.
+
 ## Examples
 
 * [Download and parse latest soundings](#download-and-parse-latest-soundings)
