@@ -19,6 +19,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from importlib import import_module
+
 import defusedxml.ElementTree as ET
 
 from fmiopendata.utils import read_url
@@ -26,6 +28,16 @@ from fmiopendata.utils import read_url
 
 BASE_URL = "https://opendata.fmi.fi/wfs?service=WFS&request="
 STORED_QUERY_URL = "https://opendata.fmi.fi/wfs?service=WFS&version=2.0.0&request=getFeature&storedquery_id="
+
+# The parser of a stored query is chosen by the first of these patterns that the
+# query id contains.  The order matters: sounding and lightning queries are also
+# served as multipoint coverages, so the specific formats are looked for first.
+PARSERS = (("radar", "fmiopendata.radar"),
+           ("sounding", "fmiopendata.sounding"),
+           ("lightning", "fmiopendata.lightning"),
+           ("grid", "fmiopendata.grid"),
+           ("multipointcoverage", "fmiopendata.multipoint"),
+           )
 
 GML_BEGIN_POSITION = ".//{http://www.opengis.net/gml/3.2}beginPosition"
 GML_DOUBLE_OR_NIL_REASON_TUPLE_LIST = ".//{http://www.opengis.net/gml/3.2}doubleOrNilReasonTupleList"
@@ -108,17 +120,20 @@ def get_stored_query_descriptions():
 
 def download_stored_query(query_id, args=None):
     """Download and parse a stored query."""
-    if "radar" in query_id.lower():
-        from fmiopendata.radar import download_and_parse
-    elif "sounding" in query_id.lower():
-        from fmiopendata.sounding import download_and_parse
-    elif "lightning" in query_id.lower():
-        from fmiopendata.lightning import download_and_parse
-    elif "grid" in query_id.lower():
-        from fmiopendata.grid import download_and_parse
-    elif "multipointcoverage" in query_id.lower():
-        from fmiopendata.multipoint import download_and_parse
-    else:
-        raise NotImplementedError("No parser available for %s" % query_id)
+    download_and_parse = _get_parser(query_id)
 
     return download_and_parse(query_id, args=args)
+
+
+def _get_parser(query_id):
+    """Get the download and parse function for the stored query *query_id*.
+
+    The parser modules are imported only when they are needed, so that the optional
+    dependencies of the radar and grid parsers stay optional.
+    """
+    lowered = query_id.lower()
+    for pattern, module_name in PARSERS:
+        if pattern in lowered:
+            return import_module(module_name).download_and_parse
+
+    raise NotImplementedError("No parser available for %s" % query_id)
