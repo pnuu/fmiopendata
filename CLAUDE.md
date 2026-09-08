@@ -15,6 +15,9 @@ selected by string matching on the WFS stored query ID.
 # Install for development (deps come from conda, see below)
 pip install --no-deps -e .
 
+# Build the distributions the way CI does
+python -m build && twine check dist/*
+
 # Run the whole test suite with coverage (what CI does)
 pytest --cov=fmiopendata fmiopendata/tests --cov-report=xml
 
@@ -46,9 +49,12 @@ over deleting a test. Queries that need a fixed time window (lightning, old dail
 observations) hard-code historical `starttime`/`endtime` values so the response is
 stable.
 
-The offline tests build small XML documents inline (`test_wms.py`,
-`test_sounding.py`, `test_lightning.py`); there are no recorded fixtures, and the
-grid and radar parsers have no offline coverage at all.
+The offline tests build their input inline rather than carrying fixtures: XML as
+string templates, a GeoTIFF written into memory with `rasterio.io.MemoryFile`
+(`test_radar.py`), and a 214-byte GRIB2 message built from an eccodes sample
+(`test_grids.py`). Keep it that way — no binary fixtures in the repository. The
+radar image in `test_radar.py` is deliberately smaller than the file buffer, which
+is what makes it catch a missing `flush()` in `Radar.download()`.
 
 ## Architecture
 
@@ -94,14 +100,18 @@ container objects whose payload is *not* fetched until the caller acts:
   are cached by `utils.read_cached_xml()`, shared with `multipoint.py`.
 - `Grid.download()` / `Grid.parse()` fetch a GRIB file and decode it with `eccodes`
   into `Grid.data[valid_time][level][dataset_name]` = `{"data": ndarray, "units": str}`,
-  replacing `missingValue` with `np.nan`. Non-GRIB formats raise `NotImplementedError`.
+  replacing `missingValue` with `np.nan`. The format comes from the URL's `format`
+  argument; anything but GRIB raises `NotImplementedError`. Messages that collide on
+  (time, level, name) are stored under a qualified name rather than overwriting. The
+  temporary file is removed when the `Grid` is dropped, unless the caller named it.
 
 `multipoint.py` is the workhorse (most stored queries route here) and produces two
 different layouts from the same XML: the default `data[time][station][parameter]` =
 `{"value", "units"}`, or, when `"timeseries=True"` is passed in `args` (a marker read
 by this library, filtered out of a copy before the URL is built),
 `data[station][parameter]["values"]` plus a shared
-`data[station]["times"]` list. Station coordinates live separately in
+`data[station]["times"]` list (a parameter actually named `times` is renamed, see
+`TIMES_KEY`). Station coordinates live separately in
 `location_metadata[station]`. Radionuclide queries take a separate per-`member`
 parsing path.
 
@@ -115,14 +125,19 @@ objects and is used mainly by the `bin/` scripts.
 
 ## Scripts and generated docs
 
-`bin/wfs_html.py` and `bin/wms_html.py` (installed as scripts) dump the live service
-catalogue. Both write HTML, or Markdown if the output filename does not end in
-`html`; the checked-in `wfs.md` and `wms.md` are the Markdown ones. Both catalogues
-are large and generated — regenerate them rather than editing by hand.
+`fmiopendata/wfs_html.py` and `fmiopendata/wms_html.py` dump the live service
+catalogue. They are installed as the console scripts `wfs_html.py` and `wms_html.py`
+(the names keep the `.py` they have always had) through `[project.scripts]` in
+`pyproject.toml`, so their `main()` must stay importable. Both write HTML, or
+Markdown if the output filename does not end in `html`; the checked-in `wfs.md` and
+`wms.md` are the Markdown ones. Both catalogues are large and generated — regenerate
+them rather than editing by hand.
 
 ## Conventions
 
-- Bump `__version__` in `fmiopendata/__init__.py`; `setup.py` imports it from there.
+- Bump `__version__` in `fmiopendata/__init__.py`; `pyproject.toml` reads it from
+  there as a dynamic version. Packaging lives in `pyproject.toml`, flake8 config in
+  `setup.cfg` (flake8 does not read pyproject).
 - Every class and function carries a docstring (flake8-docstrings is enforced; the
   module-level `D100`/`D104` are ignored, the licence header stands in for them).
 - Lines up to 120 characters; `warnings.warn()` calls pass a `stacklevel`.
