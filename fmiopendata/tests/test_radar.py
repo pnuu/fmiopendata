@@ -29,7 +29,6 @@ import numpy as np
 import pytest
 
 
-@pytest.mark.xfail(raises=AssertionError, reason="Broken WMS layer")
 @pytest.mark.network
 def test_single_vrad():
     """Test radar radial velocity."""
@@ -47,7 +46,7 @@ def test_single_vrad():
     _check_radar(data, name="vrad", unit="m/s", dtype=np.uint8)
 
 
-@pytest.mark.xfail(raises=AssertionError, reason="Broken WMS layer")
+@pytest.mark.xfail(raises=AssertionError, strict=True, reason="Broken WMS layer")
 @pytest.mark.network
 def test_single_dbz():
     """Test radar reflectivity dBZ."""
@@ -65,7 +64,7 @@ def test_single_dbz():
     _check_radar(data, name="dbz", unit="dBZ", dtype=np.uint8)
 
 
-@pytest.mark.xfail(raises=AssertionError, reason="Broken WMS layer")
+@pytest.mark.xfail(raises=AssertionError, strict=True, reason="Broken WMS layer")
 @pytest.mark.network
 def test_single_hclass():
     """Test radar hydroclass."""
