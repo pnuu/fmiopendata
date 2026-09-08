@@ -79,6 +79,7 @@ left as `None`, which is worth checking before using them.
 * [Download and parse grid data](#download-and-parse-grid-data)
 * [Download and parse observation data](#download-and-parse-observation-data)
 * [Download and parse station metadata](#download-and-parse-station-metadata)
+* [Download and parse mast data](#download-and-parse-mast-data)
 
 ### Download and parse latest soundings
 ```python
@@ -511,6 +512,42 @@ finnish_stations = stations.get_stations_by_country(country)
 region = 'Helsinki'
 helsinki_stations = stations.get_stations_by_region(region)
 ```
+
+### Download and parse mast data
+
+A weather mast measures the same parameters at several heights, so each of its
+measurements is a profile rather than a single value.
+
+```python
+
+from fmiopendata.wfs import download_stored_query
+
+mast = download_stored_query("fmi::observations::weather::mast::multipointcoverage")
+```
+
+The data are collected by measurement time, mast and parameter:
+
+```python
+
+latest = max(mast.data.keys())
+print(sorted(mast.data[latest].keys()))
+# -> ['Espoo Latokaski', 'Kuopio Vehmasmäki', 'Rovaniemi Vennivaara']
+
+profile = mast.data[latest]["Espoo Latokaski"]["Air temperature"]
+profile["heights"]  # Numpy array of the measurement heights above the mast [m]
+profile["values"]  # Numpy array of the measured values
+profile["unit"]  # Unit of the values, e.g. "degC"
+```
+
+The positions of the masts are in `location_metadata`, where `altitude` is the
+height of the foot of the mast and the profile heights are measured from it:
+
+```python
+
+print(mast.location_metadata["Espoo Latokaski"])
+# -> {'fmisid': 101000, 'latitude': 60.17771, 'longitude': 24.64009, 'altitude': 44.0}
+```
+
 
 ## Supported stored queries
 

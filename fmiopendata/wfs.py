@@ -83,6 +83,7 @@ PARSERS = (("radar", "fmiopendata.radar"),
            ("sounding", "fmiopendata.sounding"),
            ("lightning", "fmiopendata.lightning"),
            ("grid", "fmiopendata.grid"),
+           ("mast", "fmiopendata.mast"),
            ("multipointcoverage", "fmiopendata.multipoint"),
            ("station", "fmiopendata.station"),
            )
