@@ -30,6 +30,7 @@ from fmiopendata import wfs
 from fmiopendata.utils import epoch_to_datetime, read_cached_xml, read_url
 
 TIME_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
+COORDINATE_DECIMALS = 5
 
 
 class MultiPoint(object):
@@ -41,6 +42,7 @@ class MultiPoint(object):
         self.data = dict()
         self.location_metadata = dict()
         self._location2name = dict()
+        self._unknown_locations = set()
         self._timeseries = timeseries
 
         if "radionuclide-activity-concentration" in query_id:
@@ -63,7 +65,19 @@ class MultiPoint(object):
                                                  "latitude": location[0],
                                                  "longitude": location[1]
                                                  })
-            self._location2name[location] = name
+            self._location2name[_location_key(*location)] = name
+
+    def _name_for_location(self, latitude, longitude):
+        """Get the name of the station at the given coordinates."""
+        key = _location_key(latitude, longitude)
+        try:
+            return self._location2name[key]
+        except KeyError:
+            if key not in self._unknown_locations:
+                self._unknown_locations.add(key)
+                warnings.warn("No station metadata for location %s, "
+                              "its measurements are skipped" % (key,))
+            return None
 
     def _parse(self, xml):
         """Parse data."""
@@ -88,8 +102,9 @@ class MultiPoint(object):
 
     def _collect_timeseries(self, type2obs, latitudes, longitudes, times, measurements):
         for i, tim in enumerate(times):
-            loc = (latitudes[i], longitudes[i])
-            name = self._location2name[loc]
+            name = self._name_for_location(latitudes[i], longitudes[i])
+            if name is None:
+                continue
             if name not in self.data:
                 self.data[name] = dict(times=[])
             self.data[name]["times"].append(tim)
@@ -100,16 +115,28 @@ class MultiPoint(object):
 
     def _collect_non_timeseries(self, type2obs, latitudes, longitudes, times, measurements):
         for i, tim in enumerate(times):
+            name = self._name_for_location(latitudes[i], longitudes[i])
+            if name is None:
+                continue
             if tim not in self.data:
                 self.data[tim] = dict()
-            loc = (latitudes[i], longitudes[i])
-            name = self._location2name[loc]
             if name not in self.data[tim]:
                 self.data[tim][name] = dict()
             for j, key in enumerate(type2obs.keys()):
                 self.data[tim][name][type2obs[key]["name"]] = dict({"value": measurements[i, j],
                                                                     "units": type2obs[key]["units"]
                                                                     })
+
+
+def _location_key(latitude, longitude):
+    """Build the key used to match a measurement position to a station.
+
+    The station coordinates and the measurement positions are read from two
+    different elements of the response, so they are rounded to a fixed precision
+    before they are compared.
+    """
+    return (round(float(latitude), COORDINATE_DECIMALS),
+            round(float(longitude), COORDINATE_DECIMALS))
 
 
 def _parse_positions(positions_txt):
