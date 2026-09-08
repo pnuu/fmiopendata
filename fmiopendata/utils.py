@@ -20,13 +20,13 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import warnings
-from urllib.request import urlretrieve
 
 import defusedxml
 import defusedxml.ElementTree as ET
 import requests
 
 EXCEPTION_TEXT = './/{http://www.opengis.net/ows/1.1}ExceptionText'
+CHUNK_SIZE = 1024 * 1024
 
 
 def read_url(url):
@@ -59,6 +59,11 @@ def _collect_exception_texts(req_content):
 
 
 def download_to_file(url, fname):
-    """Download file from *ulr* to *fname*."""
-    outpath, http_msg = urlretrieve(url, filename=fname)
-    return outpath, http_msg
+    """Download file from *url* to *fname*."""
+    req = requests.get(url, stream=True)
+    if not req.ok:
+        _give_warning(req)
+    with open(fname, "wb") as fid:
+        for chunk in req.iter_content(chunk_size=CHUNK_SIZE):
+            fid.write(chunk)
+    return fname, req.headers
