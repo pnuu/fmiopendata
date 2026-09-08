@@ -52,7 +52,7 @@ def test_args(read_url, ParseSoundings):
 
     res = download_and_parse("foo", args=["a=1", "b=2"])
     del res
-    assert read_url.mock_calls[0].endswith("=foo&a=1&b=2")
+    assert read_url.call_args[0][0].endswith("=foo&a=1&b=2")
 
 
 def test_no_data():
