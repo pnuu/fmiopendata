@@ -23,9 +23,14 @@
 """Test station data parsers."""
 
 import datetime as dt
-from fmiopendata.station import Station, download_and_parse
 import warnings
 
+import pytest
+
+from fmiopendata.station import Station, download_and_parse
+
+# Every test here downloads the station list from the FMI services
+pytestmark = pytest.mark.network
 
 START_TIME = dt.datetime(1829, 1, 1, 0, 0, 0)
 END_TIME = dt.datetime(2025, 7, 7, 12, 5, 0)
