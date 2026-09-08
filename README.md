@@ -13,6 +13,9 @@ Python interface for FMI open data
 pip install fmiopendata
 ```
 
+This installs the libraries every parser needs: `numpy`, `requests` and
+`defusedxml`.
+
 For `grid` datasets install also `eccodes`. Both the library and
 Python bindings are needed. The former is easiest to install with
 `conda` and the latter via `pip`:
