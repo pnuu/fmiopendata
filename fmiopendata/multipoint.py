@@ -19,8 +19,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import defusedxml.ElementTree as ET
 import datetime as dt
+import warnings
+
+import defusedxml.ElementTree as ET
 
 import numpy as np
 
@@ -65,14 +67,15 @@ class MultiPoint(object):
 
     def _parse(self, xml):
         """Parse data."""
+        positions_txt = xml.findtext(wfs.GMLCOV_POSITIONS)
+        if positions_txt is None:
+            warnings.warn("No observations found")
+            return
+
         self._parse_location_metadata(xml)
 
         type2obs = _parse_names_and_units(xml)
-        try:
-            positions = _parse_positions(xml)
-        except TypeError:
-            print("No observations found")
-            return
+        positions = _parse_positions(positions_txt)
         latitudes = positions[::3]
         longitudes = positions[1::3]
         times = _parse_times(xml, positions)
@@ -109,8 +112,8 @@ class MultiPoint(object):
                                                                     })
 
 
-def _parse_positions(xml):
-    return np.fromstring(xml.findtext(wfs.GMLCOV_POSITIONS), dtype=float, sep=" ")
+def _parse_positions(positions_txt):
+    return np.fromstring(positions_txt, dtype=float, sep=" ")
 
 
 def _parse_times(xml, positions):
