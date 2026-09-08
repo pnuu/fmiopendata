@@ -52,6 +52,7 @@ class Radar(object):
         self.url = None
         self.data = None
         self._dtype = None
+        self._calibrated = False
         self.name = None
         self.label = None
         self.unit = None
@@ -98,11 +99,18 @@ class Radar(object):
         return self.data == value
 
     def calibrate(self):
-        """Calibrate the data."""
+        """Calibrate the data.
+
+        Calling this again does nothing: applying the gain and offset a second time
+        would turn the data into plausible looking nonsense.
+        """
         self.download()
+        if self._calibrated:
+            return
         if self._gain:
             self.data = self.data * self._gain
             self.data += self._offset
+        self._calibrated = True
 
 
 class ParseRadar(object):
