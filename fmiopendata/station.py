@@ -19,69 +19,19 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import os
-import sys
-import defusedxml.ElementTree as ET
+"""Parse the metadata of the FMI observation stations."""
+
 import datetime as dt
+from typing import Dict, List, Optional
+from xml.etree.ElementTree import Element
+
+import defusedxml.ElementTree as ET
 import numpy as np
 
-from xml.etree.ElementTree import Element
-from typing import List, Dict, Optional
-
-# Add the parent directory to the Python path when running as a script
-if __name__ == "__main__":
-    sys.path.insert(0, os.path.abspath(
-        os.path.join(os.path.dirname(__file__), "..")
-    ))
-
-from fmiopendata import wfs
+from fmiopendata import namespaces, wfs
 from fmiopendata.utils import read_url
 
 TIME_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
-
-# Add the needed possibly missing constants
-# to wfs module when running as script.
-if __name__ == "__main__":
-    if not hasattr(wfs, "EF_ENVIRONMENTAL_MONITORING_FACILITY"):
-        wfs.EF_ENVIRONMENTAL_MONITORING_FACILITY = (
-            ".//{http://inspire.ec.europa.eu/schemas/ef/4.0}"
-            "EnvironmentalMonitoringFacility"
-        )
-    if not hasattr(wfs, "EF_NAME"):
-        wfs.EF_NAME = (
-            ".//{http://inspire.ec.europa.eu/schemas/ef/4.0}name"
-        )
-    if not hasattr(wfs, "EF_BELONGS_TO"):
-        wfs.EF_BELONGS_TO = (
-            ".//{http://inspire.ec.europa.eu/schemas/ef/4.0}belongsTo"
-        )
-    if not hasattr(wfs, "XLINK_TITLE"):
-        wfs.XLINK_TITLE = "{http://www.w3.org/1999/xlink}title"
-    if not hasattr(wfs, "GML_TIME_PERIOD"):
-        wfs.GML_TIME_PERIOD = (
-            ".//{http://www.opengis.net/gml/3.2}TimePeriod"
-        )
-    if not hasattr(wfs, "EF_INSPIRE_ID"):
-        wfs.EF_INSPIRE_ID = (
-            ".//{http://inspire.ec.europa.eu/schemas/ef/4.0}inspireId"
-        )
-    if not hasattr(wfs, "INS_BASE_LOCAL_ID"):
-        wfs.INS_BASE_LOCAL_ID = (
-            ".//{http://inspire.ec.europa.eu/schemas/base/3.3}localId"
-        )
-    if not hasattr(wfs, "INS_BASE_NAMESPACE"):
-        wfs.INS_BASE_NAMESPACE = (
-            ".//{http://inspire.ec.europa.eu/schemas/base/3.3}namespace"
-        )
-    if not hasattr(wfs, "EF_MOBILE"):
-        wfs.EF_MOBILE = (
-            ".//{http://inspire.ec.europa.eu/schemas/ef/4.0}mobile"
-        )
-    if not hasattr(wfs, "EF_MEASUREMENT_REGIME"):
-        wfs.EF_MEASUREMENT_REGIME = (
-            ".//{http://inspire.ec.europa.eu/schemas/ef/4.0}"
-            "measurementRegime"
-        )
 
 
 class Station(object):
@@ -97,13 +47,13 @@ class Station(object):
     def _parse(self, xml: Element) -> None:
         """Parse station data."""
         # Get all station entries from the XML
-        for member in xml.findall(wfs.WFS_MEMBER):
-            facility = member.find(wfs.EF_ENVIRONMENTAL_MONITORING_FACILITY)
+        for member in xml.findall(namespaces.WFS_MEMBER):
+            facility = member.find(namespaces.EF_ENVIRONMENTAL_MONITORING_FACILITY)
             if facility is None:
                 continue
 
             # Extract the station ID
-            station_id_elem = facility.find(wfs.GML_IDENTIFIER)
+            station_id_elem = facility.find(namespaces.GML_IDENTIFIER)
             if station_id_elem is None:
                 continue
 
@@ -111,7 +61,7 @@ class Station(object):
 
             # Initialize station data dictionary with flattened structure
             station_data = {
-                "id": facility.get(wfs.GML_ID),
+                "id": facility.get(namespaces.GML_ID),
                 "fmisid": station_id,
                 "geoid": None,
                 "wmo": None,
@@ -130,7 +80,7 @@ class Station(object):
             }
 
             # Extract station names and other identifiers
-            for name_elem in facility.findall(wfs.GML_NAME):
+            for name_elem in facility.findall(namespaces.GML_NAME):
                 code_space = name_elem.get("codeSpace", "")
                 if "locationcode/name" in code_space:
                     station_data["name"] = name_elem.text
@@ -145,16 +95,16 @@ class Station(object):
 
             # If name wasn't found in gml:name, try ef:name
             if station_data["name"] is None:
-                name_elem = facility.find(wfs.EF_NAME)
+                name_elem = facility.find(namespaces.EF_NAME)
                 if name_elem is not None:
                     station_data["name"] = name_elem.text
 
             # Extract INSPIRE ID
-            inspire_id_elem = facility.find(wfs.EF_INSPIRE_ID)
+            inspire_id_elem = facility.find(namespaces.EF_INSPIRE_ID)
             if inspire_id_elem is not None:
-                local_id_elem = inspire_id_elem.find(wfs.INS_BASE_LOCAL_ID)
+                local_id_elem = inspire_id_elem.find(namespaces.INS_BASE_LOCAL_ID)
                 namespace_elem = inspire_id_elem.find(
-                    wfs.INS_BASE_NAMESPACE
+                    namespaces.INS_BASE_NAMESPACE
                 )
                 if local_id_elem is not None:
                     station_data["inspire_local_id"] = local_id_elem.text
@@ -162,18 +112,18 @@ class Station(object):
                     station_data["inspire_namespace"] = namespace_elem.text
 
             # Extract station position
-            point_elem = facility.find(wfs.GML_POINT)
+            point_elem = facility.find(namespaces.GML_POINT)
             if point_elem is not None:
-                pos_elem = point_elem.find(wfs.GML_POS)
+                pos_elem = point_elem.find(namespaces.GML_POS)
                 if pos_elem is not None:
                     coords = pos_elem.text.split()
                     station_data["latitude"] = float(coords[0])
                     station_data["longitude"] = float(coords[1])
 
             # Extract measurement regime
-            regime_elem = facility.find(wfs.EF_MEASUREMENT_REGIME)
+            regime_elem = facility.find(namespaces.EF_MEASUREMENT_REGIME)
             if regime_elem is not None:
-                href = regime_elem.get(wfs.LINK)
+                href = regime_elem.get(namespaces.LINK)
                 if href:
                     # Extract the value from the URL
                     station_data["measurement_regime"] = (
@@ -181,17 +131,17 @@ class Station(object):
                     )
 
             # Extract mobile status
-            mobile_elem = facility.find(wfs.EF_MOBILE)
+            mobile_elem = facility.find(namespaces.EF_MOBILE)
             if mobile_elem is not None and mobile_elem.text:
                 station_data["mobile"] = (
                     mobile_elem.text.lower() == "true"
                 )
 
             # Extract time period
-            time_period_elem = facility.find(wfs.GML_TIME_PERIOD)
+            time_period_elem = facility.find(namespaces.GML_TIME_PERIOD)
             if time_period_elem is not None:
-                begin_elem = time_period_elem.find(wfs.GML_BEGIN_POSITION)
-                end_elem = time_period_elem.find(wfs.GML_END_POSITION)
+                begin_elem = time_period_elem.find(namespaces.GML_BEGIN_POSITION)
+                end_elem = time_period_elem.find(namespaces.GML_END_POSITION)
 
                 if begin_elem is not None and begin_elem.text:
                     try:
@@ -209,9 +159,9 @@ class Station(object):
                             pass
 
             # Extract station network types (can be multiple)
-            belongs_elems = facility.findall(wfs.EF_BELONGS_TO)
+            belongs_elems = facility.findall(namespaces.EF_BELONGS_TO)
             for belongs_elem in belongs_elems:
-                title = belongs_elem.get(wfs.XLINK_TITLE)
+                title = belongs_elem.get(namespaces.XLINK_TITLE)
                 if title:
                     station_data["station_type"].append(title)
 
@@ -234,7 +184,7 @@ class Station(object):
             times = np.array(
                 [
                     dt.datetime.strptime(
-                        xml.findtext(wfs.GML_TIME_POSITION),
+                        xml.findtext(namespaces.GML_TIME_POSITION),
                         TIME_FORMAT
                     ).strftime(TIME_FORMAT)
                 ]
@@ -302,11 +252,5 @@ def download_and_parse(
 
 
 if __name__ == "__main__":
-    ARGS = []
-
-    # Example usage
-    station_data = download_and_parse("fmi::ef::stations", args=ARGS)
-    # for station_id, info in station_data.data.items():
-    #     print(f"Station ID: {station_id}, Name: {info['name']},
-    #           Country: {info['country']}")
-    print(station_data.data)
+    # Example usage: python -m fmiopendata.station
+    print(download_and_parse("fmi::ef::stations").data)
