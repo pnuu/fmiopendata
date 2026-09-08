@@ -151,11 +151,11 @@ def _parse_names_and_units(xml):
 
 def download_and_parse(query_id, args=None):
     """Download and parse the given stored query."""
-    timeseries = False
-    if args is None:
-        args = []
-    if "timeseries=True" in args:
-        timeseries = True
+    # Work on a copy: "timeseries=True" is a marker for this library rather than a
+    # query argument, and removing it must not modify the caller's list.
+    args = list(args) if args else []
+    timeseries = "timeseries=True" in args
+    if timeseries:
         args.remove("timeseries=True")
     url = wfs.STORED_QUERY_URL + query_id
     if args:
