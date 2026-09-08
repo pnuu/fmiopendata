@@ -77,26 +77,25 @@ class Radar(object):
     def get_area_mask(self):
         """Get a mask for areas outside the detection range."""
         self.download()
-        if self.data.dtype == np.uint8:
-            value = 255
-        elif self.data.dtype == np.uint16:
-            value = 65535
-        else:
-            if self._dtype == np.uint8:
-                max_val = 255
-            else:
-                max_val = 65535
-            value = max_val * self._gain + self._offset
-        return self.data == value
+        return self.data == self._value_of(self._raw_area_value())
 
     def get_data_mask(self):
         """Get a mask for invalid data."""
         self.download()
-        if self.data.dtype in (np.uint8, np.uint16):
-            value = 0
-        else:
-            value = 0 * self._gain + self._offset
-        return self.data == value
+        return self.data == self._value_of(0)
+
+    def _raw_area_value(self):
+        """Get the raw count that marks an area outside the detection range."""
+        if not np.issubdtype(self._dtype, np.integer):
+            raise ValueError("Cannot tell which value marks the area outside the "
+                             "detection range in %s data" % self._dtype)
+        return np.iinfo(self._dtype).max
+
+    def _value_of(self, raw_value):
+        """Get the value a raw count has in the data as it is now."""
+        if not self._calibrated or not self._gain:
+            return raw_value
+        return raw_value * self._gain + self._offset
 
     def calibrate(self):
         """Calibrate the data.
