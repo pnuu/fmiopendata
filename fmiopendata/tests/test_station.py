@@ -41,6 +41,10 @@ ARGS = [
     "endtime=" + END_TIME.isoformat(timespec="seconds") + "Z",
 ]
 
+# Stations the service gives as Finland's, but which are nowhere near it: Aboa is
+# the Finnish research station in Queen Maud Land, Antarctica, at 73 S 13 W.
+STATIONS_OUTSIDE_FINLAND = ("Antarktis Aboa",)
+
 
 def _test_verify_station_common(res):
     """Verify basic aspects of station data."""
@@ -354,7 +358,10 @@ class TestStationValues:
                     f"Invalid longitude: {station_data['longitude']}"
 
                 # For Finnish stations, rough bounds
-                if station_data["country"] == "Finland":
+                if (
+                    station_data["country"] == "Finland"
+                    and station_data["name"] not in STATIONS_OUTSIDE_FINLAND
+                ):
                     assert 59 <= station_data["latitude"] <= 71, \
                         "Finnish station latitude should be between 59-71"
                     assert 19 <= station_data["longitude"] <= 33, \
