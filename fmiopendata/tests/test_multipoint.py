@@ -243,6 +243,21 @@ def test_timeseries_parsing():
     assert station["Air temperature"]["unit"] == "degC"
 
 
+def test_station_position_with_an_elevation():
+    """Test a station whose position carries an elevation after the coordinates."""
+    from fmiopendata.multipoint import MultiPoint
+
+    xml = MULTIPOINT_XML.replace("<gml:pos>60.7222 21.02681</gml:pos>",
+                                 "<gml:pos>60.7222 21.02681 44</gml:pos>")
+    res = MultiPoint(xml % "Air temperature", "fmi::observations::weather::multipointcoverage")
+
+    assert res.location_metadata["Kustavi Isokari"] == {"fmisid": 101059,
+                                                        "latitude": 60.7222,
+                                                        "longitude": 21.02681}
+    # The measurements are still matched to the station
+    assert res.data[FIRST_TIME]["Kustavi Isokari"]["Air temperature"]["value"] == -6.7
+
+
 def test_field_without_a_label():
     """Test a parameter the response gives no label for."""
     from fmiopendata.multipoint import MultiPoint
