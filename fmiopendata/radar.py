@@ -20,8 +20,10 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import datetime as dt
-import defusedxml.ElementTree as ET
 import tempfile
+import warnings
+
+import defusedxml.ElementTree as ET
 
 import rasterio
 import numpy as np
@@ -92,9 +94,13 @@ class Radar(object):
                              "detection range in %s data" % self._dtype)
         return np.iinfo(self._dtype).max
 
+    def _can_calibrate(self):
+        """Tell whether the data can be turned into physical values."""
+        return bool(self._gain) and self._offset is not None
+
     def _value_of(self, raw_value):
         """Get the value a raw count has in the data as it is now."""
-        if not self._calibrated or not self._gain:
+        if not (self._calibrated and self._can_calibrate()):
             return raw_value
         return raw_value * self._gain + self._offset
 
@@ -107,9 +113,12 @@ class Radar(object):
         self.download()
         if self._calibrated:
             return
-        if self._gain:
+        if self._can_calibrate():
             self.data = self.data * self._gain
             self.data += self._offset
+        elif self._gain is not None or self._offset is not None:
+            warnings.warn("The dataset gives only one of the linear transformation "
+                          "gain and offset, leaving the data as they are")
         self._calibrated = True
 
 
@@ -128,6 +137,9 @@ class ParseRadar(object):
         for member in self._xml.findall(wfs.WFS_MEMBER):
             radar = Radar()
             times = member.findall(wfs.GML_TIME_INSTANT)
+            if not times:
+                warnings.warn("Skipping a radar dataset that has no measurement time")
+                continue
             tim = dt.datetime.strptime(times[0].findtext(wfs.GML_TIME_POSITION),
                                        TIME_FORMAT)
             radar.time = tim
