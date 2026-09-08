@@ -79,18 +79,21 @@ class Grid(object):
 
     def parse(self, delete=False):
         """Parse the data."""
-        if "grib" in self.url:
-            parser = self._parse_grib
-        else:
-            format = [itm for itm in self.url.split("&") if "format" in itm.lower()][0]
-            raise NotImplementedError("No parser for %s" % format)
-
-        self.download()
+        parser = self._get_parser()
         if self.data:
             return
+
+        self.download()
         parser()
         if delete:
             self.delete_file()
+
+    def _get_parser(self):
+        """Get the parser for the format the data are served in."""
+        data_format = _get_url_format(self.url)
+        if data_format is not None and "grib" in data_format.lower():
+            return self._parse_grib
+        raise NotImplementedError("No parser for %s" % (data_format or self.url))
 
     def _parse_grib(self):
         """Parser for GRIB data."""
@@ -122,6 +125,14 @@ class Grid(object):
         """Delete the downloaded file."""
         if os.path.isfile(self._fname):
             os.remove(self._fname)
+
+
+def _get_url_format(url):
+    """Get the format the data at *url* are served in, if the URL says so."""
+    for item in url.split("&"):
+        if item.lower().startswith("format="):
+            return item.split("=", 1)[1]
+    return None
 
 
 class ParseGrids(object):
