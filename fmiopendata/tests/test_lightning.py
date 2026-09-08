@@ -98,3 +98,57 @@ def _check_lightning_empty(obs):
     np.testing.assert_equal(obs.peak_current, np.array([]))
     np.testing.assert_equal(obs.cloud_indicator, np.array([], dtype=np.uint8))
     np.testing.assert_equal(obs.ellipse_major, np.array([]))
+
+
+SIMPLE_MEMBER = """  <wfs:member>
+    <BsWfs:BsWfsElement gml:id="BsWfsElement.%d.%d">
+      <BsWfs:Time>%s</BsWfs:Time>
+      <BsWfs:Location><gml:Point><gml:pos>%s</gml:pos></gml:Point></BsWfs:Location>
+      <BsWfs:ParameterName>%s</BsWfs:ParameterName>
+      <BsWfs:ParameterValue>%s</BsWfs:ParameterValue>
+    </BsWfs:BsWfsElement>
+  </wfs:member>
+"""
+SIMPLE_HEADER = """<?xml version="1.0" encoding="UTF-8"?>
+<wfs:FeatureCollection xmlns:wfs="http://www.opengis.net/wfs/2.0"
+                       xmlns:BsWfs="http://xml.fmi.fi/schema/wfs/2.0"
+                       xmlns:gml="http://www.opengis.net/gml/3.2">
+"""
+
+
+def _simple_xml(flashes):
+    """Build a "simple" format document out of (flash id, time, position, parameters)."""
+    members = []
+    for flash_id, tim, position, parameters in flashes:
+        for i, (name, value) in enumerate(parameters):
+            members.append(SIMPLE_MEMBER % (flash_id, i + 1, tim, position, name, value))
+
+    return SIMPLE_HEADER + "".join(members) + "</wfs:FeatureCollection>"
+
+
+def test_simple_stays_aligned():
+    """Test that a repeated or missing parameter does not shift the arrays."""
+    from fmiopendata.lightning import Lightning
+
+    xml = _simple_xml([
+        # The service repeats the multiplicity of the first flash
+        (1, "2010-08-01T12:00:00Z", "60.1 24.9",
+         [("multiplicity", "3"), ("peak_current", "-12.5"), ("cloud_indicator", "0"),
+          ("ellipse_major", "1.5"), ("multiplicity", "3")]),
+        # ...and leaves out the ellipse of the second one
+        (2, "2010-08-01T12:00:30Z", "61.1 25.9",
+         [("multiplicity", "1"), ("peak_current", "8.0"), ("cloud_indicator", "1")]),
+    ])
+
+    obs = Lightning(xml, "simple")
+
+    np.testing.assert_allclose(obs.latitudes, [60.1, 61.1])
+    np.testing.assert_allclose(obs.longitudes, [24.9, 25.9])
+    assert list(obs.times) == [dt.datetime(2010, 8, 1, 12, 0, 0),
+                               dt.datetime(2010, 8, 1, 12, 0, 30)]
+    np.testing.assert_allclose(obs.multiplicity, [3, 1])
+    np.testing.assert_allclose(obs.peak_current, [-12.5, 8.0])
+    np.testing.assert_allclose(obs.cloud_indicator, [0, 1])
+    # The flash the service gave no ellipse for has no ellipse, and the other one is
+    # still where it belongs
+    np.testing.assert_allclose(obs.ellipse_major, [1.5, np.nan])
