@@ -76,14 +76,14 @@ class MultiPoint(object):
             if key not in self._unknown_locations:
                 self._unknown_locations.add(key)
                 warnings.warn("No station metadata for location %s, "
-                              "its measurements are skipped" % (key,))
+                              "its measurements are skipped" % (key,), stacklevel=2)
             return None
 
     def _parse(self, xml):
         """Parse data."""
         positions_txt = xml.findtext(namespaces.GMLCOV_POSITIONS)
         if positions_txt is None:
-            warnings.warn("No observations found")
+            warnings.warn("No observations found", stacklevel=2)
             return
 
         self._parse_location_metadata(xml)

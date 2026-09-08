@@ -120,7 +120,7 @@ class Grid(object):
                 if msg["name"] in level:
                     warnings.warn("Several %s messages for level %s at %s, "
                                   "only the last one is kept" %
-                                  (msg["name"], msg["level"], datime))
+                                  (msg["name"], msg["level"], datime), stacklevel=2)
                 level[msg["name"]] = dict()
                 data = np.reshape(msg["values"], (msg["Nj"], msg["Ni"]))
                 data[data == msg["missingValue"]] = np.nan

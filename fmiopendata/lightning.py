@@ -32,10 +32,10 @@ from fmiopendata.utils import epoch_to_datetime, read_url
 TIME_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
 # Parameters of both formats, and the type the "simple" format presents them in
 PARAMETERS = {"multiplicity": np.uint8,
-                     "peak_current": None,
-                     "cloud_indicator": np.uint8,
-                     "ellipse_major": None,
-                     }
+              "peak_current": None,
+              "cloud_indicator": np.uint8,
+              "ellipse_major": None,
+              }
 # Attributes holding the flash locations and times, which a field must not replace
 RESERVED_ATTRIBUTES = ("latitudes", "longitudes", "times")
 
@@ -84,7 +84,7 @@ class Lightning(object):
                 flashes[flash_id][param] = float(member.findtext(namespaces.WFS_PARAMETER_VALUE))
 
         if not flashes:
-            warnings.warn("No observations found")
+            warnings.warn("No observations found", stacklevel=2)
 
         self.latitudes = np.array([flash["location"][0] for flash in flashes.values()])
         self.longitudes = np.array([flash["location"][1] for flash in flashes.values()])
@@ -101,7 +101,7 @@ class Lightning(object):
         positions_txt = self._xml.findtext(namespaces.GMLCOV_POSITIONS)
         data_txt = self._xml.findtext(namespaces.GML_DOUBLE_OR_NIL_REASON_TUPLE_LIST)
         if positions_txt is None or data_txt is None:
-            warnings.warn("No observations found")
+            warnings.warn("No observations found", stacklevel=2)
             self._set_empty_observations()
             return
         positions = np.fromstring(positions_txt, dtype=float, sep=" ")
@@ -115,11 +115,11 @@ class Lightning(object):
         for i, field in enumerate(fields):
             if field in RESERVED_ATTRIBUTES:
                 warnings.warn("Ignoring field %s, it would replace the flash "
-                              "locations or times" % field)
+                              "locations or times" % field, stacklevel=2)
                 continue
             if field not in PARAMETERS:
                 warnings.warn("Unknown lightning field %s, it is available as .%s" %
-                              (field, field))
+                              (field, field), stacklevel=2)
             setattr(self, field, data[i::len(fields)])
 
     def _set_empty_observations(self):

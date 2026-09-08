@@ -66,7 +66,7 @@ def _give_warning(req):
         exceptions = ["HTTP %s %s" % (req.status_code, req.reason)]
     details = '\n'.join([" - " + ex_ for ex_ in exceptions])
     exception_text = "\n\nFMI servers responded with the following errors:\n\n%s\n" % details
-    warnings.warn(exception_text)
+    warnings.warn(exception_text, stacklevel=3)
 
 
 def _collect_exception_texts(req_content):

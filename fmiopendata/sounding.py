@@ -81,7 +81,7 @@ def _align_locations_and_measurements(positions, data, num_fields, sounding):
     num = min(num_locations, num_levels)
     warnings.warn("The sounding from %s at %s has %d locations but %d measurement "
                   "levels, using the first %d of both" %
-                  (sounding.name, sounding.nominal_time, num_locations, num_levels, num))
+                  (sounding.name, sounding.nominal_time, num_locations, num_levels, num), stacklevel=2)
 
     return positions[:POSITION_ITEMS * num], data[:num_fields * num]
 
@@ -97,7 +97,7 @@ def _attribute_name(field_name):
         return FIELD_NAMES[field_name]
     except KeyError:
         warnings.warn("Unknown sounding field %s, it is available as .%s" %
-                      (field_name, field_name.lower()))
+                      (field_name, field_name.lower()), stacklevel=2)
         return field_name.lower()
 
 
@@ -130,7 +130,7 @@ class ParseSoundings(object):
             positions_txt = member.findtext(namespaces.GMLCOV_POSITIONS)
             if positions_txt is None:
                 warnings.warn("No data for the sounding from %s at %s" %
-                              (sounding.name, sounding.nominal_time))
+                              (sounding.name, sounding.nominal_time), stacklevel=2)
                 continue
             positions = np.fromstring(positions_txt, dtype=float, sep=" ")
             data = np.fromstring(member.findtext(namespaces.GML_DOUBLE_OR_NIL_REASON_TUPLE_LIST), dtype=float, sep=" ")

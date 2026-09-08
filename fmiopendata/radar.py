@@ -118,7 +118,7 @@ class Radar(object):
             self.data += self._offset
         elif self._gain is not None or self._offset is not None:
             warnings.warn("The dataset gives only one of the linear transformation "
-                          "gain and offset, leaving the data as they are")
+                          "gain and offset, leaving the data as they are", stacklevel=2)
         self._calibrated = True
 
 
@@ -138,7 +138,7 @@ class ParseRadar(object):
             radar = Radar()
             times = member.findall(namespaces.GML_TIME_INSTANT)
             if not times:
-                warnings.warn("Skipping a radar dataset that has no measurement time")
+                warnings.warn("Skipping a radar dataset that has no measurement time", stacklevel=2)
                 continue
             tim = dt.datetime.strptime(times[0].findtext(namespaces.GML_TIME_POSITION),
                                        TIME_FORMAT)

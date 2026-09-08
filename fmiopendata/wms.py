@@ -140,7 +140,7 @@ def _parse_step(step):
     """
     match = re.match(r"^PT(\d+)([HMS])$", step.strip())
     if match is None:
-        warnings.warn("Cannot handle the time step %s" % step)
+        warnings.warn("Cannot handle the time step %s" % step, stacklevel=2)
         return None, None
 
     amount = int(match.group(1))
