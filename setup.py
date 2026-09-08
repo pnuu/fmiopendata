@@ -20,10 +20,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-"""Setup for trollflow2."""
+"""Setup for fmiopendata."""
 
 from setuptools import setup
 from fmiopendata import __version__
+
+with open("README.md", "r", encoding="utf-8") as fid:
+    long_description = fid.read()
 
 install_requires = ['numpy', 'requests', 'defusedxml']
 extras_require = {'radar': ['rasterio'],
@@ -37,7 +40,8 @@ extras_require['all'] = list(set(all_extras))
 setup(name="fmiopendata",
       version=__version__,
       description='Python library for accessing FMI open data',
-      long_description='Python library for accessing FMI open data',
+      long_description=long_description,
+      long_description_content_type='text/markdown',
       author='Panu Lahtinen',
       author_email='pnuu+git@iki.fi',
       classifiers=["Development Status :: 4 - Beta",
@@ -48,7 +52,7 @@ setup(name="fmiopendata",
                    "Programming Language :: Python",
                    "Topic :: Scientific/Engineering",
                    ],
-      url="https://github.com/pnuu/pyfmiopendata",
+      url="https://github.com/pnuu/fmiopendata",
       packages=['fmiopendata', ],
       scripts=["bin/wms_html.py",
                "bin/wfs_html.py",
@@ -56,6 +60,5 @@ setup(name="fmiopendata",
       data_files=[],
       install_requires=install_requires,
       extras_require=extras_require,
-      tests_require=['rasterio', 'eccodes'],
-      python_requires='>=3.8',
+      python_requires='>=3.10',
       )
