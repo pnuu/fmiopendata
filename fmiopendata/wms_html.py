@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
 # Copyright (c) Panu Lahtinen
@@ -20,8 +19,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import sys
+"""List the WMS layers available in FMI open data."""
+
 import datetime as dt
+import sys
 
 from fmiopendata.wms import get_wms_layers
 

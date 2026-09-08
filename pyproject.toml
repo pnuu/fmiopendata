@@ -1,0 +1,43 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "fmiopendata"
+description = "Python library for accessing FMI open data"
+readme = "README.md"
+authors = [{name = "Panu Lahtinen", email = "pnuu+git@iki.fi"}]
+license = "GPL-3.0-or-later"
+license-files = ["LICENSE"]
+requires-python = ">=3.10"
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Topic :: Scientific/Engineering",
+]
+dependencies = ["numpy", "requests", "defusedxml"]
+dynamic = ["version"]
+
+[project.optional-dependencies]
+radar = ["rasterio"]
+grid = ["eccodes"]
+all = ["rasterio", "eccodes"]
+
+[project.urls]
+Homepage = "https://github.com/pnuu/fmiopendata"
+
+# The names keep the ".py" the scripts have always been installed under
+[project.scripts]
+"wfs_html.py" = "fmiopendata.wfs_html:main"
+"wms_html.py" = "fmiopendata.wms_html:main"
+
+[tool.setuptools]
+packages = ["fmiopendata"]
+
+[tool.setuptools.dynamic]
+version = {attr = "fmiopendata.__version__"}
+
+[tool.pytest.ini_options]
+markers = ["network: the test downloads data from the FMI open data services"]
