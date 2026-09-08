@@ -218,6 +218,19 @@ def test_timeseries_parsing():
     assert station["Air temperature"]["unit"] == "degC"
 
 
+def test_parameter_called_times():
+    """Test a parameter that would replace the measurement times."""
+    from fmiopendata.multipoint import MultiPoint
+
+    with pytest.warns(UserWarning, match='it is stored as "times \\(parameter\\)"'):
+        res = MultiPoint(MULTIPOINT_XML % "times",
+                         "fmi::observations::weather::multipointcoverage", timeseries=True)
+
+    station = res.data["Kustavi Isokari"]
+    assert station["times"] == [FIRST_TIME, SECOND_TIME]
+    assert station["times (parameter)"]["values"] == [-6.7, -6.5]
+
+
 def test_measurement_without_a_station():
     """Test a measurement at a position no station is given for."""
     from fmiopendata.multipoint import MultiPoint

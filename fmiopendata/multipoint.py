@@ -31,6 +31,8 @@ from fmiopendata.utils import epoch_to_datetime, read_cached_xml, read_url
 
 TIME_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
 COORDINATE_DECIMALS = 5
+# The key the measurement times are kept under in the timeseries layout
+TIMES_KEY = "times"
 
 
 class MultiPoint(object):
@@ -101,17 +103,19 @@ class MultiPoint(object):
             self._collect_non_timeseries(type2obs, latitudes, longitudes, times, measurements)
 
     def _collect_timeseries(self, type2obs, latitudes, longitudes, times, measurements):
+        parameter_names = _timeseries_names(type2obs)
         for i, tim in enumerate(times):
             name = self._name_for_location(latitudes[i], longitudes[i])
             if name is None:
                 continue
             if name not in self.data:
-                self.data[name] = dict(times=[])
-            self.data[name]["times"].append(tim)
+                self.data[name] = {TIMES_KEY: []}
+            self.data[name][TIMES_KEY].append(tim)
             for j, key in enumerate(type2obs.keys()):
-                if type2obs[key]["name"] not in self.data[name]:
-                    self.data[name][type2obs[key]["name"]] = {"values": [], "unit": type2obs[key]["units"]}
-                self.data[name][type2obs[key]["name"]]["values"].append(measurements[i, j])
+                parameter = parameter_names[key]
+                if parameter not in self.data[name]:
+                    self.data[name][parameter] = {"values": [], "unit": type2obs[key]["units"]}
+                self.data[name][parameter]["values"].append(measurements[i, j])
 
     def _collect_non_timeseries(self, type2obs, latitudes, longitudes, times, measurements):
         for i, tim in enumerate(times):
@@ -126,6 +130,25 @@ class MultiPoint(object):
                 self.data[tim][name][type2obs[key]["name"]] = dict({"value": measurements[i, j],
                                                                     "units": type2obs[key]["units"]
                                                                     })
+
+
+def _timeseries_names(type2obs):
+    """Get the key each parameter is stored under in the timeseries layout.
+
+    The measurement times share the dictionary with the parameters, so a parameter
+    of that name would replace them.
+    """
+    names = dict()
+    for key, observation in type2obs.items():
+        name = observation["name"]
+        if name == TIMES_KEY:
+            name = "%s (parameter)" % name
+            warnings.warn('A parameter is called "%s", which is where the measurement '
+                          'times are kept, so it is stored as "%s"' % (TIMES_KEY, name),
+                          stacklevel=2)
+        names[key] = name
+
+    return names
 
 
 def _location_key(latitude, longitude):
