@@ -68,3 +68,5 @@ htmlcov
 # editor backup files
 *~
 .DS_STORE
+
+.cache
