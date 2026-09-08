@@ -161,5 +161,18 @@ def download_and_parse(query_id, args=None):
     if args:
         url = url + "&" + "&".join(args)
     xml = read_url(url)
-    mode = query_id.split("::")[-1]
-    return Lightning(xml, mode)
+    return Lightning(xml, _get_mode(query_id))
+
+
+def _get_mode(query_id):
+    """Get the format the stored query *query_id* returns.
+
+    The format is matched anywhere in the query id, so that a qualifier after it
+    does not hide it.  An unrecognised query id is passed on as it is, for Lightning
+    to reject with a message naming it.
+    """
+    lowered = query_id.lower()
+    for mode in ("multipointcoverage", "simple"):
+        if mode in lowered:
+            return mode
+    return query_id.split("::")[-1]
