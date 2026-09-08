@@ -46,16 +46,28 @@ class Grid(object):
         self.longitudes = None
         self.url = None
         self._fname = None
+        self._temporary_file = False
 
     def download(self, fname=None):
         """Read the data."""
         if self._fname is not None:
             return
         if fname is None:
-            temp = tempfile.NamedTemporaryFile(delete=False)
-            fname = temp.name
-        outpath, http_msg = download_to_file(self.url, fname)
+            fid, fname = tempfile.mkstemp(suffix=".grib")
+            os.close(fid)
+            self._temporary_file = True
+        download_to_file(self.url, fname)
         self._fname = fname
+
+    def __del__(self):
+        """Remove the temporary file this object created, if there is one."""
+        if not self._temporary_file:
+            return
+        try:
+            self.delete_file()
+        except (AttributeError, OSError, TypeError):
+            # Nothing can be done about it while the interpreter is shutting down
+            pass
 
     def parse(self, delete=False):
         """Parse the data."""
