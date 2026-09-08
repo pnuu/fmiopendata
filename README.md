@@ -389,7 +389,9 @@ print(obs.location_metadata["Kustavi Isokari"])
 ```
 
 It is also possible to collect the data to a structure more usable for timeseries
-analysis by adding `"timeseries=True"` to the arguments:
+analysis by adding `"timeseries=True"` to the arguments.  This one is read by
+`fmiopendata` itself rather than sent to the service, so it has to be written
+exactly like that, and the argument list you pass in is left as it was:
 
 ```python
 
