@@ -25,7 +25,7 @@ import datetime as dt
 import numpy as np
 
 from fmiopendata import wfs
-from fmiopendata.utils import epoch_to_datetime, read_url
+from fmiopendata.utils import epoch_to_datetime, read_cached_xml, read_url
 
 TIME_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
 
@@ -136,8 +136,9 @@ def _parse_names_and_units(xml):
             name = field.findtext(wfs.SWE_LABEL)
             units = field.find(wfs.SWE_UOM).attrib['code']
         else:
-            # They are in a separate metadata document
-            root = ET.fromstring(read_url(url))
+            # They are in a separate metadata document.  The same document is
+            # referred to by every member of a response, so it is cached.
+            root = read_cached_xml(url)
             name = root.findtext(wfs.OMOP_LABEL)
             try:
                 units = root.find(wfs.OMOP_UOM).attrib["uom"]
