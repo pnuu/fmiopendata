@@ -20,9 +20,11 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import datetime as dt
-import defusedxml.ElementTree as ET
 import os
 import tempfile
+import warnings
+
+import defusedxml.ElementTree as ET
 
 import numpy as np
 import eccodes
@@ -115,6 +117,10 @@ class Grid(object):
                 if msg["level"] not in self.data[datime]:
                     self.data[datime][msg["level"]] = dict()
                 level = self.data[datime][msg["level"]]
+                if msg["name"] in level:
+                    warnings.warn("Several %s messages for level %s at %s, "
+                                  "only the last one is kept" %
+                                  (msg["name"], msg["level"], datime))
                 level[msg["name"]] = dict()
                 data = np.reshape(msg["values"], (msg["Nj"], msg["Ni"]))
                 data[data == msg["missingValue"]] = np.nan
