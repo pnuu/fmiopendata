@@ -29,6 +29,8 @@ from fmiopendata.utils import read_url
 
 WMS_BASE = "https://openwms.fmi.fi/geoserver/wms?request=GetCapabilities"
 WMS_LAYERS = './/{http://www.opengis.net/wms}Layer'
+# The WMS capabilities give the times with fractional seconds, unlike the WFS
+# documents the parsers read
 TIME_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
 STEP_UNITS = {"H": "hour", "M": "minute", "S": "second"}
 
