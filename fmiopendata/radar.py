@@ -65,10 +65,13 @@ class Radar(object):
                     msg = "WMS returned an exception: %s" % str(data)
                     raise ValueError(msg)
                 fid.write(data)
-                img = rasterio.open(fid.name)
-                self.projection = img.crs.wkt
-                self.data = img.read()
-                self._dtype = self.data.dtype
+                # The image is read back through the file name, so make sure the
+                # data have actually reached the file before it is opened
+                fid.flush()
+                with rasterio.open(fid.name) as img:
+                    self.projection = img.crs.wkt
+                    self.data = img.read()
+                    self._dtype = self.data.dtype
 
     def get_area_mask(self):
         """Get a mask for areas outside the detection range."""
