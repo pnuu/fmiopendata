@@ -183,7 +183,7 @@ import datetime as dt
 from fmiopendata.wfs import download_stored_query
 
 # Limit the time
-now = dt.datetime.utcnow()
+now = dt.datetime.now(dt.timezone.utc)
 # Depending on the current time and availability of the model data, adjusting
 # the hours below might be necessary to get any data
 start_time = now.strftime('%Y-%m-%dT00:00:00Z')
@@ -315,12 +315,12 @@ import datetime as dt
 from fmiopendata.wfs import download_stored_query
 
 # Retrieve the latest hour of data from a bounding box
-end_time = dt.datetime.utcnow()
+end_time = dt.datetime.now(dt.timezone.utc)
 start_time = end_time - dt.timedelta(hours=1)
 # Convert times to properly formatted strings
-start_time = start_time.isoformat(timespec="seconds") + "Z"
+start_time = start_time.strftime("%Y-%m-%dT%H:%M:%SZ")
 # -> 2020-07-07T12:00:00Z
-end_time = end_time.isoformat(timespec="seconds") + "Z"
+end_time = end_time.strftime("%Y-%m-%dT%H:%M:%SZ")
 # -> 2020-07-07T13:00:00Z
 
 obs = download_stored_query("fmi::observations::weather::multipointcoverage",
