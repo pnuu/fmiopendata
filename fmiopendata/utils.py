@@ -19,6 +19,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import datetime as dt
 import warnings
 
 import defusedxml
@@ -27,6 +28,12 @@ import requests
 
 EXCEPTION_TEXT = './/{http://www.opengis.net/ows/1.1}ExceptionText'
 CHUNK_SIZE = 1024 * 1024
+EPOCH = dt.datetime(1970, 1, 1)
+
+
+def epoch_to_datetime(seconds):
+    """Convert *seconds* since the Unix epoch to a naive UTC datetime."""
+    return EPOCH + dt.timedelta(seconds=float(seconds))
 
 
 def read_url(url):

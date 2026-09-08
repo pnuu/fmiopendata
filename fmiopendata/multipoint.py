@@ -25,7 +25,7 @@ import datetime as dt
 import numpy as np
 
 from fmiopendata import wfs
-from fmiopendata.utils import read_url
+from fmiopendata.utils import epoch_to_datetime, read_url
 
 TIME_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
 
@@ -114,7 +114,7 @@ def _parse_positions(xml):
 
 
 def _parse_times(xml, positions):
-    times = np.array([dt.datetime(1970, 1, 1) + dt.timedelta(seconds=t) for t in positions[2::3]])
+    times = np.array([epoch_to_datetime(t) for t in positions[2::3]])
     if times.size == 0:
         times = np.array([dt.datetime.strptime(xml.findtext(wfs.GML_TIME_POSITION), TIME_FORMAT)])
     return times

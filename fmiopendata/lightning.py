@@ -25,7 +25,7 @@ import datetime as dt
 import numpy as np
 
 from fmiopendata import wfs
-from fmiopendata.utils import read_url
+from fmiopendata.utils import epoch_to_datetime, read_url
 
 TIME_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
 
@@ -100,7 +100,7 @@ class Lightning(object):
         self.latitudes = positions[::3]
         self.longitudes = positions[1::3]
         times = positions[2::3]
-        self.times = np.array([dt.datetime.utcfromtimestamp(t) for t in times])
+        self.times = np.array([epoch_to_datetime(t) for t in times])
 
         data = np.fromstring(self._xml.findtext(wfs.GML_DOUBLE_OR_NIL_REASON_TUPLE_LIST), dtype=float, sep=" ")
         fields = [f.attrib['name'] for f in self._xml.findall(wfs.SWE_FIELD)]

@@ -25,7 +25,7 @@ import datetime as dt
 import numpy as np
 
 from fmiopendata import wfs
-from fmiopendata.utils import read_url
+from fmiopendata.utils import epoch_to_datetime, read_url
 
 TIME_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
 FIELD_NAMES = {"PAP_PT1S_AVG": "pressures",
@@ -96,7 +96,7 @@ class ParseSoundings(object):
             sounding.lons = positions[1::4]
             sounding.altitudes = positions[2::4]
             times = positions[3::4]
-            sounding.times = np.array([dt.datetime.utcfromtimestamp(t) for t in times])
+            sounding.times = np.array([epoch_to_datetime(t) for t in times])
 
             data = np.fromstring(member.findtext(wfs.GML_DOUBLE_OR_NIL_REASON_TUPLE_LIST), dtype=float, sep=" ")
             fields = member.findall(wfs.SWE_FIELD)
