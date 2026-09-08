@@ -23,6 +23,9 @@
 """Test multipoint coverage parsers."""
 
 import datetime as dt
+from unittest import mock
+
+import pytest
 
 START_TIME = dt.datetime(2020, 7, 7, 12, 0, 0)
 START_TIME_OLD = dt.datetime(1969, 7, 7)
@@ -38,6 +41,7 @@ ARGS_OLD = ["bbox=24,59,26,61",
 ARGS_TIMESERIES = ["bbox=24,59,26,61", "timeseries=True"]
 
 
+@pytest.mark.network
 def test_multipoint_mareograph_default():
     """Test multipoint coverage parser for default query of mareograph data."""
     from fmiopendata.multipoint import download_and_parse
@@ -68,6 +72,7 @@ def _verify_multipoint_common(res):
     assert isinstance(meta["longitude"], float)
 
 
+@pytest.mark.network
 def test_multipoint_weather():
     """Test multipoint coverage parser for weather station data."""
     from fmiopendata.multipoint import download_and_parse
@@ -83,6 +88,7 @@ def test_multipoint_weather():
     assert end_time <= END_TIME
 
 
+@pytest.mark.network
 def test_old_multipoint_daily_weather():
     """Test multipoint coverage parser for daily weather station data for pre-1970s."""
     from fmiopendata.multipoint import download_and_parse
@@ -96,6 +102,7 @@ def test_old_multipoint_daily_weather():
     assert end_time <= END_TIME_OLD
 
 
+@pytest.mark.network
 def test_multipoint_weather_timeseries():
     """Test multipoint coverage parser for weather station data in timeseries mode."""
     from fmiopendata.multipoint import download_and_parse
@@ -117,10 +124,120 @@ def test_multipoint_weather_timeseries():
             assert "unit" in res.data[loc][measurement]
 
 
+@pytest.mark.network
 def test_multipoint_radionuclide():
     """Test multipoint coverage parser for radionuclide data."""
     from fmiopendata.multipoint import download_and_parse
 
+    # The query returns the latest measurements, so it takes no time range
     res = download_and_parse("stuk::observations::air::radionuclide-activity-concentration::latest::multipointcoverage",
-                             args=ARGS)
+                             args=["bbox=18,55,35,75"])
     _verify_multipoint_common(res)
+
+
+def test_args_are_not_modified():
+    """Test that the caller's argument list survives the call."""
+    from fmiopendata.multipoint import download_and_parse
+
+    args = ["bbox=24,59,26,61", "timeseries=True"]
+    with mock.patch("fmiopendata.multipoint.read_url"), \
+            mock.patch("fmiopendata.multipoint.MultiPoint") as MultiPoint:
+        download_and_parse("fmi::observations::weather::multipointcoverage", args=args)
+        download_and_parse("fmi::observations::weather::multipointcoverage", args=args)
+
+    assert args == ["bbox=24,59,26,61", "timeseries=True"]
+    # The marker is meant for this library, so it is not passed on to the service ...
+    for call in MultiPoint.mock_calls:
+        assert "timeseries" not in str(call.args)
+    # ... and both calls asked for the timeseries layout
+    assert MultiPoint.call_args_list[0].kwargs["timeseries"] is True
+    assert MultiPoint.call_args_list[1].kwargs["timeseries"] is True
+
+
+MULTIPOINT_XML = """<?xml version="1.0" encoding="UTF-8"?>
+<wfs:FeatureCollection xmlns:wfs="http://www.opengis.net/wfs/2.0"
+                       xmlns:gml="http://www.opengis.net/gml/3.2"
+                       xmlns:gmlcov="http://www.opengis.net/gmlcov/1.0"
+                       xmlns:swe="http://www.opengis.net/swe/2.0">
+  <gml:Point gml:id="point-fmisid-101059">
+    <gml:name>Kustavi Isokari</gml:name>
+    <gml:pos>60.7222 21.02681</gml:pos>
+  </gml:Point>
+  <gmlcov:positions>
+    60.7222 21.02681 1788868800
+    60.7222 21.02681 1788869400
+  </gmlcov:positions>
+  <gml:doubleOrNilReasonTupleList>
+    -6.7 1005.1
+    -6.5 1005.3
+  </gml:doubleOrNilReasonTupleList>
+  <swe:DataRecord>
+    <swe:field name="t2m">
+      <swe:Quantity>
+        <swe:label>%s</swe:label>
+        <swe:uom code="degC"/>
+      </swe:Quantity>
+    </swe:field>
+    <swe:field name="p_sea">
+      <swe:Quantity>
+        <swe:label>Pressure (msl)</swe:label>
+        <swe:uom code="hPa"/>
+      </swe:Quantity>
+    </swe:field>
+  </swe:DataRecord>
+</wfs:FeatureCollection>
+"""
+FIRST_TIME = dt.datetime(2026, 9, 8, 12, 0)
+SECOND_TIME = dt.datetime(2026, 9, 8, 12, 10)
+
+
+def test_parsing():
+    """Test parsing a response without downloading one."""
+    from fmiopendata.multipoint import MultiPoint
+
+    res = MultiPoint(MULTIPOINT_XML % "Air temperature", "fmi::observations::weather::multipointcoverage")
+
+    assert sorted(res.data) == [FIRST_TIME, SECOND_TIME]
+    assert res.data[FIRST_TIME]["Kustavi Isokari"]["Air temperature"] == {"value": -6.7, "units": "degC"}
+    assert res.data[SECOND_TIME]["Kustavi Isokari"]["Pressure (msl)"] == {"value": 1005.3, "units": "hPa"}
+    assert res.location_metadata["Kustavi Isokari"] == {"fmisid": 101059,
+                                                        "latitude": 60.7222,
+                                                        "longitude": 21.02681}
+
+
+def test_timeseries_parsing():
+    """Test parsing a response into the timeseries layout."""
+    from fmiopendata.multipoint import MultiPoint
+
+    res = MultiPoint(MULTIPOINT_XML % "Air temperature",
+                     "fmi::observations::weather::multipointcoverage", timeseries=True)
+
+    station = res.data["Kustavi Isokari"]
+    assert station["times"] == [FIRST_TIME, SECOND_TIME]
+    assert station["Air temperature"]["values"] == [-6.7, -6.5]
+    assert station["Air temperature"]["unit"] == "degC"
+
+
+def test_parameter_called_times():
+    """Test a parameter that would replace the measurement times."""
+    from fmiopendata.multipoint import MultiPoint
+
+    with pytest.warns(UserWarning, match='it is stored as "times \\(parameter\\)"'):
+        res = MultiPoint(MULTIPOINT_XML % "times",
+                         "fmi::observations::weather::multipointcoverage", timeseries=True)
+
+    station = res.data["Kustavi Isokari"]
+    assert station["times"] == [FIRST_TIME, SECOND_TIME]
+    assert station["times (parameter)"]["values"] == [-6.7, -6.5]
+
+
+def test_measurement_without_a_station():
+    """Test a measurement at a position no station is given for."""
+    from fmiopendata.multipoint import MultiPoint
+
+    xml = MULTIPOINT_XML.replace("60.7222 21.02681 1788869400", "1.0 2.0 1788869400")
+    with pytest.warns(UserWarning, match="No station metadata for location"):
+        res = MultiPoint(xml % "Air temperature", "fmi::observations::weather::multipointcoverage")
+
+    # The measurement that does have a station is kept
+    assert sorted(res.data) == [FIRST_TIME]

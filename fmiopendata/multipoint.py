@@ -19,15 +19,20 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import defusedxml.ElementTree as ET
 import datetime as dt
+import warnings
+
+import defusedxml.ElementTree as ET
 
 import numpy as np
 
-from fmiopendata import wfs
-from fmiopendata.utils import read_url
+from fmiopendata import namespaces, wfs
+from fmiopendata.utils import epoch_to_datetime, read_cached_xml, read_url
 
 TIME_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
+COORDINATE_DECIMALS = 5
+# The key the measurement times are kept under in the timeseries layout
+TIMES_KEY = "times"
 
 
 class MultiPoint(object):
@@ -39,6 +44,7 @@ class MultiPoint(object):
         self.data = dict()
         self.location_metadata = dict()
         self._location2name = dict()
+        self._unknown_locations = set()
         self._timeseries = timeseries
 
         if "radionuclide-activity-concentration" in query_id:
@@ -48,31 +54,44 @@ class MultiPoint(object):
 
     def _parse_radionuclide(self):
         """Parse radionuclide data."""
-        for member in self._xml.findall(wfs.WFS_MEMBER):
+        for member in self._xml.findall(namespaces.WFS_MEMBER):
             self._parse(member)
 
     def _parse_location_metadata(self, xml):
         """Parse location metadata."""
-        for point in xml.findall(wfs.GML_POINT):
-            fmisid = int(point.attrib[wfs.GML_ID].split('-')[-1])
-            name = point.findtext(wfs.GML_NAME)
-            location = tuple(float(p) for p in point.findtext(wfs.GML_POS).split())
+        for point in xml.findall(namespaces.GML_POINT):
+            fmisid = int(point.attrib[namespaces.GML_ID].split('-')[-1])
+            name = point.findtext(namespaces.GML_NAME)
+            location = tuple(float(p) for p in point.findtext(namespaces.GML_POS).split())
             self.location_metadata[name] = dict({"fmisid": fmisid,
                                                  "latitude": location[0],
                                                  "longitude": location[1]
                                                  })
-            self._location2name[location] = name
+            self._location2name[_location_key(*location)] = name
+
+    def _name_for_location(self, latitude, longitude):
+        """Get the name of the station at the given coordinates."""
+        key = _location_key(latitude, longitude)
+        try:
+            return self._location2name[key]
+        except KeyError:
+            if key not in self._unknown_locations:
+                self._unknown_locations.add(key)
+                warnings.warn("No station metadata for location %s, "
+                              "its measurements are skipped" % (key,), stacklevel=2)
+            return None
 
     def _parse(self, xml):
         """Parse data."""
+        positions_txt = xml.findtext(namespaces.GMLCOV_POSITIONS)
+        if positions_txt is None:
+            warnings.warn("No observations found", stacklevel=2)
+            return
+
         self._parse_location_metadata(xml)
 
         type2obs = _parse_names_and_units(xml)
-        try:
-            positions = _parse_positions(xml)
-        except TypeError:
-            print("No observations found")
-            return
+        positions = _parse_positions(positions_txt)
         latitudes = positions[::3]
         longitudes = positions[1::3]
         times = _parse_times(xml, positions)
@@ -84,23 +103,27 @@ class MultiPoint(object):
             self._collect_non_timeseries(type2obs, latitudes, longitudes, times, measurements)
 
     def _collect_timeseries(self, type2obs, latitudes, longitudes, times, measurements):
+        parameter_names = _timeseries_names(type2obs)
         for i, tim in enumerate(times):
-            loc = (latitudes[i], longitudes[i])
-            name = self._location2name[loc]
+            name = self._name_for_location(latitudes[i], longitudes[i])
+            if name is None:
+                continue
             if name not in self.data:
-                self.data[name] = dict(times=[])
-            self.data[name]["times"].append(tim)
+                self.data[name] = {TIMES_KEY: []}
+            self.data[name][TIMES_KEY].append(tim)
             for j, key in enumerate(type2obs.keys()):
-                if type2obs[key]["name"] not in self.data[name]:
-                    self.data[name][type2obs[key]["name"]] = {"values": [], "unit": type2obs[key]["units"]}
-                self.data[name][type2obs[key]["name"]]["values"].append(measurements[i, j])
+                parameter = parameter_names[key]
+                if parameter not in self.data[name]:
+                    self.data[name][parameter] = {"values": [], "unit": type2obs[key]["units"]}
+                self.data[name][parameter]["values"].append(measurements[i, j])
 
     def _collect_non_timeseries(self, type2obs, latitudes, longitudes, times, measurements):
         for i, tim in enumerate(times):
+            name = self._name_for_location(latitudes[i], longitudes[i])
+            if name is None:
+                continue
             if tim not in self.data:
                 self.data[tim] = dict()
-            loc = (latitudes[i], longitudes[i])
-            name = self._location2name[loc]
             if name not in self.data[tim]:
                 self.data[tim][name] = dict()
             for j, key in enumerate(type2obs.keys()):
@@ -109,38 +132,71 @@ class MultiPoint(object):
                                                                     })
 
 
-def _parse_positions(xml):
-    return np.fromstring(xml.findtext(wfs.GMLCOV_POSITIONS), dtype=float, sep=" ")
+def _timeseries_names(type2obs):
+    """Get the key each parameter is stored under in the timeseries layout.
+
+    The measurement times share the dictionary with the parameters, so a parameter
+    of that name would replace them.
+    """
+    names = dict()
+    for key, observation in type2obs.items():
+        name = observation["name"]
+        if name == TIMES_KEY:
+            name = "%s (parameter)" % name
+            warnings.warn('A parameter is called "%s", which is where the measurement '
+                          'times are kept, so it is stored as "%s"' % (TIMES_KEY, name),
+                          stacklevel=2)
+        names[key] = name
+
+    return names
+
+
+def _location_key(latitude, longitude):
+    """Build the key used to match a measurement position to a station.
+
+    The station coordinates and the measurement positions are read from two
+    different elements of the response, so they are rounded to a fixed precision
+    before they are compared.
+    """
+    return (round(float(latitude), COORDINATE_DECIMALS),
+            round(float(longitude), COORDINATE_DECIMALS))
+
+
+def _parse_positions(positions_txt):
+    return np.fromstring(positions_txt, dtype=float, sep=" ")
 
 
 def _parse_times(xml, positions):
-    times = np.array([dt.datetime(1970, 1, 1) + dt.timedelta(seconds=t) for t in positions[2::3]])
+    times = np.array([epoch_to_datetime(t) for t in positions[2::3]])
     if times.size == 0:
-        times = np.array([dt.datetime.strptime(xml.findtext(wfs.GML_TIME_POSITION), TIME_FORMAT)])
+        times = np.array([dt.datetime.strptime(xml.findtext(namespaces.GML_TIME_POSITION), TIME_FORMAT)])
     return times
 
 
 def _parse_measurements(xml, shape):
-    measurements = np.fromstring(xml.findtext(wfs.GML_DOUBLE_OR_NIL_REASON_TUPLE_LIST), dtype=float, sep=" ")
+    measurements = np.fromstring(xml.findtext(namespaces.GML_DOUBLE_OR_NIL_REASON_TUPLE_LIST), dtype=float, sep=" ")
     return np.reshape(measurements, shape)
 
 
 def _parse_names_and_units(xml):
     type2obs = dict()
 
-    for field in xml.findall(wfs.SWE_FIELD):
+    for field in xml.findall(namespaces.SWE_FIELD):
         typ = field.attrib["name"]
-        try:
-            url = field.attrib[wfs.LINK]
-            root = ET.fromstring(read_url(url))
-            name = root.findtext(wfs.OMOP_LABEL)
+        url = field.attrib.get(namespaces.LINK)
+        if url is None:
+            # The label and unit are given inline
+            name = field.findtext(namespaces.SWE_LABEL)
+            units = field.find(namespaces.SWE_UOM).attrib['code']
+        else:
+            # They are in a separate metadata document.  The same document is
+            # referred to by every member of a response, so it is cached.
+            root = read_cached_xml(url)
+            name = root.findtext(namespaces.OMOP_LABEL)
             try:
-                units = root.find(wfs.OMOP_UOM).attrib["uom"]
+                units = root.find(namespaces.OMOP_UOM).attrib["uom"]
             except AttributeError:
                 units = ''
-        except KeyError:
-            name = field.findtext(wfs.SWE_LABEL)
-            units = field.find(wfs.SWE_UOM).attrib['code']
         type2obs[typ] = dict({"name": name, "units": units})
 
     return type2obs
@@ -148,11 +204,11 @@ def _parse_names_and_units(xml):
 
 def download_and_parse(query_id, args=None):
     """Download and parse the given stored query."""
-    timeseries = False
-    if args is None:
-        args = []
-    if "timeseries=True" in args:
-        timeseries = True
+    # Work on a copy: "timeseries=True" is a marker for this library rather than a
+    # query argument, and removing it must not modify the caller's list.
+    args = list(args) if args else []
+    timeseries = "timeseries=True" in args
+    if timeseries:
         args.remove("timeseries=True")
     url = wfs.STORED_QUERY_URL + query_id
     if args:

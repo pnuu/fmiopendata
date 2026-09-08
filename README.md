@@ -13,6 +13,9 @@ Python interface for FMI open data
 pip install fmiopendata
 ```
 
+This installs the libraries every parser needs: `numpy`, `requests` and
+`defusedxml`.
+
 For `grid` datasets install also `eccodes`. Both the library and
 Python bindings are needed. The former is easiest to install with
 `conda` and the latter via `pip`:
@@ -45,6 +48,28 @@ wfs_html.py
 ```
 
 The `Query ID` is the handle that can be used to request data from WFS stored queries. See examples below.
+
+Both scripts take the output file name as an argument.  They default to HTML,
+which any browser renders locally, and write Markdown instead when the name does
+not end in `html` - that is what the catalogues kept in this repository are, so
+that GitHub renders them:
+```bash
+
+wms_html.py wms.md
+wfs_html.py wfs.md
+```
+
+The `wfs.md` and `wms.md` catalogues in this repository are made this way, and
+are worth regenerating now and then: FMI adds and retires layers and queries.
+
+## Errors and missing data
+
+A request the services refuse does not raise: `fmiopendata` warns with the
+message the service sent and carries on, and the parser then usually returns an
+empty result.  A query that returns nothing warns as well.  So do the cases
+where a response is not self consistent, such as a sounding whose measurements
+and locations do not match.  Attributes for data a product does not carry are
+left as `None`, which is worth checking before using them.
 
 ## Examples
 
@@ -142,7 +167,8 @@ Radar.etop_threshold  # Reflectivity limit for `etop` datasets
 Radar.label  # Clear-text name for the data
 Radar.max_velocity  # Maximum wind speed for `vrad` datasets
 Radar.name  # Name of the dataset
-Radar.projection  # WKT projection string for the dataset
+Radar.projection  # CRS identifier of the dataset, e.g. "EPSG:3067"
+Radar.projection_wkt  # WKT projection string, if .download() has been called
 Radar.time  # Nominal measurement time of the dataset
 Radar.unit  # Unit of the calibrated data
 Radar.url  # Direct download URL for the data
@@ -183,7 +209,7 @@ import datetime as dt
 from fmiopendata.wfs import download_stored_query
 
 # Limit the time
-now = dt.datetime.utcnow()
+now = dt.datetime.now(dt.timezone.utc)
 # Depending on the current time and availability of the model data, adjusting
 # the hours below might be necessary to get any data
 start_time = now.strftime('%Y-%m-%dT00:00:00Z')
@@ -315,12 +341,12 @@ import datetime as dt
 from fmiopendata.wfs import download_stored_query
 
 # Retrieve the latest hour of data from a bounding box
-end_time = dt.datetime.utcnow()
+end_time = dt.datetime.now(dt.timezone.utc)
 start_time = end_time - dt.timedelta(hours=1)
 # Convert times to properly formatted strings
-start_time = start_time.isoformat(timespec="seconds") + "Z"
+start_time = start_time.strftime("%Y-%m-%dT%H:%M:%SZ")
 # -> 2020-07-07T12:00:00Z
-end_time = end_time.isoformat(timespec="seconds") + "Z"
+end_time = end_time.strftime("%Y-%m-%dT%H:%M:%SZ")
 # -> 2020-07-07T13:00:00Z
 
 obs = download_stored_query("fmi::observations::weather::multipointcoverage",
@@ -386,7 +412,9 @@ print(obs.location_metadata["Kustavi Isokari"])
 ```
 
 It is also possible to collect the data to a structure more usable for timeseries
-analysis by adding `"timeseries=True"` to the arguments:
+analysis by adding `"timeseries=True"` to the arguments.  This one is read by
+`fmiopendata` itself rather than sent to the service, so it has to be written
+exactly like that, and the argument list you pass in is left as it was:
 
 ```python
 
@@ -504,3 +532,28 @@ This parser supports at least the following stored queries:
 * `stuk::observations::external-radiation::latest::multipointcoverage`
 * `stuk::observations::external-radiation::multipointcoverage`
 * `urban::observations::airquality::hourly::multipointcoverage`
+
+## Development
+
+Run the tests with
+
+```bash
+
+pytest fmiopendata/tests
+```
+
+Most of the tests download from the FMI services, so they need a network
+connection and they fail when a stored query or a WMS layer is broken at the
+other end.  The ones that do not are marked, and can be run on their own:
+
+```bash
+
+pytest -m "not network" fmiopendata/tests
+```
+
+The style checks are run with
+
+```bash
+
+pre-commit run --all-files
+```

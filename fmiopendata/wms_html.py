@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
 # Copyright (c) Panu Lahtinen
@@ -20,8 +19,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import sys
+"""List the WMS layers available in FMI open data."""
+
 import datetime as dt
+import sys
 
 from fmiopendata.wms import get_wms_layers
 
@@ -66,8 +67,8 @@ def write_times(fid, layer):
     if layer.time_step_str:
         fid.write("<li>Available times:</li>")
         fid.write("<ul>")
-        fid.write("<li>Earliest: %s</li>" % dt.datetime.strftime(min(layer.times), TIME_FORMAT))
-        fid.write("<li>Latest: %s</li>" % dt.datetime.strftime(max(layer.times), TIME_FORMAT))
+        fid.write("<li>Earliest: %s</li>" % dt.datetime.strftime(layer.start_time, TIME_FORMAT))
+        fid.write("<li>Latest: %s</li>" % dt.datetime.strftime(layer.end_time, TIME_FORMAT))
         fid.write("<li>%s</li>" % layer.time_step_str)
         fid.write("</ul>")
 
@@ -86,7 +87,7 @@ def write_html(fname, layers):
     """Save HTML page showing the WMS layers."""
     with open(fname, 'w') as fid:
         fid.write("<html><body>")
-        fid.write("<h1>Available WMS layers in FMI open data.</hi>")
+        fid.write("<h1>Available WMS layers in FMI open data.</h1>")
         for key in sorted(layers):
             layer = layers[key]
             write_title(fid, layer)
@@ -100,6 +101,66 @@ def write_html(fname, layers):
         fid.write("</body></html>")
 
 
+def write_title_md(fid, layer):
+    """Write title of the layer in markdown."""
+    fid.write("## %s\n\n" % layer.title)
+
+
+def write_abstract_md(fid, layer):
+    """Write abstract of the layer in markdown."""
+    if layer.abstract:
+        fid.write("%s\n\n" % layer.abstract)
+
+
+def write_name_md(fid, layer):
+    """Write name of the layer in markdown."""
+    fid.write("* Layer ID: `%s`\n" % layer.name)
+
+
+def write_bbox_md(fid, layer):
+    """Write bounding boxes and CRSs available for the layer in markdown."""
+    if layer.bbox:
+        fid.write("* Bounding boxes:\n")
+        for bbox in layer.bbox:
+            fid.write("    * %s\n" % bbox['CRS'])
+            fid.write("        * X min: %s\n" % bbox['minx'])
+            fid.write("        * X max: %s\n" % bbox['maxx'])
+            fid.write("        * Y min: %s\n" % bbox['miny'])
+            fid.write("        * Y max: %s\n" % bbox['maxy'])
+
+
+def write_times_md(fid, layer):
+    """Write earliest and latest times, and time step for the layer in markdown."""
+    if layer.time_step_str:
+        fid.write("* Available times:\n")
+        fid.write("    * Earliest: %s\n" % dt.datetime.strftime(layer.start_time, TIME_FORMAT))
+        fid.write("    * Latest: %s\n" % dt.datetime.strftime(layer.end_time, TIME_FORMAT))
+        fid.write("    * %s\n" % layer.time_step_str)
+
+
+def write_elevations_md(fid, layer):
+    """Write available elevations for the layer in markdown."""
+    if layer.elevations:
+        fid.write("* Elevations:\n")
+        for elev in layer.elevations:
+            fid.write("    * %s\n" % elev)
+
+
+def write_md(fname, layers):
+    """Save markdown page showing the WMS layers."""
+    with open(fname, 'w') as fid:
+        fid.write("# Available WMS layers in FMI open data.\n\n")
+        for key in sorted(layers):
+            layer = layers[key]
+            write_title_md(fid, layer)
+            write_abstract_md(fid, layer)
+            write_name_md(fid, layer)
+            write_bbox_md(fid, layer)
+            write_times_md(fid, layer)
+            write_elevations_md(fid, layer)
+            fid.write("\n\n")
+
+
 def main():
     """Run the script."""
     try:
@@ -108,7 +169,10 @@ def main():
         fname = "wms.html"
 
     layers = get_wms_layers()
-    write_html(fname, layers)
+    if fname.endswith("html"):
+        write_html(fname, layers)
+    else:
+        write_md(fname, layers)
 
 
 if __name__ == "__main__":

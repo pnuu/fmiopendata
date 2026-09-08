@@ -5,6 +5,53 @@ on:
   - pull_request
 
 jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install pre-commit
+        run: pip install pre-commit
+
+      - name: Run the checks
+        run: pre-commit run --all-files
+
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Build the distributions
+        run: |
+          pip install build twine
+          python -m build
+          twine check dist/*
+
+      # The test job installs with --no-deps from a conda environment, so this is
+      # the only place the declared dependencies and entry points are exercised.
+      # The radar and grid extras are left out: they need libraries that do not
+      # come from PyPI alone.
+      - name: Install the wheel
+        run: pip install dist/*.whl
+
+      - name: Check what the wheel installed
+        run: |
+          python -c "import fmiopendata; print(fmiopendata.__version__)"
+          command -v wfs_html.py
+          command -v wms_html.py
+
   build:
     runs-on: ubuntu-latest
     strategy:
@@ -38,7 +85,7 @@ jobs:
           pytest --cov=fmiopendata fmiopendata/tests --cov-report=xml
 
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v1
+        uses: codecov/codecov-action@v5
         with:
-          file: ./coverage.xml
+          files: ./coverage.xml
           env_vars: PYTHON_VERSION
