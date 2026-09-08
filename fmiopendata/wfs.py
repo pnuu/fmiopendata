@@ -62,6 +62,7 @@ SWE_FIELD = ".//{http://www.opengis.net/swe/2.0}field"
 SWE_LABEL = ".//{http://www.opengis.net/swe/2.0}label"
 SWE_UOM = ".//{http://www.opengis.net/swe/2.0}uom"
 WFS_ABSTRACT = ".//{http://www.opengis.net/wfs/2.0}Abstract"
+WFS_ABSTRACT_ELEMENT = "{http://www.opengis.net/wfs/2.0}Abstract"
 WFS_BS_WFS_ELEMENT = ".//{http://xml.fmi.fi/schema/wfs/2.0}BsWfsElement"
 WFS_MEMBER = ".//{http://www.opengis.net/wfs/2.0}member"
 WFS_PARAMETER = ".//{http://www.opengis.net/wfs/2.0}Parameter"
@@ -71,6 +72,7 @@ WFS_RETURN_FEATURE_TYPE = ".//{http://www.opengis.net/wfs/2.0}ReturnFeatureType"
 WFS_STORED_QUERY = ".//{http://www.opengis.net/wfs/2.0}StoredQuery"
 WFS_TIME = ".//{http://xml.fmi.fi/schema/wfs/2.0}Time"
 WFS_TITLE = ".//{http://www.opengis.net/wfs/2.0}Title"
+WFS_TITLE_ELEMENT = "{http://www.opengis.net/wfs/2.0}Title"
 
 
 def get_req_xml(req):
@@ -83,6 +85,14 @@ def get_capabilities():
     xml = get_req_xml("getCapabilities")
 
     return xml
+
+
+def _get_text(element, tag):
+    """Get the stripped text of the first child of *element* with the given *tag*."""
+    text = element.findtext(tag)
+    if text is None:
+        return None
+    return text.strip()
 
 
 def _is_by_id_query(query_id):
@@ -115,10 +125,8 @@ def get_stored_query_descriptions():
     for f in root:
         if _is_by_id_query(f.attrib['id']):
             continue
-        f_ch = list(f)
-        desc = dict({'title': f_ch[0].text.strip(),
-                     'description': f_ch[1].text.strip()})
-        res[f.attrib['id']] = desc
+        res[f.attrib['id']] = dict({'title': _get_text(f, WFS_TITLE_ELEMENT),
+                                    'description': _get_text(f, WFS_ABSTRACT_ELEMENT)})
 
     return res
 
