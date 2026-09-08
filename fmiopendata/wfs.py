@@ -85,6 +85,11 @@ def get_capabilities():
     return xml
 
 
+def _is_by_id_query(query_id):
+    """Tell whether *query_id* returns one identified data set instead of a search."""
+    return "ById" in query_id
+
+
 def get_stored_queries():
     """Get stored queries."""
     queries = get_req_xml("ListStoredQueries")
@@ -93,7 +98,7 @@ def get_stored_queries():
     queries = root.findall(WFS_STORED_QUERY)
     for query in queries:
         name = query.attrib['id']
-        if "ById" in name:
+        if _is_by_id_query(name):
             continue
         title = query.findtext(WFS_TITLE)
         return_type = query.findtext(WFS_RETURN_FEATURE_TYPE)
@@ -108,7 +113,7 @@ def get_stored_query_descriptions():
     res = dict()
     root = ET.fromstring(descriptions)
     for f in root:
-        if f.attrib['id'] == 'GetDataSetById':
+        if _is_by_id_query(f.attrib['id']):
             continue
         f_ch = list(f)
         desc = dict({'title': f_ch[0].text.strip(),
