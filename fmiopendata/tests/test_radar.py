@@ -29,6 +29,7 @@ import pytest
 
 
 @pytest.mark.xfail(raises=AssertionError, reason="Broken WMS layer")
+@pytest.mark.network
 def test_single_vrad():
     """Test radar radial velocity."""
     from fmiopendata.radar import download_and_parse
@@ -46,6 +47,7 @@ def test_single_vrad():
 
 
 @pytest.mark.xfail(raises=AssertionError, reason="Broken WMS layer")
+@pytest.mark.network
 def test_single_dbz():
     """Test radar reflectivity dBZ."""
     from fmiopendata.radar import download_and_parse
@@ -63,6 +65,7 @@ def test_single_dbz():
 
 
 @pytest.mark.xfail(raises=AssertionError, reason="Broken WMS layer")
+@pytest.mark.network
 def test_single_hclass():
     """Test radar hydroclass."""
     from fmiopendata.radar import download_and_parse
@@ -79,6 +82,7 @@ def test_single_hclass():
     _check_radar(data, name="hclass", unit="Index", dtype=np.uint8)
 
 
+@pytest.mark.network
 def test_single_etop_20():
     """Test radar echo top height."""
     from fmiopendata.radar import download_and_parse
@@ -99,6 +103,7 @@ def test_single_etop_20():
     _check_radar(data, name="etop", unit="m", dtype=np.uint8)
 
 
+@pytest.mark.network
 def test_composite_dbz():
     """Test radar composite dBZ."""
     from fmiopendata.radar import download_and_parse
@@ -115,6 +120,7 @@ def test_composite_dbz():
     _check_radar(data, name="dbz", unit="dBZ", dtype=np.uint8)
 
 
+@pytest.mark.network
 def test_composite_rr():
     """Test radar composite rain rate."""
     from fmiopendata.radar import download_and_parse
@@ -131,6 +137,7 @@ def test_composite_rr():
     _check_radar(data, name="rr", unit="mm/h", dtype=np.uint16)
 
 
+@pytest.mark.network
 def test_composite_rr1h():
     """Test radar composite 1 hour accumulated rain rainfall."""
     from fmiopendata.radar import download_and_parse
@@ -147,6 +154,7 @@ def test_composite_rr1h():
     _check_radar(data, name="rr1h", unit="mm", dtype=np.uint16)
 
 
+@pytest.mark.network
 def test_composite_rr12h():
     """Test radar composite 12 hour accumulated rain rainfall."""
     from fmiopendata.radar import download_and_parse
@@ -163,6 +171,7 @@ def test_composite_rr12h():
     _check_radar(data, name="rr12h", unit="mm", dtype=np.uint16)
 
 
+@pytest.mark.network
 def test_composite_rr24h():
     """Test radar composite 24 hour accumulated rain rainfall."""
     from fmiopendata.radar import download_and_parse

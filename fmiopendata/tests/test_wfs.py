@@ -26,6 +26,7 @@ from unittest import mock
 import pytest
 
 
+@pytest.mark.network
 def test_get_capabilities():
     """Test downloading WFS capabilities."""
     from fmiopendata.wfs import get_capabilities
@@ -34,6 +35,7 @@ def test_get_capabilities():
     assert "WFS_Capabilities" in str(res)
 
 
+@pytest.mark.network
 def test_get_stored_queries():
     """Test downloading and parsing WFS stored queries."""
     from fmiopendata.wfs import get_stored_queries
@@ -44,6 +46,7 @@ def test_get_stored_queries():
         assert "title" in res[key]
 
 
+@pytest.mark.network
 def test_get_stored_query_descriptions():
     """Test downloading stored query descriptions."""
     from fmiopendata.wfs import get_stored_query_descriptions

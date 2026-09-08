@@ -32,6 +32,7 @@ import pytest
 ARGS = ["bbox=24,59,26,61", "parameters=temperature"]
 
 
+@pytest.mark.network
 def test_grid():
     """Test parsing grid data."""
     from fmiopendata.grid import download_and_parse

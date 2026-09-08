@@ -24,7 +24,10 @@
 
 from unittest import mock
 
+import pytest
 
+
+@pytest.mark.network
 def test_sounding():
     """Test sounding parser."""
     from fmiopendata.sounding import download_and_parse

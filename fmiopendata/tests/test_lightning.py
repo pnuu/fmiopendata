@@ -35,6 +35,7 @@ ARGS = ["starttime=" + START_TIME.isoformat(timespec="seconds") + "Z",
         "endtime=" + END_TIME.isoformat(timespec="seconds") + "Z"]
 
 
+@pytest.mark.network
 def test_lightning():
     """Test parsing lightning data."""
     from fmiopendata.lightning import download_and_parse

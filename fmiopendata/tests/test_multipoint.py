@@ -24,6 +24,8 @@
 
 import datetime as dt
 
+import pytest
+
 START_TIME = dt.datetime(2020, 7, 7, 12, 0, 0)
 START_TIME_OLD = dt.datetime(1969, 7, 7)
 END_TIME = dt.datetime(2020, 7, 7, 12, 5, 0)
@@ -38,6 +40,7 @@ ARGS_OLD = ["bbox=24,59,26,61",
 ARGS_TIMESERIES = ["bbox=24,59,26,61", "timeseries=True"]
 
 
+@pytest.mark.network
 def test_multipoint_mareograph_default():
     """Test multipoint coverage parser for default query of mareograph data."""
     from fmiopendata.multipoint import download_and_parse
@@ -68,6 +71,7 @@ def _verify_multipoint_common(res):
     assert isinstance(meta["longitude"], float)
 
 
+@pytest.mark.network
 def test_multipoint_weather():
     """Test multipoint coverage parser for weather station data."""
     from fmiopendata.multipoint import download_and_parse
@@ -83,6 +87,7 @@ def test_multipoint_weather():
     assert end_time <= END_TIME
 
 
+@pytest.mark.network
 def test_old_multipoint_daily_weather():
     """Test multipoint coverage parser for daily weather station data for pre-1970s."""
     from fmiopendata.multipoint import download_and_parse
@@ -96,6 +101,7 @@ def test_old_multipoint_daily_weather():
     assert end_time <= END_TIME_OLD
 
 
+@pytest.mark.network
 def test_multipoint_weather_timeseries():
     """Test multipoint coverage parser for weather station data in timeseries mode."""
     from fmiopendata.multipoint import download_and_parse
@@ -117,6 +123,7 @@ def test_multipoint_weather_timeseries():
             assert "unit" in res.data[loc][measurement]
 
 
+@pytest.mark.network
 def test_multipoint_radionuclide():
     """Test multipoint coverage parser for radionuclide data."""
     from fmiopendata.multipoint import download_and_parse
