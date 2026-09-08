@@ -28,6 +28,12 @@ from fmiopendata import wfs
 from fmiopendata.utils import epoch_to_datetime, read_url
 
 TIME_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
+# Parameters of the "simple" format, and the type they are presented in
+SIMPLE_PARAMETERS = {"multiplicity": np.uint8,
+                     "peak_current": None,
+                     "cloud_indicator": np.uint8,
+                     "ellipse_major": None,
+                     }
 
 
 class Lightning(object):
@@ -55,35 +61,29 @@ class Lightning(object):
 
         Version for fmi::observations::lightning::simple query.
 
+        Each flash is described by several members, one per parameter, so the
+        members are collected per flash before the arrays are built.  That way a
+        parameter that is missing or repeated for a flash cannot shift the other
+        parameters out of step with the locations.
+
         """
-        lats, lons, times, flash_ids = [], [], [], []
-        multiplicity, peak_current, cloud_indicator, ellipse_major = [], [], [], []
+        flashes = dict()
         for member in self._xml.findall(wfs.WFS_MEMBER):
             flash_id = _get_flash_id(member)
-            tim = dt.datetime.strptime(member.findtext(wfs.WFS_TIME), TIME_FORMAT)
-            lat, lon = [float(p) for p in member.findtext(wfs.GML_POS).split()]
-            if flash_id not in flash_ids:
-                lats.append(lat)
-                lons.append(lon)
-                times.append(tim)
-                flash_ids.append(flash_id)
+            if flash_id not in flashes:
+                flashes[flash_id] = {
+                    "time": dt.datetime.strptime(member.findtext(wfs.WFS_TIME), TIME_FORMAT),
+                    "location": [float(p) for p in member.findtext(wfs.GML_POS).split()],
+                }
             param = member.findtext(wfs.WFS_PARAMETER_NAME)
-            val = member.findtext(wfs.WFS_PARAMETER_VALUE)
-            if param == "multiplicity":
-                multiplicity.append(int(val))
-            elif param == "peak_current":
-                peak_current.append(float(val))
-            elif param == "cloud_indicator":
-                cloud_indicator.append(int(val))
-            elif param == "ellipse_major":
-                ellipse_major.append(float(val))
-        self.latitudes = np.array(lats)
-        self.longitudes = np.array(lons)
-        self.times = np.array(times)
-        self.multiplicity = np.array(multiplicity).astype(np.uint8)
-        self.peak_current = np.array(peak_current)
-        self.cloud_indicator = np.array(cloud_indicator).astype(np.uint8)
-        self.ellipse_major = np.array(ellipse_major)
+            if param in SIMPLE_PARAMETERS:
+                flashes[flash_id][param] = float(member.findtext(wfs.WFS_PARAMETER_VALUE))
+
+        self.latitudes = np.array([flash["location"][0] for flash in flashes.values()])
+        self.longitudes = np.array([flash["location"][1] for flash in flashes.values()])
+        self.times = np.array([flash["time"] for flash in flashes.values()])
+        for param, dtype in SIMPLE_PARAMETERS.items():
+            setattr(self, param, _collect_parameter(flashes, param, dtype))
 
     def _parse_multipoint(self):
         """Parse lightning data.
@@ -116,6 +116,18 @@ class Lightning(object):
         self.peak_current = np.array([])
         self.cloud_indicator = np.array([], dtype=np.uint8)
         self.ellipse_major = np.array([])
+
+
+def _collect_parameter(flashes, param, dtype):
+    """Collect the values of *param* from *flashes*, one per flash.
+
+    A flash the service did not give the parameter for gets a NaN, which also means
+    the array cannot be presented as an integer type in that case.
+    """
+    values = np.array([flash.get(param, np.nan) for flash in flashes.values()], dtype=float)
+    if dtype is not None and not np.isnan(values).any():
+        values = values.astype(dtype)
+    return values
 
 
 def _get_flash_id(member):
