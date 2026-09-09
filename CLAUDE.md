@@ -32,10 +32,11 @@ pytest fmiopendata/tests/test_multipoint.py::test_multipoint_weather
 pre-commit run --all-files
 ```
 
-The `rasterio` (radar) and `eccodes` (grid) dependencies are painful via pip; the CI
-environment in `continuous_integration/environment.yaml` installs them from
-conda-forge (`eccodes` needs both the conda library and the `eccodes` pip bindings).
-Recreate that environment locally when touching `radar.py` or `grid.py`.
+The optional dependencies — `rasterio` (radar), `eccodes` and `netCDF4` (grid) and
+`pandas` (the DataFrame interface) — are painful via pip; the CI environment in
+`continuous_integration/environment.yaml` installs them from conda-forge (`eccodes`
+needs both the conda library and the `eccodes` pip bindings). Recreate that
+environment locally when touching `radar.py`, `grid.py` or `multipoint.py`.
 
 ## Most tests hit the live FMI servers
 
