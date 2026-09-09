@@ -19,4 +19,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-__version__ = "0.5.0"
+"""Python library for accessing FMI open data."""
+
+from importlib.metadata import PackageNotFoundError, version
+
+try:
+    __version__ = version("fmiopendata")
+except PackageNotFoundError:
+    # The package is being used from a checkout that has not been installed
+    __version__ = "unknown"

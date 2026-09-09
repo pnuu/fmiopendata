@@ -1,6 +1,6 @@
 [build-system]
-requires = ["setuptools>=64"]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling", "hatch-vcs"]
+build-backend = "hatchling.build"
 
 [project]
 name = "fmiopendata"
@@ -35,11 +35,24 @@ Homepage = "https://github.com/pnuu/fmiopendata"
 "wfs_html.py" = "fmiopendata.wfs_html:main"
 "wms_html.py" = "fmiopendata.wms_html:main"
 
-[tool.setuptools]
-packages = ["fmiopendata"]
+# The version is the git tag, plus the distance from it when the checkout is not
+# exactly on one: a release is made by tagging it and nothing else
+[tool.hatch.version]
+source = "vcs"
 
-[tool.setuptools.dynamic]
-version = {attr = "fmiopendata.__version__"}
+[tool.hatch.build.targets.wheel]
+packages = ["fmiopendata"]
+exclude = ["fmiopendata/tests"]
+
+# Everything else in the checkout - the generated catalogues, the CI configuration,
+# the notes - is of no use to anyone installing the package.  The tests are, so
+# they are in the source distribution although they are not in the wheel
+[tool.hatch.build.targets.sdist]
+include = [
+    "/fmiopendata",
+    "/README.md",
+    "/setup.cfg",
+]
 
 [tool.pytest.ini_options]
 markers = ["network: the test downloads data from the FMI open data services"]
