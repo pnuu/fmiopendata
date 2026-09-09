@@ -9,7 +9,7 @@ readme = "README.md"
 authors = [{name = "Panu Lahtinen", email = "pnuu+git@iki.fi"}]
 license = "GPL-3.0-or-later"
 license-files = ["LICENSE"]
-requires-python = ">=3.10"
+requires-python = ">=3.12"
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Science/Research",
