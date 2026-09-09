@@ -66,7 +66,7 @@ jobs:
       - name: Setup Conda Environment
         uses: conda-incubator/setup-miniconda@v3
         with:
-          miniforge-version: latest
+          miniconda-version: latest
           python-version: ${{ matrix.python-version }}
           environment-file: continuous_integration/environment.yaml
           activate-environment: test-environment
