@@ -27,6 +27,9 @@ jobs:
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
+        with:
+          # The version comes from the tags, which a shallow checkout does not have
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -62,6 +65,9 @@ jobs:
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
+        with:
+          # The version comes from the tags, which a shallow checkout does not have
+          fetch-depth: 0
 
       - name: Setup Conda Environment
         uses: conda-incubator/setup-miniconda@v3
