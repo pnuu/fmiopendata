@@ -84,11 +84,11 @@ def test_grid():
         data.download()
     download_to_file.assert_not_called()
 
-    # Only a parser for "grib" format has been implemented
+    # GRIB and NetCDF are the formats there are parsers for
     earliest = min(res.data.keys())
     data = res.data[earliest]
     # Fake the URL
-    data.url = "format=netcdf"
+    data.url = "format=ascii"
     with pytest.raises(NotImplementedError):
         data.parse()
 
@@ -223,8 +223,8 @@ def test_unsupported_format():
     from fmiopendata.grid import Grid
 
     grid = Grid()
-    grid.url = "https://opendata.fmi.fi/download?producer=test&format=netcdf"
-    with pytest.raises(NotImplementedError, match="netcdf"):
+    grid.url = "https://opendata.fmi.fi/download?producer=test&format=ascii"
+    with pytest.raises(NotImplementedError, match="ascii"):
         grid.parse()
 
     # A URL that says nothing about the format is named as it is
@@ -245,3 +245,81 @@ def test_messages_that_share_a_key(tmp_path):
     np.testing.assert_allclose(level["2 metre temperature"]["data"][0, 0], 270.0)
     np.testing.assert_allclose(
         level["2 metre temperature (heightAboveGround, instant)"]["data"][0, 0], 271.0)
+
+
+def _write_netcdf(fname, levels=None):
+    """Write a small NetCDF file, with a level dimension when *levels* are given."""
+    import netCDF4
+
+    with netCDF4.Dataset(fname, "w", format="NETCDF4") as dataset:
+        dataset.createDimension("time", 2)
+        dataset.createDimension("lat", 3)
+        dataset.createDimension("lon", 4)
+        time = dataset.createVariable("time", "f8", ("time",))
+        time.units = "hours since 2026-09-08 18:00:00"
+        time[:] = [0, 1]
+        latitudes = dataset.createVariable("lat", "f8", ("lat",))
+        latitudes[:] = [60.0, 60.1, 60.2]
+        longitudes = dataset.createVariable("lon", "f8", ("lon",))
+        longitudes[:] = [24.5, 24.6, 24.7, 24.8]
+
+        dimensions = ("time", "lat", "lon")
+        shape = (2, 3, 4)
+        if levels is not None:
+            dataset.createDimension("level", len(levels))
+            dataset.createVariable("level", "f8", ("level",))[:] = levels
+            dimensions = ("time", "level", "lat", "lon")
+            shape = (2, len(levels), 3, 4)
+
+        variable = dataset.createVariable("AQIndex", "f4", dimensions, fill_value=MISSING_VALUE)
+        variable.units = "index"
+        variable.long_name = "Air Quality Index"
+        values = np.arange(int(np.prod(shape)), dtype=float).reshape(shape)
+        # One point the model has no value for
+        values.reshape(-1)[1] = MISSING_VALUE
+        variable[:] = values
+
+    return fname
+
+
+def _get_netcdf_grid(tmp_path, levels=None):
+    """Parse a NetCDF file the way a downloaded grid is parsed."""
+    from fmiopendata.grid import Grid
+
+    grid = Grid()
+    grid.url = "https://opendata.fmi.fi/download?producer=enfuser&format=netcdf"
+    grid._fname = _write_netcdf(str(tmp_path / "test.nc"), levels=levels)
+    grid.parse()
+
+    return grid
+
+
+def test_netcdf_parsing(tmp_path):
+    """Test parsing NetCDF data, which is how the air quality forecasts come."""
+    grid = _get_netcdf_grid(tmp_path)
+
+    first, second = sorted(grid.data)
+    assert first == dt.datetime(2026, 9, 8, 18, 0)
+    assert second == dt.datetime(2026, 9, 8, 19, 0)
+    # Without a level dimension everything is on one level, as GRIB data would be
+    assert list(grid.data[first]) == [0]
+
+    dataset = grid.data[first][0]["Air Quality Index"]
+    assert dataset["units"] == "index"
+    assert dataset["data"].shape == (3, 4) == grid.latitudes.shape == grid.longitudes.shape
+    np.testing.assert_allclose(dataset["data"][0], [0.0, np.nan, 2.0, 3.0])
+    np.testing.assert_allclose(grid.latitudes[:, 0], [60.0, 60.1, 60.2])
+    np.testing.assert_allclose(grid.longitudes[0], [24.5, 24.6, 24.7, 24.8])
+    # The second time is a grid of its own
+    np.testing.assert_allclose(grid.data[second][0]["Air Quality Index"]["data"][0],
+                               [12.0, 13.0, 14.0, 15.0])
+
+
+def test_netcdf_levels(tmp_path):
+    """Test NetCDF data that are given on several levels."""
+    grid = _get_netcdf_grid(tmp_path, levels=[0, 10])
+
+    first = min(grid.data)
+    assert sorted(grid.data[first]) == [0, 10]
+    np.testing.assert_allclose(grid.data[first][10]["Air Quality Index"]["data"][0],
+                               [12.0, 13.0, 14.0, 15.0])
