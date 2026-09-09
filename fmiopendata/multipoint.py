@@ -103,6 +103,62 @@ class MultiPoint(object):
         else:
             self._collect_non_timeseries(type2obs, latitudes, longitudes, times, measurements)
 
+    def to_dataframe(self, exclude_empty=False):
+        """Collect the observations into a pandas DataFrame.
+
+        The frame is indexed by the observation time and the station name, and has a
+        column per observed parameter.  The units are in ``frame.attrs["units"]`` and
+        the station coordinates in ``frame.attrs["location_metadata"]``, since a
+        DataFrame has nowhere else to keep them.
+
+        With *exclude_empty* the columns that hold no values at all are left out;
+        querying a bounding box tends to produce a few of those.
+        """
+        pd = _import_pandas()
+
+        index, rows, units = self._collect_rows()
+        frame = pd.DataFrame(rows, index=pd.MultiIndex.from_tuples(
+            index, names=["time", "location"])).sort_index()
+        if exclude_empty:
+            frame = frame.dropna(axis=1, how="all")
+        frame.attrs["units"] = {name: unit for name, unit in units.items() if name in frame}
+        frame.attrs["location_metadata"] = self.location_metadata
+
+        return frame
+
+    def _collect_rows(self):
+        """Collect the observations as one row per time and station."""
+        index, rows, units = [], [], dict()
+
+        for time, name, measurements in self._iterate_observations():
+            index.append((time, name))
+            row = dict()
+            for parameter, measurement in measurements.items():
+                row[parameter] = measurement["value"]
+                units.setdefault(parameter, measurement["units"])
+            rows.append(row)
+
+        return index, rows, units
+
+    def _iterate_observations(self):
+        """Go through the data as (time, station, {parameter: {value, units}}).
+
+        The two layouts keep the same observations in a different shape, and a frame
+        is built from either of them.
+        """
+        if not self._timeseries:
+            for time, stations in self.data.items():
+                for name, measurements in stations.items():
+                    yield time, name, measurements
+            return
+
+        for name, station in self.data.items():
+            parameters = [key for key in station if key != TIMES_KEY]
+            for i, time in enumerate(station[TIMES_KEY]):
+                yield time, name, {parameter: {"value": station[parameter]["values"][i],
+                                               "units": station[parameter]["unit"]}
+                                   for parameter in parameters}
+
     def _collect_timeseries(self, type2obs, latitudes, longitudes, times, measurements):
         parameter_names = _timeseries_names(type2obs)
         for i, tim in enumerate(times):
@@ -131,6 +187,18 @@ class MultiPoint(object):
                 self.data[tim][name][type2obs[key]["name"]] = dict({"value": measurements[i, j],
                                                                     "units": type2obs[key]["units"]
                                                                     })
+
+
+def _import_pandas():
+    """Import pandas, explaining what to install when it is not there."""
+    try:
+        import pandas
+    except ImportError:
+        raise ImportError("Collecting the observations into a DataFrame requires "
+                          "pandas, which comes with the \"pandas\" extra of "
+                          "fmiopendata") from None
+
+    return pandas
 
 
 def _timeseries_names(type2obs):

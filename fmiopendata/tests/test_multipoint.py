@@ -293,3 +293,60 @@ def test_measurement_without_a_station():
 
     # The measurement that does have a station is kept
     assert sorted(res.data) == [FIRST_TIME]
+
+
+def test_to_dataframe():
+    """Test collecting the observations into a DataFrame."""
+    from fmiopendata.multipoint import MultiPoint
+
+    res = MultiPoint(MULTIPOINT_XML % "Air temperature", "fmi::observations::weather::multipointcoverage")
+    frame = res.to_dataframe()
+
+    assert list(frame.index.names) == ["time", "location"]
+    assert list(frame.index) == [(FIRST_TIME, "Kustavi Isokari"), (SECOND_TIME, "Kustavi Isokari")]
+    assert sorted(frame.columns) == ["Air temperature", "Pressure (msl)"]
+    assert list(frame["Air temperature"]) == [-6.7, -6.5]
+    # The units and the coordinates have nowhere else to go
+    assert frame.attrs["units"] == {"Air temperature": "degC", "Pressure (msl)": "hPa"}
+    assert frame.attrs["location_metadata"] == res.location_metadata
+
+
+def test_to_dataframe_from_either_layout():
+    """Test that both layouts give the same DataFrame."""
+    from fmiopendata.multipoint import MultiPoint
+
+    query = "fmi::observations::weather::multipointcoverage"
+    xml = MULTIPOINT_XML % "Air temperature"
+    frame = MultiPoint(xml, query).to_dataframe()
+    timeseries_frame = MultiPoint(xml, query, timeseries=True).to_dataframe()
+
+    assert frame.equals(timeseries_frame)
+    assert frame.attrs == timeseries_frame.attrs
+
+
+def test_to_dataframe_without_empty_columns():
+    """Test leaving out the parameters that have no values at all."""
+    from fmiopendata.multipoint import MultiPoint
+
+    xml = (MULTIPOINT_XML % "Air temperature").replace("-6.7 1005.1", "-6.7 NaN").replace(
+        "-6.5 1005.3", "-6.5 NaN")
+    res = MultiPoint(xml, "fmi::observations::weather::multipointcoverage")
+
+    assert sorted(res.to_dataframe().columns) == ["Air temperature", "Pressure (msl)"]
+
+    frame = res.to_dataframe(exclude_empty=True)
+    assert list(frame.columns) == ["Air temperature"]
+    # The unit of a parameter that was left out goes with it
+    assert frame.attrs["units"] == {"Air temperature": "degC"}
+
+
+def test_to_dataframe_without_pandas():
+    """Test asking for a DataFrame in an installation that has no pandas."""
+    import sys
+
+    from fmiopendata.multipoint import MultiPoint
+
+    res = MultiPoint(MULTIPOINT_XML % "Air temperature", "fmi::observations::weather::multipointcoverage")
+    with mock.patch.dict(sys.modules, {"pandas": None}):
+        with pytest.raises(ImportError, match="pandas"):
+            res.to_dataframe()

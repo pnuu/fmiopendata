@@ -24,7 +24,8 @@ dynamic = ["version"]
 radar = ["rasterio"]
 grid = ["eccodes"]
 netcdf = ["netCDF4"]
-all = ["rasterio", "eccodes", "netCDF4"]
+pandas = ["pandas"]
+all = ["rasterio", "eccodes", "netCDF4", "pandas"]
 
 [project.urls]
 Homepage = "https://github.com/pnuu/fmiopendata"
