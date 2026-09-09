@@ -29,6 +29,13 @@ pip install eccodes
 For `radar` datasets `rasterio` is needed. It can be installed with
 `pip`, although usage of `miniconda` is strongly encouraged.
 
+Collecting observations into a `pandas.DataFrame` needs `pandas`:
+
+```bash
+
+pip install pandas
+```
+
 ## Available data
 This library provides two very simple scripts that list all the available data on
 FMI open data WMS and WFS services.
@@ -411,6 +418,36 @@ To get the location for the stations, one can use the `location_metadata` dictio
 print(obs.location_metadata["Kustavi Isokari"])
 # -> {'fmisid': 101059, 'latitude': 60.7222, 'longitude': 21.02681}
 ```
+
+#### Observations as a pandas DataFrame
+
+Either layout can be collected into a `DataFrame` indexed by the observation time
+and the station, with a column per parameter:
+
+```python
+
+df = obs.to_dataframe()
+
+print(df.head(2).to_string(max_cols=4))
+# ->                                       Air temperature  Wind speed  ...
+#     time                location
+#     2026-09-08 20:59:00 Helsinki Harmaja             NaN        11.4  ...
+#     2026-09-08 21:00:00 Helsinki Harmaja            16.0        11.4  ...
+```
+
+A frame has nowhere to keep the units and the station coordinates, so they are in
+its `attrs`:
+
+```python
+
+print(df.attrs["units"]["Air temperature"])
+# -> 'degC'
+print(df.attrs["location_metadata"]["Helsinki Kaisaniemi"])
+# -> {'fmisid': 100971, 'latitude': 60.17523, 'longitude': 24.94459}
+```
+
+Querying a bounding box tends to return a few parameters that none of the stations
+in it measure.  `obs.to_dataframe(exclude_empty=True)` leaves those columns out.
 
 It is also possible to collect the data to a structure more usable for timeseries
 analysis by adding `"timeseries=True"` to the arguments.  This one is read by

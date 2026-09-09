@@ -23,7 +23,8 @@ dynamic = ["version"]
 [project.optional-dependencies]
 radar = ["rasterio"]
 grid = ["eccodes"]
-all = ["rasterio", "eccodes"]
+pandas = ["pandas"]
+all = ["rasterio", "eccodes", "pandas"]
 
 [project.urls]
 Homepage = "https://github.com/pnuu/fmiopendata"
