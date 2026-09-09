@@ -33,6 +33,11 @@ from fmiopendata import namespaces, wfs
 from fmiopendata.utils import read_url, download_to_file
 
 TIME_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
+# The names NetCDF data from FMI give the dimensions of a grid
+_TIME_DIMENSION = "time"
+_LEVEL_DIMENSION = "level"
+_LATITUDE_DIMENSION = "lat"
+_LONGITUDE_DIMENSION = "lon"
 
 
 class Grid(object):
@@ -92,9 +97,11 @@ class Grid(object):
 
     def _get_parser(self):
         """Get the parser for the format the data are served in."""
-        data_format = _get_url_format(self.url)
-        if data_format is not None and "grib" in data_format.lower():
+        data_format = (_get_url_format(self.url) or "").lower()
+        if "grib" in data_format:
             return self._parse_grib
+        if "netcdf" in data_format:
+            return self._parse_netcdf
         raise NotImplementedError("No parser for %s" % (data_format or self.url))
 
     def _parse_grib(self):
@@ -126,6 +133,38 @@ class Grid(object):
                 data = np.reshape(msg["values"], (msg["Nj"], msg["Ni"]))
                 data[data == msg["missingValue"]] = np.nan
                 level[name] = dict({"data": data, "units": msg["units"]})
+
+    def _parse_netcdf(self):
+        """Parser for NetCDF data."""
+        try:
+            import netCDF4
+        except ImportError:
+            raise ImportError("Reading NetCDF data requires the netCDF4 library, which "
+                              "comes with the \"netcdf\" extra of fmiopendata") from None
+
+        with netCDF4.Dataset(self._fname) as dataset:
+            times = _get_times(dataset)
+            levels = _get_levels(dataset)
+            self.latitudes, self.longitudes = _get_coordinates(dataset)
+            for name, variable in dataset.variables.items():
+                if not _is_data_variable(variable, dataset):
+                    continue
+                self._collect_netcdf_variable(name, variable, times, levels)
+
+    def _collect_netcdf_variable(self, name, variable, times, levels):
+        """Collect one NetCDF variable, one grid per time and level."""
+        name = getattr(variable, "long_name", name)
+        units = getattr(variable, "units", "")
+        values = _to_array(variable[:])
+        has_levels = _LEVEL_DIMENSION in variable.dimensions
+
+        for i, time in enumerate(times):
+            for j, level in enumerate(levels):
+                data = values[i, j] if has_levels else values[i]
+                level_data = self.data.setdefault(time, dict()).setdefault(level, dict())
+                level_data[name] = dict({"data": data, "units": units})
+                if not has_levels:
+                    break
 
     def delete_file(self):
         """Delete the downloaded file, if there is one."""
@@ -159,6 +198,64 @@ def _get_key(msg, key):
         return msg[key]
     except (KeyError, RuntimeError, ValueError):
         return None
+
+
+def _get_times(dataset):
+    """Get the times of the grids in *dataset* as naive UTC datetimes."""
+    import netCDF4
+
+    variable = dataset.variables[_TIME_DIMENSION]
+    times = netCDF4.num2date(variable[:], variable.units,
+                             only_use_cftime_datetimes=False, only_use_python_datetimes=True)
+
+    # num2date gives a datetime subclass of its own; the GRIB data are keyed by plain
+    # datetimes, and the two are not worth telling apart
+    return [dt.datetime(time.year, time.month, time.day,
+                        time.hour, time.minute, time.second, time.microsecond)
+            for time in np.atleast_1d(times)]
+
+
+def _get_levels(dataset):
+    """Get the levels of the grids in *dataset*.
+
+    A dataset without a level dimension has all its data on one level, which is
+    given as 0 so that the data are laid out the same way as GRIB data are.
+    """
+    variable = dataset.variables.get(_LEVEL_DIMENSION)
+    if variable is None:
+        return [0]
+
+    return [_to_number(level) for level in np.atleast_1d(variable[:])]
+
+
+def _get_coordinates(dataset):
+    """Get the latitudes and longitudes of *dataset* as grids."""
+    latitudes = _to_array(dataset.variables[_LATITUDE_DIMENSION][:])
+    longitudes = _to_array(dataset.variables[_LONGITUDE_DIMENSION][:])
+    if latitudes.ndim == 1:
+        longitudes, latitudes = np.meshgrid(longitudes, latitudes)
+
+    return latitudes, longitudes
+
+
+def _is_data_variable(variable, dataset):
+    """Tell whether *variable* holds data rather than describing the grid."""
+    if variable.name in dataset.dimensions:
+        return False
+
+    return _LATITUDE_DIMENSION in variable.dimensions and _LONGITUDE_DIMENSION in variable.dimensions
+
+
+def _to_array(values):
+    """Turn *values* into a plain array, with the values that are missing as NaN."""
+    return np.ma.filled(np.ma.masked_invalid(np.ma.asarray(values, dtype=float)), np.nan)
+
+
+def _to_number(value):
+    """Turn a coordinate value into an int when it is one, so that levels read nicely."""
+    number = float(value)
+
+    return int(number) if number.is_integer() else number
 
 
 def _get_url_format(url):

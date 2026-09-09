@@ -29,6 +29,14 @@ pip install eccodes
 For `radar` datasets `rasterio` is needed. It can be installed with
 `pip`, although usage of `miniconda` is strongly encouraged.
 
+Some `grid` datasets, such as the air quality forecasts, are served as NetCDF
+instead of GRIB. Reading those needs `netCDF4`:
+
+```bash
+
+pip install netCDF4
+```
+
 Collecting observations into a `pandas.DataFrame` needs `pandas`:
 
 ```bash
@@ -208,8 +216,9 @@ lightning1.ellipse_major  # Location accuracy of the lightning event [km]
 ### Download and parse grid data
 
 The example below uses `fmi::forecast::harmonie::surface::grid` for demonstration.  Also other
-`grid` stored queries should work, as long as the data are available in GRIB format.
-This parser requires `eccodes` library to be installed.
+`grid` stored queries should work.  Data in GRIB format are read with the `eccodes`
+library, and data in NetCDF format - the air quality forecasts, for example - with
+`netCDF4`; whichever the query serves needs to be installed.
 
 ```python
 
@@ -341,6 +350,41 @@ The whole structure `Grid.data[valid_time][level][dataset_name]` with `'data'` a
 members is common to all `grid` type WFS data.
 
 The data arrays will have invalid values replaced with `np.nan`.
+
+Queries that serve NetCDF instead of GRIB are read the same way, into the same
+structure.  The air quality forecasts are one of them:
+
+```python
+
+from fmiopendata.wfs import download_stored_query
+
+aq = download_stored_query("fmi::forecast::enfuser::airquality::helsinki-metropolitan::grid")
+
+# Take the latest model run and read it.  The whole forecast area is hundreds of
+# megabytes, so limiting the area and the time is worth it - see the arguments in
+# the observation example below
+data = aq.data[max(aq.data.keys())]
+data.parse(delete=True)
+
+valid_time = min(data.data.keys())
+print(sorted(data.data[valid_time][0].keys()))
+# -> ['Air Quality Index near ground level in scale of 1 to 5',
+#     'Black Carbon Concentration',
+#     'Lung Deposited Surface Area',
+#     'NO2 mass concentration',
+#     'O3 mass concentration',
+#     'PM10 mass concentration',
+#     'PM25 mass concentration',
+#     'Particle Number Concentration']
+
+pm25 = data.data[valid_time][0]["PM25 mass concentration"]
+pm25["data"]  # Numpy array of the values, with the missing ones as np.nan
+pm25["units"]  # -> 'ug/m3'
+```
+
+The datasets are named by the `long_name` the file gives them, and NetCDF data
+without a level dimension are placed on level `0`, so that the structure is the
+same whichever format a query serves.
 
 ### Download and parse observation data
 ```python

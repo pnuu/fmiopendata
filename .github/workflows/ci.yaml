@@ -14,7 +14,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: "3.14"
 
       - name: Install pre-commit
         run: pip install pre-commit
@@ -31,7 +31,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: "3.14"
 
       - name: Build the distributions
         run: |
@@ -57,7 +57,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        python-version: ["3.10", "3.11", "3.12"]
+        python-version: ["3.12", "3.13", "3.14"]
         experimental: [false]
     steps:
       - name: Checkout source
